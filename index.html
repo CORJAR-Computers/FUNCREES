@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Fundación Funcrees Colombia | Crece Una Esperanza</title>
+
+  <!-- SEO Meta Tags -->
+  <meta name="description"
+    content="Fundación Funcrees Colombia en Sincelejo. Soluciones sociales innovadoras para un impacto positivo, dignificación y atención integral al adulto mayor en Sucre.">
+  <meta name="keywords"
+    content="Fundación, Adulto Mayor, Sincelejo, Colombia, Apadrinamiento, Donaciones, Voluntariado, Vejez Digna, Funcrees">
+  <meta name="author" content="Funcrees Colombia">
+
+  <!-- Google Fonts (carga no bloqueante con font-display: swap) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
+  <noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap">
+  </noscript>
+
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+
+  <!-- Leaflet.js for Interactive Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+
+  <!-- ==========================================
+       Configuración del Entorno (producción/desarrollo)
+       ========================================== -->
+  <script>
+    // ==========================================
+    // Configuración del Entorno — Auto-detección
+    // NO se necesita cambiar manualmente entre desarrollo y producción.
+    // ==========================================
+    (function() {
+      var hostname = window.location.hostname;
+      var isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '';
+      window.__FUNCREES_CONFIG = {
+        API_BASE: isLocal
+          ? 'http://127.0.0.1:8000/api'
+          : (window.location.protocol + '//' + hostname + '/api')
+      };
+    })();
+  </script>
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <!-- ==========================================
+       HEADER & NAVIGATION
+       ========================================== -->
+  <header class="header">
+    <div class="header-container">
+      <a href="#" class="logo-wrapper" data-target="inicio">
+        <!-- Official Logo -->
+        <img class="logo-img" src="assets/Logo.png" alt="Logo Funcrees"
+          style="height: 50px; width: auto; object-fit: contain;">
+        <div class="logo-text">
+          <span class="logo-title">FUNCREES</span>
+          <span class="logo-subtitle">Crece Una Esperanza</span>
+        </div>
+      </a>
+
+      <button class="menu-toggle" aria-label="Abrir menú de navegación" id="mobile-menu-btn">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+
+      <nav>
+        <ul class="nav-menu">
+          <li><a class="nav-link active" href="#" data-target="inicio">Inicio</a></li>
+          <li><a class="nav-link" href="#" data-target="quienes-somos">Quiénes Somos</a></li>
+          <li><a class="nav-link" href="#" data-target="nuestros-proyectos">Nuestros Proyectos</a></li>
+          <li><a class="nav-link" href="#" data-target="historias-de-vida">Historias de Vida</a></li>
+          <li><a class="nav-link" href="#" data-target="donaciones-aliados">Donaciones y Aliados</a></li>
+          <li><a class="nav-link" href="#" data-target="eventos">Eventos</a></li>
+          <li><a class="nav-link" href="#" data-target="contacto-footer">Contactar</a></li>
+          <li class="theme-toggle-li">
+            <button class="theme-toggle" id="dark-mode-btn" aria-label="Alternar tema oscuro"
+              title="Alternar Modo Oscuro">
+              <!-- Inline Moon SVG initially -->
+              <svg class="icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              </svg>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ==========================================
+       MAIN CONTENT (SPA VIEWS)
+       ========================================== -->
+  <main class="main-content">
+
+    <!-- PAGE 1: INICIO (HOME) -->
+    <section id="inicio" class="view-section active">
+      <div class="hero">
+        <div class="hero-bg-leaves">
+          <!-- Leaf 1 -->
+          <svg class="leaf-svg leaf-1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17 2 C15 5 11 8 8 11 C5 14 3 17 2 22 C7 21 10 19 13 16 C16 13 19 9 22 7 C21 5 19 3 17 2 Z"
+              fill="#578c57" />
+          </svg>
+          <!-- Leaf 2 -->
+          <svg class="leaf-svg leaf-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17 2 C15 5 11 8 8 11 C5 14 3 17 2 22 C7 21 10 19 13 16 C16 13 19 9 22 7 C21 5 19 3 17 2 Z"
+              fill="#419572" />
+          </svg>
+          <!-- Leaf 3 -->
+          <svg class="leaf-svg leaf-3" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17 2 C15 5 11 8 8 11 C5 14 3 17 2 22 C7 21 10 19 13 16 C16 13 19 9 22 7 C21 5 19 3 17 2 Z"
+              fill="#2d502d" />
+          </svg>
+        </div>
+
+        <!-- Hero real background image: elderly people in community -->
+        <div class="hero-bg-img"
+          style="background-image: url('assets/Foto%20Fundación.png'); background-size: cover; background-position: center;">
+        </div>
+        <!-- Theme-aware overlay for readability -->
+        <div style="position:absolute;inset:0;background:var(--hero-overlay);z-index:1;transition:background 0.3s;">
+        </div>
+
+        <div class="hero-container" style="position:relative;z-index:2;">
+          <div class="hero-content">
+            <span class="hero-tag">
+              <i class="fa-solid fa-seedling"></i> Sincelejo, Sucre
+            </span>
+            <h1 class="hero-title">Soluciones Sociales Innovadoras para un Impacto Positivo y Duradero</h1>
+            <p class="hero-desc">Apoyamos a nuestros abuelitos a través de la inclusión integral, salud preventiva
+              comunitaria y modelos autosostenibles.</p>
+            <div class="hero-actions">
+              <button class="btn btn-primary" id="btn-conoce-labor">Conoce Nuestra Labor</button>
+              <button class="btn btn-outline" id="btn-unete-aliado">Únete como Aliado</button>
+            </div>
+          </div>
+          <div class="hero-card-featured">
+            <h3 class="hero-card-title">Adultos Mayores Atendidos</h3>
+            <span class="hero-card-stat">+120</span>
+            <p class="hero-card-desc">Reciben atención nutricional, médica preventiva, talleres recreativos y terapias
+              físicas de manera constante.</p>
+            <hr style="border: none; border-top: 1px solid var(--border-color); margin: 0.5rem 0;">
+            <button class="btn btn-secondary" style="padding:0.5rem 1rem; font-size:0.8rem;"
+              onclick="openDonationModal('apadrinamiento')">
+              Apadrinar Hoy 🤝
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           STATS IMPACT BANNER — Impacto en Números
+           ========================================== -->
+      <div class="stats-banner">
+        <div class="stats-grid">
+          <div class="stat-item">
+            <i class="fa-solid fa-users stat-icon"></i>
+            <span class="stat-number" data-target="120" data-prefix="+" id="stat-beneficiarios">0</span>
+            <span class="stat-label">Adultos Mayores Atendidos</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <i class="fa-solid fa-seedling stat-icon"></i>
+            <span class="stat-number" data-target="11" id="stat-proyectos">0</span>
+            <span class="stat-label">Proyectos Activos</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <i class="fa-solid fa-map-location-dot stat-icon"></i>
+            <span class="stat-number" data-target="25" id="stat-municipios">0</span>
+            <span class="stat-label">Municipios de Alcance</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <i class="fa-solid fa-briefcase-medical stat-icon"></i>
+            <span class="stat-number" data-target="5" id="stat-ejes">0</span>
+            <span class="stat-label">Áreas Profesionales</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sostenibilidad Quick Cards -->
+      <div class="sostenibilidad-quick">
+        <div style="text-align:center; max-width: 600px; margin: 0 auto 3rem;">
+          <span class="section-subtitle">Ecosistema de Sostenibilidad</span>
+          <h2 style="color:var(--secondary)">Acciones que Transforman Realidades</h2>
+        </div>
+        <div class="quick-grid">
+          <div class="quick-card" onclick="openDonationModal('apadrinamiento')">
+            <div class="quick-icon-wrapper">
+              <i class="fa-solid fa-users"></i>
+            </div>
+            <h3 class="quick-title">Apadrinamiento</h3>
+            <p class="quick-desc">Vincula tu corazón directamente a un abuelito apoyando sus necesidades mensuales.</p>
+            <span class="btn-text">Apadrina un Abuelito +</span>
+          </div>
+
+          <div class="quick-card" onclick="openDonationModal('donacion')">
+            <div class="quick-icon-wrapper">
+              <i class="fa-solid fa-hand-holding-heart"></i>
+            </div>
+            <h3 class="quick-title">Donación Directa</h3>
+            <p class="quick-desc">Realiza aportes económicos libres para financiar insumos generales y proyectos.</p>
+            <span class="btn-text">Haz tu donación +</span>
+          </div>
+
+          <div class="quick-card" onclick="openDonationModal('patrocinio')">
+            <div class="quick-icon-wrapper">
+              <i class="fa-solid fa-building-flag"></i>
+            </div>
+            <h3 class="quick-title">Alianza Empresarial</h3>
+            <p class="quick-desc">Participación corporativa mediante Responsabilidad Social (RSE).</p>
+            <span class="btn-text">Patrocinio RSE +</span>
+          </div>
+
+          <div class="quick-card" onclick="openDonationModal('voluntariado')">
+            <div class="quick-icon-wrapper">
+              <i class="fa-solid fa-people-carry-box"></i>
+            </div>
+            <h3 class="quick-title">Voluntariado</h3>
+            <p class="quick-desc">Regala tu tiempo, conocimiento o arte para alegrar la vida de los mayores.</p>
+            <span class="btn-text">Súmate a la causa +</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TESTIMONIAL CAROUSEL SECTION (outside view-sections, always visible in inicio scroll context) -->
+    <section id="testimonials-section" class="view-section active" style="padding:0; background: var(--bg-secondary);">
+      <div class="testimonial-section">
+        <div class="testimonial-container">
+          <div class="section-header" style="margin-bottom: 3rem;">
+            <span class="section-subtitle">Voces de Esperanza</span>
+            <h2 class="section-title">Lo Que Dicen Nuestros Abuelitos</h2>
+            <p class="section-description">Testimonios genuinos de quienes han transformado su vida gracias a tu apoyo y
+              solidaridad.</p>
+          </div>
+
+          <div class="testimonial-carousel" id="testimonial-carousel">
+            <div class="testimonial-track" id="testimonial-track">
+              <!-- Populated by JS -->
+            </div>
+            <button class="testimonial-btn testimonial-btn-prev" id="testimonial-prev" aria-label="Testimonio anterior">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button class="testimonial-btn testimonial-btn-next" id="testimonial-next"
+              aria-label="Testimonio siguiente">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+          <div class="testimonial-dots" id="testimonial-dots"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 2: QUIÉNES SOMOS -->
+    <section id="quienes-somos" class="view-section">
+      <div class="section">
+        <div class="section-header">
+          <span class="section-subtitle">Identidad Corporativa</span>
+          <h2 class="section-title">Quiénes Somos: Compromiso con el Cambio Social</h2>
+          <p class="section-description">Una organización Sincelejana que trabaja con transparencia y ética para
+            dignificar la vida en la edad dorada.</p>
+        </div>
+
+        <div class="identidad-grid">
+          <div class="identidad-text-block">
+            <p>La <strong>Fundación Crece una Esperanza Social (FUNCREESCOLOMBIA)</strong> es una entidad sin ánimo de
+              lucro (ESAL) con personería jurídica y autonomía administrativa, nacida en Sincelejo, Sucre. Somos una
+              organización privada y pluralista guiada por la ética, el respeto a la dignidad y el compromiso social.
+            </p>
+            <p>Nos consolidamos como un motor de transformación social. Diseñamos, gestionamos y ejecutamos soluciones
+              innovadoras para promover el desarrollo integral del ser humano en todas las etapas de su vida; desde la
+              infancia hasta la sabiduría de nuestras personas mayores, convencidos de que cada etapa debe vivirse con
+              dignidad, propósito y autonomía.</p>
+            <p><strong>NIT:</strong> 902036173-3 &nbsp;&bull;&nbsp; <strong>Domicilio:</strong> Carrera 15b #41c - 07,
+              Sincelejo, Sucre</p>
+            <div style="display:flex; gap:1.5rem; margin-top:2rem; flex-wrap:wrap;">
+              <div style="display:flex; align-items:center; gap:0.5rem; color:var(--primary-dark); font-weight:700;">
+                <i class="fa-solid fa-shield-check" style="font-size:1.5rem;"></i> Transparencia
+              </div>
+              <div style="display:flex; align-items:center; gap:0.5rem; color:var(--primary-dark); font-weight:700;">
+                <i class="fa-solid fa-heart-pulse" style="font-size:1.5rem;"></i> Solidaridad Ética
+              </div>
+            </div>
+          </div>
+          <div class="identidad-image-grid">
+            <!-- Real images: elderly care, community, huerto -->
+            <div class="identidad-img"
+              style="background-image: url('https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=600&h=400&fit=crop'); background-size:cover; background-position:center;">
+            </div>
+            <div class="identidad-img"
+              style="background-image: url('https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&h=400&fit=crop'); background-size:cover; background-position:center;">
+            </div>
+            <div class="identidad-img identidad-img-large"
+              style="background-image: url('https://images.unsplash.com/photo-1592477353930-b99b380f70a5?w=800&h=500&fit=crop'); background-size:cover; background-position:center;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Misión & Visión -->
+        <div class="mision-vision-container">
+          <div class="mv-card mision-card">
+            <div class="mv-header">
+              <div class="mv-icon"><i class="fa-solid fa-hands-holding-child"></i></div>
+              <h3 class="mv-title">Nuestra Misión</h3>
+            </div>
+            <p class="mv-text">Despertar el potencial humano y restituir la dignidad de quienes más lo necesitan.
+              Transformamos la vulnerabilidad en oportunidad mediante soluciones sociales innovadoras que promueven el
+              desarrollo integral del ser humano en todas las etapas de su vida, bajo principios de ética, empatía y
+              respeto.</p>
+          </div>
+          <div class="mv-card vision-card">
+            <div class="mv-header">
+              <div class="mv-icon"><i class="fa-solid fa-road-circle-check"></i></div>
+              <h3 class="mv-title">Nuestra Visión 2030</h3>
+            </div>
+            <p class="mv-text">Ser reconocidos como un referente líder a nivel nacional en el cuidado afectivo de
+              adultos mayores y en la formación de líderes con propósito. Nos consolidaremos como un motor de cambio que
+              fortalece comunidades autónomas, productivas y resilientes, destacándonos por nuestra gestión,
+              transparencia y desarrollo sostenible.</p>
+          </div>
+        </div>
+
+        <!-- Valores Fundamentales -->
+        <div style="text-align:center; margin-bottom: 3.5rem;">
+          <span class="section-subtitle">Nuestros Valores</span>
+          <h2 style="color:var(--secondary)">Principios que Guían Nuestro Camino</h2>
+        </div>
+        <div class="valores-grid">
+          <div class="valor-card">
+            <div class="valor-icon"><i class="fa-solid fa-house-heart"></i></div>
+            <h4 class="valor-title">Familia</h4>
+            <p class="valor-desc">Entender a la comunidad como un núcleo esencial de apoyo, cuidado y afecto.</p>
+          </div>
+          <div class="valor-card">
+            <div class="valor-icon"><i class="fa-solid fa-people-group"></i></div>
+            <h4 class="valor-title">Unión</h4>
+            <p class="valor-desc">Trabajar en sinergia con todos los sectores para multiplicar el impacto social.</p>
+          </div>
+          <div class="valor-card">
+            <div class="valor-icon"><i class="fa-solid fa-hands-holding"></i></div>
+            <h4 class="valor-title">Nobleza</h4>
+            <p class="valor-desc">Actuar con rectitud, transparencia y un corazón dispuesto al servicio.</p>
+          </div>
+          <div class="valor-card">
+            <div class="valor-icon"><i class="fa-solid fa-shield-check"></i></div>
+            <h4 class="valor-title">Compromiso</h4>
+            <p class="valor-desc">Entregarse con firmeza a la transformación positiva de las realidades sociales.</p>
+          </div>
+          <div class="valor-card">
+            <div class="valor-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+            <h4 class="valor-title">Respeto</h4>
+            <p class="valor-desc">Reconocer y salvaguardar la dignidad y el valor de cada etapa de la vida.</p>
+          </div>
+          <div class="valor-card">
+            <div class="valor-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+            <h4 class="valor-title">Empatía</h4>
+            <p class="valor-desc">Conectarse de forma genuina con el otro para comprender y atender sus necesidades.</p>
+          </div>
+          <div class="valor-card">
+            <div class="valor-icon"><i class="fa-solid fa-seedling"></i></div>
+            <h4 class="valor-title">Esperanza</h4>
+            <p class="valor-desc">Creer firmemente en la superación humana y en la construcción de un futuro digno.</p>
+          </div>
+          <div class="valor-card">
+            <div class="valor-icon"><i class="fa-solid fa-hands-holding-circle"></i></div>
+            <h4 class="valor-title">Solidaridad</h4>
+            <p class="valor-desc">Actuar como fuerza motriz para brindar respaldo oportuno a los más vulnerables.</p>
+          </div>
+        </div>
+
+        <!-- Objetivos Estratégicos -->
+        <div class="objetivos-box">
+          <div class="objetivos-grid">
+            <div>
+              <span class="section-subtitle">Objetivos Estratégicos</span>
+              <h2 style="color:var(--secondary); margin-bottom:1.5rem;">Cuatro Pilares de Acción</h2>
+              <p style="color:var(--text-muted); margin-bottom: 2rem;">Para materializar nuestra visión, enfocamos
+                nuestra gestión en cuatro pilares fundamentales que garantizan que cada peso donado genere un impacto
+                social visible y duradero.</p>
+              <button class="btn btn-primary" onclick="openDonationModal('voluntariado')">Quiero ser Voluntario</button>
+            </div>
+            <div>
+              <ul class="objetivos-list">
+                <li class="objetivo-item">
+                  <div class="objetivo-check">✓</div>
+                  <span class="objetivo-text"><strong>Desarrollo Integral y Equidad:</strong> Impulsar el crecimiento
+                    del individuo y su entorno mediante proyectos de asistencia y formación, construyendo una sociedad
+                    más justa y solidaria.</span>
+                </li>
+                <li class="objetivo-item">
+                  <div class="objetivo-check">✓</div>
+                  <span class="objetivo-text"><strong>Productividad y Autonomía:</strong> Diseñar y ejecutar proyectos
+                    que generen empleo e ingresos, promoviendo modelos sostenibles que permitan la independencia
+                    económica comunitaria.</span>
+                </li>
+                <li class="objetivo-item">
+                  <div class="objetivo-check">✓</div>
+                  <span class="objetivo-text"><strong>Bienestar y Cultura:</strong> Fortalecer el bienestar social e
+                    identidad cultural a través del arte, la recreación y el deporte como herramientas clave de cohesión
+                    y salud mental.</span>
+                </li>
+                <li class="objetivo-item">
+                  <div class="objetivo-check">✓</div>
+                  <span class="objetivo-text"><strong>Generación de Conocimiento:</strong> Liderar espacios académicos
+                    —foros, seminarios y conferencias— para fomentar el intercambio de saberes e incidir en políticas
+                    sociales de impacto real.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==========================================
+             PRINCIPIOS INSTITUCIONALES
+             ========================================== -->
+        <div class="principios-section">
+          <div style="text-align:center; margin-bottom:0;">
+            <span class="section-subtitle">Reglas Innegociables</span>
+            <h2 style="color:var(--secondary)">Principios Institucionales</h2>
+            <p style="color:var(--text-muted); font-size:1rem; margin-top:0.75rem;">Los fundamentos éticos que guían
+              cada operación en el territorio.</p>
+          </div>
+          <div class="principios-grid">
+            <div class="principio-card">
+              <i class="fa-solid fa-star-of-life principio-icon"></i>
+              <h4 class="principio-title">Dignidad Humana</h4>
+              <p class="principio-desc">Respetar y priorizar el valor intrínseco del ser humano en cada proceso de
+                intervención social.</p>
+            </div>
+            <div class="principio-card">
+              <i class="fa-solid fa-person-rays principio-icon"></i>
+              <h4 class="principio-title">Autonomía y Empoderamiento</h4>
+              <p class="principio-desc">Brindar herramientas para que las personas sean dueñas de su propio desarrollo y
+                bienestar.</p>
+            </div>
+            <div class="principio-card">
+              <i class="fa-solid fa-circle-nodes principio-icon"></i>
+              <h4 class="principio-title">Inclusión y Pluralismo</h4>
+              <p class="principio-desc">Abrir espacios equitativos para todos, sin distinción de origen, género o
+                condición social.</p>
+            </div>
+            <div class="principio-card">
+              <i class="fa-solid fa-leaf principio-icon"></i>
+              <h4 class="principio-title">Sostenibilidad Social</h4>
+              <p class="principio-desc">Diseñar acciones que generen beneficios duraderos y trascendentes en el tejido
+                social.</p>
+            </div>
+            <div class="principio-card">
+              <i class="fa-solid fa-book-open-reader principio-icon"></i>
+              <h4 class="principio-title">Valorización del Saber</h4>
+              <p class="principio-desc">Respetar, proteger y potenciar el conocimiento ancestral y los talentos locales
+                de cada comunidad.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==========================================
+             MODELO ESTRATÉGICO — Relación Causa-Efecto
+             ========================================== -->
+        <div class="modelo-section">
+          <div style="text-align:center; margin-bottom:0;">
+            <span class="section-subtitle">Cómo Operamos</span>
+            <h2 style="color:var(--secondary)">Modelo Estratégico: Relación Causa-Efecto</h2>
+            <p
+              style="color:var(--text-muted); font-size:1rem; margin-top:0.75rem; max-width:620px; margin-left:auto; margin-right:auto;">
+              El impacto social real es el resultado de una planificación rigurosa. Operamos bajo un modelo
+              tridimensional que garantiza que cada recurso se traduzca en bienestar.</p>
+          </div>
+          <div class="modelo-grid">
+            <div class="modelo-pillar">
+              <div class="modelo-step-num">01</div>
+              <i class="fa-solid fa-chalkboard-user modelo-icon"></i>
+              <h4 class="modelo-title">Capacitación Continua</h4>
+              <p class="modelo-desc">Formamos permanentemente a nuestro talento humano para asegurar un desempeño de
+                alto nivel, alineado con las mejores prácticas de gestión social.</p>
+            </div>
+            <div class="modelo-pillar">
+              <div class="modelo-step-num">02</div>
+              <i class="fa-solid fa-chart-bar modelo-icon"></i>
+              <h4 class="modelo-title">Decisión Basada en Datos</h4>
+              <p class="modelo-desc">Fundamentamos los programas en estudios socioeconómicos técnicos e identificamos
+                las necesidades reales desde la base social para entregar resultados medibles.</p>
+            </div>
+            <div class="modelo-pillar">
+              <div class="modelo-step-num">03</div>
+              <i class="fa-solid fa-arrows-spin modelo-icon"></i>
+              <h4 class="modelo-title">Ciclo de Mejora Continua</h4>
+              <p class="modelo-desc">Aplicamos una secuencia lógica de intervención donde cada acción genera un efecto
+                positivo, permitiendo monitorear y optimizar el impacto de manera constante.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- PAGE 3: NUESTROS PROYECTOS -->
+    <section id="nuestros-proyectos" class="view-section">
+      <div class="section">
+        <div class="section-header">
+          <span class="section-subtitle">Nuestra Acción</span>
+          <h2 class="section-title">Nuestros Proyectos: Innovación que Transforma Realidades</h2>
+          <p class="section-description">El portafolio de proyectos es la herramienta principal para cumplir la misión
+            de transformación social. Diseñados estratégicamente para responder a las necesidades de las comunidades
+            vulnerables.</p>
+        </div>
+
+        <!-- Projects Search -->
+        <div class="section-search-box">
+          <i class="fa-solid fa-search section-search-icon"></i>
+          <input type="text" class="section-search-input" id="proyectos-search-input"
+            placeholder="Buscar proyectos por nombre, descripción o categoría..." autocomplete="off">
+          <button class="section-search-clear" id="proyectos-search-clear" aria-label="Limpiar búsqueda"><i
+              class="fa-solid fa-xmark"></i></button>
+        </div>
+        <span class="section-results-count" id="proyectos-results-count">11 proyectos</span>
+
+        <!-- Grid dynamically populated by app.js -->
+        <div class="proyectos-grid" id="proyectos-grid-container"></div>
+      </div>
+    </section>
+
+    <!-- PAGE 4: HISTORIAS DE VIDA -->
+    <section id="historias-de-vida" class="view-section">
+      <div class="section">
+        <div class="section-header">
+          <span class="section-subtitle">Rostros de Esperanza</span>
+          <h2 class="section-title">Rostros de Esperanza, Historias de Vida</h2>
+          <p class="section-description">Detrás de cada abuelito hay una vida llena de sabiduría, esfuerzo y amor.
+            Conoce sus testimonios y apóyalos de manera directa.</p>
+        </div>
+
+        <!-- Abuelitos Search -->
+        <div class="section-search-box">
+          <i class="fa-solid fa-search section-search-icon"></i>
+          <input type="text" class="section-search-input" id="abuelitos-search-input"
+            placeholder="Buscar abuelitos por nombre, testimonio o historia..." autocomplete="off">
+          <button class="section-search-clear" id="abuelitos-search-clear" aria-label="Limpiar búsqueda"><i
+              class="fa-solid fa-xmark"></i></button>
+        </div>
+        <span class="section-results-count" id="abuelitos-results-count">4 abuelitos</span>
+
+        <!-- Grid dynamically populated by app.js -->
+        <div class="beneficiarios-grid" id="abuelitos-grid-container"></div>
+      </div>
+    </section>
+
+    <!-- PAGE 5: DONACIONES Y ALIADOS -->
+    <section id="donaciones-aliados" class="view-section">
+      <div class="section">
+        <div class="section-header">
+          <span class="section-subtitle">Sostenibilidad Colectiva</span>
+          <h2 class="section-title">Tu Apoyo es la Semilla del Cambio</h2>
+          <p class="section-description">Tu aporte nos ayuda a expandir las soluciones sociales, garantizando alimentos,
+            medicinas y afecto diario a los adultos mayores de Sincelejo.</p>
+        </div>
+
+        <div class="donaciones-grid">
+          <div class="donacion-card">
+            <div class="donacion-icon"><i class="fa-solid fa-users"></i></div>
+            <h3 class="donacion-title">Apadrinamiento</h3>
+            <p class="donacion-text">"Apadrina a un abuelito". Conecta directamente con un adulto mayor y aporta
+              mensualmente a su bienestar integral.</p>
+            <button class="btn btn-primary" onclick="openDonationModal('apadrinamiento')">Ver Modalidades +</button>
+          </div>
+
+          <div class="donacion-card">
+            <div class="donacion-icon"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+            <h3 class="donacion-title">Donaciones Generales</h3>
+            <p class="donacion-text">Aportes únicos o recurrentes que permiten la operatividad general del comedor y
+              suministros de salud.</p>
+            <button class="btn btn-secondary" onclick="openDonationModal('donacion')">Ver Modalidades +</button>
+          </div>
+
+          <div class="donacion-card">
+            <div class="donacion-icon"><i class="fa-solid fa-building-circle-arrow-right"></i></div>
+            <h3 class="donacion-title">Patrocinio Empresarial</h3>
+            <p class="donacion-text">"Responsabilidad Social". Proyectos conjuntos donde las empresas apadrinan huertos
+              o jornadas de salud.</p>
+            <button class="btn btn-outline" onclick="openDonationModal('patrocinio')">Ver Alianzas +</button>
+          </div>
+
+          <div class="donacion-card">
+            <div class="donacion-icon"><i class="fa-solid fa-heart-circle-plus"></i></div>
+            <h3 class="donacion-title">Voluntariado Activo</h3>
+            <p class="donacion-text">"Súmate a la causa". Aporta tus habilidades profesionales en medicina, arte, cocina
+              o agricultura urbana.</p>
+            <button class="btn btn-outline" style="border-color:orange; color:orange;"
+              onclick="openDonationModal('voluntariado')">Unirse +</button>
+          </div>
+        </div>
+
+        <div
+          style="background-color:var(--bg-secondary); border-radius:var(--radius-lg); padding:3rem; text-align:center; max-width:800px; margin: 0 auto;">
+          <h3 style="color:var(--secondary); margin-bottom:1rem; font-size:1.4rem;">Métodos de Recaudo en Colombia</h3>
+          <p style="color:var(--text-muted); font-size:0.95rem; margin-bottom:2rem; line-height:1.6;">
+            Aceptamos transacciones directas a través de <strong>PSE (todos los bancos colombianos)</strong>,
+            procesamiento con <strong>Wompi</strong> (Tarjetas de Crédito, Nequi, Daviplata), transferencia directa a
+            <strong>Bancolombia</strong> y recaudo manual por <strong>Efecty</strong>.
+          </p>
+          <div style="display:flex; justify-content:center; gap:2rem; flex-wrap:wrap;">
+            <div
+              style="background:var(--bg-card); padding:0.5rem 1.5rem; border-radius:8px; font-weight:700; color:var(--secondary); border:1px solid var(--border-color)">
+              PSE</div>
+            <div
+              style="background:var(--bg-card); padding:0.5rem 1.5rem; border-radius:8px; font-weight:700; color:var(--secondary); border:1px solid var(--border-color)">
+              Wompi</div>
+            <div
+              style="background:var(--bg-card); padding:0.5rem 1.5rem; border-radius:8px; font-weight:700; color:var(--secondary); border:1px solid var(--border-color)">
+              Bancolombia</div>
+            <div
+              style="background:var(--bg-card); padding:0.5rem 1.5rem; border-radius:8px; font-weight:700; color:var(--secondary); border:1px solid var(--border-color)">
+              Efecty</div>
+          </div>
+        </div>
+        <!-- ==========================================
+             PRICING TIERS — Niveles de Apadrinamiento
+             ========================================== -->
+        <div class="pricing-tiers-section">
+          <div style="text-align:center; max-width:650px; margin:0 auto 0;">
+            <span class="section-subtitle">Elige tu Nivel</span>
+            <h2 style="color:var(--secondary)">Niveles de Apadrinamiento</h2>
+            <p style="color:var(--text-muted); font-size:0.95rem; margin-top:0.75rem;">Cada nivel impacta directamente
+              la vida de adultos mayores, jóvenes, mujeres rurales y niños de Sucre. Precios en USD · equivalencia
+              aprox. en COP.</p>
+          </div>
+          <div class="pricing-tiers-grid">
+
+            <!-- SEMILLA -->
+            <div class="pricing-card pricing-card--semilla">
+              <span class="pricing-level">🌱 Semilla</span>
+              <div class="pricing-amount">
+                <span class="pricing-usd">$30 <small style="font-size:1rem;">USD</small></span>
+                <span class="pricing-cop">≈ $126.000 COP</span>
+                <span class="pricing-period">por mes</span>
+              </div>
+              <p class="pricing-name">Padrino Semilla</p>
+              <p class="pricing-target">Para personas naturales comprometidas con el cambio social</p>
+              <ul class="pricing-features">
+                <li>Alimentación balanceada y seguimiento nutricional</li>
+                <li>Atención básica en salud preventiva</li>
+                <li>Acompañamiento emocional directo</li>
+                <li>Reporte mensual de impacto</li>
+              </ul>
+              <button class="pricing-btn pricing-btn--semilla" onclick="openDonationModal('apadrinamiento')">Ser Padrino
+                Semilla</button>
+            </div>
+
+            <!-- RAÍZ -->
+            <div class="pricing-card pricing-card--raiz">
+              <span class="pricing-badge pricing-badge--popular">Más Popular</span>
+              <span class="pricing-level">🌿 Raíz</span>
+              <div class="pricing-amount">
+                <span class="pricing-usd">$90 <small style="font-size:1rem;">USD</small></span>
+                <span class="pricing-cop">≈ $378.000 COP</span>
+                <span class="pricing-period">por mes</span>
+              </div>
+              <p class="pricing-name">Padrino Raíz</p>
+              <p class="pricing-target">Para Pymes y entidades con vocación social</p>
+              <ul class="pricing-features">
+                <li>Todo lo incluido en Semilla</li>
+                <li>Fortalecimiento de capacidades operativas</li>
+                <li>Seguridad alimentaria estructural</li>
+                <li>Visibilidad como aliado en redes y eventos</li>
+                <li>Certificado de alianza institucional</li>
+              </ul>
+              <button class="pricing-btn pricing-btn--raiz" onclick="openDonationModal('apadrinamiento')">Ser Padrino
+                Raíz</button>
+            </div>
+
+            <!-- LEGADO -->
+            <div class="pricing-card pricing-card--legado">
+              <span class="pricing-badge pricing-badge--premium">⭐ Premium</span>
+              <span class="pricing-level">🏆 Legado</span>
+              <div class="pricing-amount">
+                <span class="pricing-usd">$130 <small style="font-size:1rem;">USD</small></span>
+                <span class="pricing-cop">≈ $546.000 COP</span>
+                <span class="pricing-period">por mes · Aporte Solidario y Significativo</span>
+              </div>
+              <p class="pricing-name">Padrino Legado</p>
+              <p class="pricing-target">Para grandes empresas y perfiles de alto impacto</p>
+              <ul class="pricing-features">
+                <li>Todo lo incluido en Raíz</li>
+                <li>Impulso a cambios estructurales y expansión regional</li>
+                <li>Nombramiento como Embajador Corporativo</li>
+                <li>Co-branding institucional y medios digitales</li>
+                <li>Acceso exclusivo a eventos y rendición de cuentas</li>
+              </ul>
+              <button class="pricing-btn pricing-btn--legado" onclick="openDonationModal('patrocinio')">Ser Padrino
+                Legado ✨</button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="eventos" class="view-section">
+      <div class="section">
+        <div class="section-header">
+          <span class="section-subtitle">Eventos de Recaudación</span>
+          <h2 class="section-title">Eventos con Propósito</h2>
+          <p class="section-description">Participa en nuestras actividades benéficas. Adquiere bonos solidarios para
+            apoyar de forma recreativa y transparente.</p>
+        </div>
+
+        <div class="eventos-container">
+          <!-- Event Filters -->
+          <div class="evento-filters">
+            <div class="evento-filter-btns">
+              <button class="evento-filter-btn active" data-filter="todos"><i class="fa-solid fa-list"></i>
+                Todos</button>
+              <button class="evento-filter-btn" data-filter="evento"><i class="fa-solid fa-calendar-day"></i> Eventos
+                Próximos</button>
+              <button class="evento-filter-btn" data-filter="campania"><i class="fa-solid fa-infinity"></i> Campañas
+                Permanentes</button>
+            </div>
+            <span class="evento-results-count" id="evento-results-count">4 eventos</span>
+            <div class="evento-search-box">
+              <i class="fa-solid fa-search evento-search-icon"></i>
+              <input type="text" class="evento-search-input" id="evento-search-input"
+                placeholder="Buscar eventos por nombre o descripción..." autocomplete="off">
+              <button class="evento-search-clear" id="evento-search-clear" aria-label="Limpiar búsqueda"><i
+                  class="fa-solid fa-xmark"></i></button>
+            </div>
+          </div>
+
+          <!-- Eventos Grid populated by JS -->
+          <div class="eventos-grid" id="eventos-grid-container"></div>
+
+          <!-- Eventos Sidebar visual panel -->
+          <div class="eventos-side-img-box">
+            <div class="eventos-side-img"
+              style="background-image: url('https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=800&h=600&fit=crop'); background-size:cover; background-position:center;">
+            </div>
+            <div class="eventos-side-overlay">
+              <h3 class="eventos-side-title">Participar y Ayudar</h3>
+              <p class="eventos-side-desc">Al comprar tus boletas del Bingo Solidario o adquirir números para nuestra
+                Gran Rifa de la Esperanza, no solo juegas, sino que financias directamente insumos para terapias físicas
+                y el suministro de alimentos frescos del huerto.</p>
+              <button class="btn btn-primary" onclick="openTicketModal('bingo')"
+                style="align-self:flex-start; margin-top:1.5rem;">Adquirir Bono Bingo</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 7: CONTACTO (SPA View-Section - navegable desde el menú) -->
+    <section id="contacto-footer" class="view-section" style="padding: 5rem 1rem; background: var(--bg-secondary);">
+      <div style="max-width: 1280px; margin: 0 auto;">
+        <div class="section-header" style="margin-bottom: 3rem;">
+          <span class="section-subtitle">Estamos Aquí para Ti</span>
+          <h2 class="section-title">Contacto y Alianzas</h2>
+          <p class="section-description">¿Tienes dudas sobre los apadrinamientos, quieres proponer una alianza
+            corporativa
+            o registrarte como donante recurrente? Escríbenos, con gusto te atendemos.</p>
+        </div>
+
+        <div class="contact-section-grid">
+
+          <!-- Contact Form Column -->
+          <div class="contact-form-side">
+            <form class="contact-form" id="footer-contact-form">
+              <div class="form-group">
+                <label class="form-label" for="contact-name">Nombre Completo:</label>
+                <input type="text" id="contact-name" name="nombre" class="form-input" placeholder="Ingresa tu nombre..." required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="contact-email">Correo Electrónico:</label>
+                <input type="email" id="contact-email" name="email" class="form-input" placeholder="ejemplo@correo.com" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="contact-telefono">Teléfono (WhatsApp):</label>
+                <input type="tel" id="contact-telefono" name="telefono" class="form-input" placeholder="+57 300 123 4567">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="contact-msg">Mensaje o Consulta:</label>
+                <textarea id="contact-msg" name="mensaje" class="form-input form-textarea" placeholder="Escribe tu mensaje aquí..."
+                  required></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="margin-top: 1rem; padding: 0.85rem 2rem;">Enviar
+                Mensaje</button>
+            </form>
+          </div>
+
+          <!-- Interactive Map Column (Leaflet) -->
+          <div class="contact-map-side"
+            style="display:flex; flex-direction:column; height:450px; padding:0; position:relative; overflow:hidden;">
+            <div id="funcrees-map" class="leaflet-map-container"
+              style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:0; border-radius:0;">
+            </div>
+            <!-- Info Overlay -->
+            <div class="map-info-overlay" style="margin: 1.5rem; position:relative; z-index:1000;">
+              <h3 class="map-info-title"><i class="fa-solid fa-building-circle-check"></i> Sede Administrativa</h3>
+              <div class="map-info-text"><i class="fa-solid fa-map-location-dot"></i> Carrera 15b #41c - 07, Sincelejo,
+                Sucre</div>
+              <div class="map-info-text"><i class="fa-solid fa-phone"></i> +57 313 792 4439</div>
+              <div class="map-info-text"><i class="fa-solid fa-envelope"></i> fundacioncreceunaesperanza@gmail.com</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  </section>
+
+  <!-- ==========================================
+       EMBAJADORES DE ESPERANZA — Permanent Section
+       ========================================== -->
+  <section class="embajadores-section">
+    <div class="embajadores-gold-bar"></div>
+    <div class="embajadores-container">
+      <span class="embajadores-icon-wrap">🌟</span>
+      <span class="embajadores-eyebrow">Programa Especial</span>
+      <h2 class="embajadores-title">Convierte tu Influencia<br>en Transformación Social</h2>
+      <p class="embajadores-desc">
+        Si eres líder de opinión, empresario o profesional con visión de impacto, te invitamos a ser nuestra voz en el
+        territorio. Como Embajador de Esperanza, tu liderazgo multiplica el alcance de nuestra misión y abre puertas a
+        nuevas oportunidades para las comunidades vulnerables de Colombia.
+      </p>
+      <div class="embajadores-benefits">
+        <div class="embajador-benefit">
+          <i class="fa-solid fa-medal"></i>
+          <span>Distinción Oficial de Embajador</span>
+        </div>
+        <div class="embajador-benefit">
+          <i class="fa-solid fa-calendar-star"></i>
+          <span>Acceso a Eventos Exclusivos</span>
+        </div>
+        <div class="embajador-benefit">
+          <i class="fa-solid fa-certificate"></i>
+          <span>Certificación Institucional</span>
+        </div>
+      </div>
+      <button class="embajadores-cta" onclick="document.querySelector('[data-target=\'contacto-footer\']').click()">
+        <i class="fa-solid fa-star" style="margin-right:0.5rem;"></i>Quiero ser Embajador
+      </button>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       CAROUSEL: NUESTROS ALIADOS
+       (Visible permanentemente, fuera del SPA pero antes del footer)
+       ========================================== -->
+  <section class="aliados-section">
+    <h3 class="carousel-title">Nuestros Aliados Colaboradores</h3>
+    <div class="carousel-track-wrapper">
+      <div class="carousel-track">
+        <!-- 6 unique aliados, duplicated once for infinite scroll effect -->
+        <div class="aliado-badge">
+          <svg class="aliado-logo" viewBox="0 0 140 40" width="140" height="40" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" rx="20" fill="#f5f5f5" class="aliado-bg-rect" />
+            <circle cx="25" cy="20" r="10" fill="#ef3829" />
+            <circle cx="25" cy="20" r="6" stroke="#ffffff" stroke-width="2" />
+            <text x="48" y="25" fill="#333333" font-family="Outfit" font-weight="800" font-size="14">Claro</text>
+          </svg>
+        </div>
+        <div class="aliado-badge">
+          <svg class="aliado-logo" viewBox="0 0 140 40" width="140" height="40" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" rx="20" fill="#f5f5f5" class="aliado-bg-rect" />
+            <circle cx="25" cy="20" r="10" fill="#002f6c" />
+            <path d="M20 22 L23 18 L26 21 L30 17" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
+            <text x="48" y="25" fill="#002f6c" font-family="Outfit" font-weight="800" font-size="14">USAID</text>
+          </svg>
+        </div>
+        <div class="aliado-badge">
+          <svg class="aliado-logo" viewBox="0 0 140 40" width="140" height="40" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" rx="20" fill="#f5f5f5" class="aliado-bg-rect" />
+            <path d="M18 12 L25 8 L32 12 V22 C32 26 25 30 25 30 C25 30 18 26 18 22 V12 Z" fill="#2e7d32" />
+            <path d="M25 8 V30" stroke="#ffb300" stroke-width="2" />
+            <text x="48" y="25" fill="#2e7d32" font-family="Outfit" font-weight="800" font-size="12">SUCRE</text>
+          </svg>
+        </div>
+        <div class="aliado-badge">
+          <svg class="aliado-logo" viewBox="0 0 140 40" width="140" height="40" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" rx="20" fill="#f5f5f5" class="aliado-bg-rect" />
+            <path d="M18 12 H32 V28 H18 Z" fill="#1565c0" />
+            <path d="M25 12 L32 20 L25 28 L18 20 Z" fill="#ffd54f" />
+            <text x="48" y="25" fill="#1565c0" font-family="Outfit" font-weight="800" font-size="11">SINCELEJO</text>
+          </svg>
+        </div>
+        <div class="aliado-badge">
+          <svg class="aliado-logo" viewBox="0 0 140 40" width="140" height="40" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" rx="20" fill="#f5f5f5" class="aliado-bg-rect" />
+            <rect x="18" y="14" width="6" height="12" fill="#ffd54f" />
+            <rect x="24" y="14" width="6" height="12" fill="#000000" />
+            <rect x="30" y="14" width="6" height="12" fill="#d32f2f" />
+            <text x="44" y="25" fill="#333333" font-family="Outfit" font-weight="800" font-size="11">Bancolombia</text>
+          </svg>
+        </div>
+        <div class="aliado-badge">
+          <svg class="aliado-logo" viewBox="0 0 140 40" width="140" height="40" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" rx="20" fill="#f5f5f5" class="aliado-bg-rect" />
+            <circle cx="25" cy="20" r="9" fill="#0d47a1" />
+            <path d="M21 20 H29 M25 16 V24" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+            <text x="44" y="25" fill="#0d47a1" font-family="Outfit" font-weight="800" font-size="11">MINSALUD</text>
+          </svg>
+        </div>
+
+        <!-- Duplicate set for seamless infinite scroll -->
+        <div class="aliado-badge">
+          <svg class="aliado-logo" viewBox="0 0 140 40" width="140" height="40" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" rx="20" fill="#f5f5f5" class="aliado-bg-rect" />
+            <circle cx="25" cy="20" r="10" fill="#ef3829" />
+            <circle cx="25" cy="20" r="6" stroke="#ffffff" stroke-width="2" />
+            <text x="48" y="25" fill="#333333" font-family="Outfit" font-weight="800" font-size="14">Claro</text>
+          </svg>
+        </div>
+        <div class="aliado-badge">
+          <svg class="aliado-logo" viewBox="0 0 140 40" width="140" height="40" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" rx="20" fill="#f5f5f5" class="aliado-bg-rect" />
+            <circle cx="25" cy="20" r="10" fill="#002f6c" />
+            <path d="M20 22 L23 18 L26 21 L30 17" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
+            <text x="48" y="25" fill="#002f6c" font-family="Outfit" font-weight="800" font-size="14">USAID</text>
+          </svg>
+        </div>
+        <div class="aliado-badge">
+          <svg class="aliado-logo" viewBox="0 0 140 40" width="140" height="40" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" rx="20" fill="#f5f5f5" class="aliado-bg-rect" />
+            <path d="M18 12 L25 8 L32 12 V22 C32 26 25 30 25 30 C25 30 18 26 18 22 V12 Z" fill="#2e7d32" />
+            <path d="M25 8 V30" stroke="#ffb300" stroke-width="2" />
+            <text x="48" y="25" fill="#2e7d32" font-family="Outfit" font-weight="800" font-size="12">SUCRE</text>
+          </svg>
+        </div>
+        <div class="aliado-badge">
+          <svg class="aliado-logo" viewBox="0 0 140 40" width="140" height="40" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" rx="20" fill="#f5f5f5" class="aliado-bg-rect" />
+            <path d="M18 12 H32 V28 H18 Z" fill="#1565c0" />
+            <path d="M25 12 L32 20 L25 28 L18 20 Z" fill="#ffd54f" />
+            <text x="48" y="25" fill="#1565c0" font-family="Outfit" font-weight="800" font-size="11">SINCELEJO</text>
+          </svg>
+        </div>
+        <div class="aliado-badge">
+          <svg class="aliado-logo" viewBox="0 0 140 40" width="140" height="40" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" rx="20" fill="#f5f5f5" class="aliado-bg-rect" />
+            <rect x="18" y="14" width="6" height="12" fill="#ffd54f" />
+            <rect x="24" y="14" width="6" height="12" fill="#000000" />
+            <rect x="30" y="14" width="6" height="12" fill="#d32f2f" />
+            <text x="44" y="25" fill="#333333" font-family="Outfit" font-weight="800" font-size="11">Bancolombia</text>
+          </svg>
+        </div>
+        <div class="aliado-badge">
+          <svg class="aliado-logo" viewBox="0 0 140 40" width="140" height="40" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" rx="20" fill="#f5f5f5" class="aliado-bg-rect" />
+            <circle cx="25" cy="20" r="9" fill="#0d47a1" />
+            <path d="M21 20 H29 M25 16 V24" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+            <text x="44" y="25" fill="#0d47a1" font-family="Outfit" font-weight="800" font-size="11">MINSALUD</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Legal & Social footer links -->
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-logo-desc">
+        <h3 class="footer-logo-title">FUNCREES COLOMBIA</h3>
+        <p class="footer-desc">Transformamos la vulnerabilidad en oportunidad. Soluciones sociales innovadoras para un
+          impacto positivo y duradero en las comunidades de Sincelejo, Sucre y todo el territorio nacional.</p>
+        <div class="footer-socials">
+          <a class="social-link" href="https://www.facebook.com/Funcreescolombia" target="_blank" rel="noopener"
+            aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+          <a class="social-link" href="https://www.instagram.com/funcreescolombia2026" target="_blank" rel="noopener"
+            aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          <a class="social-link" href="https://wa.me/573137924439" target="_blank" rel="noopener"
+            aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+        </div>
+      </div>
+
+      <div class="footer-links-col">
+        <h3 class="footer-title">Enlaces Rápidos</h3>
+        <ul class="footer-links-list">
+          <li><a class="footer-link" href="#" data-target="inicio">Inicio</a></li>
+          <li><a class="footer-link" href="#" data-target="quienes-somos">Quiénes Somos</a></li>
+          <li><a class="footer-link" href="#" data-target="nuestros-proyectos">Proyectos Activos</a></li>
+          <li><a class="footer-link" href="#" data-target="historias-de-vida">Perfiles de Abuelitos</a></li>
+          <li><a class="footer-link" href="#" data-target="donaciones-aliados">Donaciones &amp; Apadrinamiento</a></li>
+          <li><a class="footer-link" href="#" data-target="eventos">Eventos Solidarios</a></li>
+          <li><a class="footer-link" href="#" data-target="contacto-footer">Contacto</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-links-col">
+        <h3 class="footer-title">Transparencia</h3>
+        <ul class="footer-links-list">
+          <li><a class="footer-link" href="#">Políticas de Privacidad</a></li>
+          <li><a class="footer-link" href="#">Términos y Condiciones</a></li>
+          <li><a class="footer-link" href="#">Rendición de Cuentas Anual</a></li>
+          <li><a class="footer-link" href="#">Certificado de Existencia y Representación</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>&copy; 2026 Fundación Crece una Esperanza (Funcrees) Colombia. Todos los derechos reservados.</span>
+      <span>Diseñado por CORJAR Computer Solutions</span>
+    </div>
+  </footer>
+
+  <!-- ==========================================
+       FLOATING ACCESSIBILITY PANEL
+       ========================================== -->
+  <div class="accessibility-widget">
+    <button class="acc-btn-main" id="acc-widget-btn" aria-label="Abrir panel de opciones de accesibilidad visual"
+      title="Opciones de Accesibilidad">
+      <i class="fa-solid fa-universal-access"></i>
+    </button>
+
+    <div class="acc-panel" id="acc-panel">
+      <div class="acc-panel-header">
+        <h3 class="acc-panel-title"><i class="fa-solid fa-sliders"></i> Accesibilidad</h3>
+        <button class="acc-panel-close" id="acc-close-btn" aria-label="Cerrar panel de accesibilidad">✕</button>
+      </div>
+
+      <!-- Font Scale buttons -->
+      <div class="acc-control-group">
+        <span class="acc-control-label">Tamaño del Texto</span>
+        <div class="acc-btn-row">
+          <button class="acc-action-btn" id="btn-font-dec" aria-label="Reducir tamaño de letra"><i
+              class="fa-solid fa-minus"></i> A-</button>
+          <button class="acc-action-btn" id="btn-font-inc" aria-label="Aumentar tamaño de letra"><i
+              class="fa-solid fa-plus"></i> A+</button>
+        </div>
+      </div>
+
+      <!-- Color Contrast -->
+      <div class="acc-control-group">
+        <span class="acc-control-label">Contraste de Pantalla</span>
+        <button class="acc-action-btn" id="btn-contrast-toggle"
+          aria-label="Alternar modo de alto contraste para baja visión">
+          <i class="fa-solid fa-circle-half-stroke"></i> Alto Contraste
+        </button>
+      </div>
+
+      <!-- Dyslexia Font -->
+      <div class="acc-control-group">
+        <span class="acc-control-label">Tipo de Letra</span>
+        <button class="acc-action-btn" id="btn-dyslexia-toggle" aria-label="Alternar tipografía adaptada para dislexia">
+          <i class="fa-solid fa-font"></i> Fuente Fácil Lectura
+        </button>
+      </div>
+
+      <!-- SpeechSynthesis Voice Reader -->
+      <div class="acc-control-group">
+        <span class="acc-control-label">Lector de Voz</span>
+        <button class="acc-action-btn" id="btn-voice-toggle" aria-label="Alternar lector de pantalla simulado por voz">
+          <i class="fa-solid fa-volume-high"></i> Activar Lector por Voz
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       GLOBAL INTERACTIVE MODALS
+       ========================================== -->
+  <div class="modal-backdrop" id="global-modal-backdrop" onclick="closeActiveModal()">
+    <div class="modal-card" id="global-modal-card-container" onclick="event.stopPropagation()">
+      <!-- Populated dynamically by JS -->
+    </div>
+  </div>
+
+  <!-- Leaflet.js for Interactive Map -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Javascript -->
+  <script src="app.js"></script>
+
+  <!-- WhatsApp Float with inline SVG -->
+  <a href="https://wa.me/573137924439?text=Hola%20Fundaci%C3%B3n%20FUNCREESCOLOMBIA%2C%20quisiera%20saber%20m%C3%A1s%20sobre%20c%C3%B3mo%20puedo%20apoyar."
+    target="_blank" class="whatsapp-float" aria-label="Contactar por WhatsApp" title="Chatear con nosotros">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.835-3.321c1.644.976 3.51 1.49 5.409 1.491 5.541 0 10.051-4.506 10.054-10.047a9.92 9.92 0 0 0-2.93-7.11 9.925 9.925 0 0 0-7.114-2.923C6.722 2.093 2.212 6.6 2.209 12.14c0 1.95.509 3.856 1.478 5.525L2.732 21.69l4.16-1.011zm12.022-7.234c-.329-.164-1.948-.961-2.247-1.07-.3-.11-.518-.164-.735.164-.217.329-.841 1.07-1.031 1.288-.19.218-.38.245-.71.082-.329-.164-1.389-.512-2.647-1.633-.978-.873-1.637-1.95-1.829-2.28-.192-.329-.02-.507.145-.671.148-.147.329-.384.494-.576.164-.192.219-.329.329-.548.11-.219.055-.411-.028-.576-.082-.164-.735-1.771-1.007-2.43-.265-.636-.53-.55-.735-.56-.19-.007-.408-.007-.626-.007-.218 0-.571.082-.871.411-.3.329-1.147 1.122-1.147 2.736 0 1.614 1.174 3.175 1.338 3.394.164.22 2.313 3.532 5.6 4.951.782.338 1.39.54 1.868.692.788.25 1.505.215 2.07.13.63-.094 1.948-.795 2.222-1.564.275-.769.275-1.428.193-1.563-.083-.136-.3-.219-.629-.383z" />
+    </svg>
+    <span class="whatsapp-tooltip">¿Cómo podemos ayudarte?</span>
+  </a>
+
+</body>
+
+</html>

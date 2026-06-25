@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Propuesta Comercial - FUNCREES | CORJAR Computers Solutions</title>
+  
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap">
+  
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* Styling & Design Tokens for CORJAR Theme */
+    :root {
+      --corjar-dark: #070c14;
+      --corjar-card-bg: #101622;
+      --corjar-navy: #0d1b2a;
+      --corjar-cyan: #00d2ff;
+      --corjar-gold: #ff9e1b;
+      --corjar-gray: #e0e6ed;
+      --corjar-muted: #8892b0;
+      --corjar-border: #1e293b;
+      
+      --doc-bg: #ffffff;
+      --doc-text: #1e293b;
+      --doc-primary: #0d1b2a;
+      --doc-accent: #006699;
+      --doc-border: #cbd5e1;
+      
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--corjar-dark);
+      color: var(--corjar-gray);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+    }
+
+    /* Header Panel */
+    .corjar-header {
+      background-color: var(--corjar-card-bg);
+      border-bottom: 2px solid var(--corjar-border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-logo-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .header-logo {
+      height: 45px;
+      border-radius: var(--radius-sm);
+    }
+
+    .header-title {
+      font-size: 1.25rem;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+    }
+
+    .header-subtitle {
+      font-size: 0.75rem;
+      color: var(--corjar-cyan);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.25rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-cyan {
+      background-color: var(--corjar-cyan);
+      color: var(--corjar-dark);
+    }
+
+    .btn-cyan:hover {
+      background-color: #00b0d6;
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid var(--corjar-border);
+      color: var(--corjar-gray);
+    }
+
+    .btn-outline:hover {
+      background-color: rgba(255,255,255,0.05);
+      border-color: var(--corjar-gray);
+    }
+
+    /* Main Container Split */
+    .main-wrapper {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      height: calc(100vh - 75px);
+      overflow: hidden;
+    }
+
+    /* Control Panel Sidebar */
+    .control-panel {
+      background-color: var(--corjar-card-bg);
+      border-right: 1px solid var(--corjar-border);
+      padding: 1.5rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .panel-section-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--corjar-gold);
+      border-bottom: 1px solid var(--corjar-border);
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .control-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--corjar-gray);
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-prefix {
+      position: absolute;
+      left: 0.75rem;
+      font-size: 0.85rem;
+      color: var(--corjar-muted);
+      font-weight: 600;
+    }
+
+    .form-input {
+      width: 100%;
+      background-color: var(--corjar-dark);
+      border: 1px solid var(--corjar-border);
+      border-radius: var(--radius-sm);
+      padding: 0.5rem 0.75rem 0.5rem 2rem;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: all 0.15s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--corjar-cyan);
+      box-shadow: 0 0 0 2px rgba(0, 210, 255, 0.2);
+    }
+
+    .form-select {
+      width: 100%;
+      background-color: var(--corjar-dark);
+      border: 1px solid var(--corjar-border);
+      border-radius: var(--radius-sm);
+      padding: 0.5rem 0.75rem;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+
+    .form-select:focus {
+      outline: none;
+      border-color: var(--corjar-cyan);
+    }
+
+    /* Document Sheet Preview */
+    .document-preview-container {
+      padding: 2rem;
+      overflow-y: auto;
+      background-color: var(--corjar-dark);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .proposal-sheet {
+      background-color: var(--doc-bg);
+      color: var(--doc-text);
+      width: 100%;
+      max-width: 800px;
+      padding: 4rem;
+      box-shadow: var(--shadow-md);
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      position: relative;
+    }
+
+    /* Corporate Proposal Styles */
+    .doc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid var(--doc-primary);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .doc-logo-img {
+      height: 65px;
+      object-fit: contain;
+    }
+
+    .doc-meta-right {
+      text-align: right;
+    }
+
+    .doc-meta-title {
+      font-size: 1.5rem;
+      color: var(--doc-primary);
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+
+    .doc-meta-ref {
+      font-weight: 700;
+      color: var(--doc-accent);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .doc-meta-text {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+
+    .doc-client-info {
+      background-color: #f8fafc;
+      border-left: 4px solid var(--doc-accent);
+      padding: 1.25rem;
+      margin-bottom: 2.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      font-size: 0.85rem;
+    }
+
+    .client-title {
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--doc-primary);
+      font-size: 0.8rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .doc-intro {
+      margin-bottom: 2rem;
+      text-align: justify;
+    }
+
+    .doc-section-title {
+      font-size: 1.15rem;
+      color: var(--doc-primary);
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--doc-border);
+      padding-bottom: 0.4rem;
+      margin-bottom: 1rem;
+      margin-top: 2rem;
+    }
+
+    .doc-bullet-list {
+      margin-left: 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .doc-bullet-item strong {
+      color: var(--doc-primary);
+    }
+
+    /* Proposal Cost Table */
+    .cost-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 2rem;
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+    }
+
+    .cost-table th {
+      background-color: var(--doc-primary);
+      color: #ffffff;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+
+    .cost-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--doc-border);
+      vertical-align: top;
+    }
+
+    .cost-table tr:nth-child(even) td {
+      background-color: #f8fafc;
+    }
+
+    .text-right {
+      text-align: right !important;
+    }
+
+    .cost-table-total-row td {
+      border-top: 2px solid var(--doc-primary);
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--doc-primary);
+      background-color: #f1f5f9 !important;
+    }
+
+    .doc-terms {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 2rem;
+      background-color: #f8fafc;
+      padding: 1rem;
+      border-radius: var(--radius-sm);
+    }
+
+    .doc-signature {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4rem;
+      padding-top: 2rem;
+    }
+
+    .sig-line {
+      border-top: 1px solid #94a3b8;
+      width: 260px;
+      text-align: center;
+      padding-top: 0.5rem;
+      font-size: 0.8rem;
+      color: #475569;
+    }
+
+    .sig-name {
+      font-weight: 700;
+      color: var(--doc-primary);
+    }
+
+    /* Print styling rules */
+    @media print {
+      body {
+        background-color: #ffffff;
+        color: #000000;
+      }
+      .corjar-header,
+      .control-panel {
+        display: none !important;
+      }
+      .main-wrapper {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow: visible;
+      }
+      .document-preview-container {
+        padding: 0;
+        background-color: #ffffff;
+        overflow: visible;
+      }
+      .proposal-sheet {
+        box-shadow: none;
+        max-width: 100%;
+        padding: 0;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================
+       CORJAR CONTROL HEADER
+       ========================================== -->
+  <header class="corjar-header">
+    <div class="header-logo-container">
+      <img src="assets/corjar_logo.png" alt="CORJAR Logo" class="header-logo">
+      <div>
+        <h1 class="header-title">CORJAR Computers Solutions</h1>
+        <span class="header-subtitle">Generador de Propuestas Comerciales</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" onclick="window.print()">
+        <i class="fa-solid fa-file-pdf"></i> Guardar como PDF / Imprimir
+      </button>
+      <a href="index.html" class="btn btn-cyan">
+        <i class="fa-solid fa-arrow-left"></i> Volver a la Web
+      </a>
+    </div>
+  </header>
+
+  <!-- ==========================================
+       SPLIT MAIN SECTION
+       ========================================== -->
+  <div class="main-wrapper">
+    
+    <!-- LEFT PANEL: VALUE CONTROLLERS -->
+    <aside class="control-panel">
+      
+      <div>
+        <h3 class="panel-section-title"><i class="fa-solid fa-sliders"></i> Costos del Proyecto</h3>
+        
+        <div class="control-group" style="margin-top: 1rem;">
+          <label class="control-label" for="val-desarrollo">Desarrollo Web (Colaboración):</label>
+          <div class="input-wrapper">
+            <span class="input-prefix">$</span>
+            <input type="number" id="val-desarrollo" class="form-input" value="2000000" oninput="updateValues()">
+          </div>
+        </div>
+
+        <div class="control-group" style="margin-top: 1rem;">
+          <label class="control-label" for="val-descuento">Descuento Solidario:</label>
+          <div class="input-wrapper">
+            <span class="input-prefix">$</span>
+            <input type="number" id="val-descuento" class="form-input" value="500000" oninput="updateValues()">
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="panel-section-title"><i class="fa-solid fa-server"></i> Hosting y Dominio</h3>
+        
+        <div class="control-group" style="margin-top: 1rem;">
+          <label class="control-label" for="sel-hosting-plan">Plan de Hosting:</label>
+          <select id="sel-hosting-plan" class="form-select" onchange="changeHostingPlan(this.value)">
+            <option value="business_12">Hostinger Business (12 Meses)</option>
+            <option value="business_24">Hostinger Business (24 Meses)</option>
+            <option value="business_48">Hostinger Business (48 Meses)</option>
+            <option value="custom">Valor Personalizado</option>
+          </select>
+        </div>
+
+        <div class="control-group" style="margin-top: 1rem;">
+          <label class="control-label" for="val-hosting">Costo de Hosting (COP):</label>
+          <div class="input-wrapper">
+            <span class="input-prefix">$</span>
+            <input type="number" id="val-hosting" class="form-input" value="329000" oninput="updateValues()">
+          </div>
+        </div>
+
+        <div class="control-group" style="margin-top: 1rem;">
+          <label class="control-label" for="val-dominio">Costo de Dominio (COP):</label>
+          <div class="input-wrapper">
+            <span class="input-prefix">$</span>
+            <input type="number" id="val-dominio" class="form-input" value="49000" oninput="updateValues()">
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="panel-section-title"><i class="fa-solid fa-shield-halved"></i> Soporte Pos-Entrega</h3>
+        
+        <div class="control-group" style="margin-top: 1rem;">
+          <label class="control-label" for="val-soporte">Soporte Mensual (COP):</label>
+          <div class="input-wrapper">
+            <span class="input-prefix">$</span>
+            <input type="number" id="val-soporte" class="form-input" value="150000" oninput="updateValues()">
+          </div>
+        </div>
+
+        <div class="control-group" style="margin-top: 1rem;">
+          <label class="control-label" for="val-meses-soporte">Meses de Soporte Incluidos:</label>
+          <select id="val-meses-soporte" class="form-select" onchange="updateValues()">
+            <option value="0">Ninguno (Soporte bajo demanda)</option>
+            <option value="3" selected>3 Meses Incluidos</option>
+            <option value="6">6 Meses Incluidos</option>
+            <option value="12">12 Meses Incluidos</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--corjar-border); font-size: 0.75rem; color: var(--corjar-muted); line-height: 1.4;">
+        <p><i class="fa-solid fa-info-circle"></i> Los valores modificados en este panel se calculan en tiempo real y se reflejan en el documento imprimible de la derecha.</p>
+        <p style="margin-top: 0.5rem;"><i class="fa-solid fa-print"></i> Pulsa el botón superior "Guardar como PDF" para generar la propuesta limpia lista para el cliente.</p>
+      </div>
+
+    </aside>
+
+    <!-- RIGHT PANEL: INTERACTIVE PROPOSAL DOCUMENT PREVIEW -->
+    <main class="document-preview-container">
+      <div class="proposal-sheet" id="proposal-document">
+        
+        <!-- Document Header Letterhead -->
+        <header class="doc-header">
+          <img src="assets/corjar_logo.png" alt="CORJAR Logo" class="doc-logo-img">
+          <div class="doc-meta-right">
+            <h2 class="doc-meta-title">Propuesta Comercial</h2>
+            <div class="doc-meta-ref" id="doc-reference">Ref: PROP-2026-004</div>
+            <div class="doc-meta-text"><strong>Fecha:</strong> <span id="doc-date">11 de Junio, 2026</span></div>
+            <div class="doc-meta-text"><strong>Validez:</strong> 15 días calendario</div>
+          </div>
+        </header>
+
+        <!-- Client & Contractor Info -->
+        <section class="doc-client-info">
+          <div>
+            <div class="client-title">Prestador del Servicio</div>
+            <strong>CORJAR Computers Solutions</strong><br>
+            RUT: 92520615<br>
+            Sincelejo, Sucre, Colombia<br>
+            Email: corjarcomputers@gmail.com<br>
+            Teléfono: +57 (317) 746-7035
+          </div>
+          <div>
+            <div class="client-title">Preparado para</div>
+            <strong>Fundación Crece una Esperanza (Funcrees)</strong><br>
+            Atn: Representación Legal<br>
+            Sincelejo, Sucre, Colombia<br>
+            Sector: Desarrollo e Inclusión Social
+          </div>
+        </section>
+
+        <!-- Intro -->
+        <section class="doc-intro">
+          <p style="margin-bottom: 1rem;">Estimados miembros de la <strong>Fundación Funcrees Colombia</strong>,</p>
+          <p>De acuerdo con su requerimiento para el desarrollo de su presencia institucional en la web, nos complace presentar la propuesta técnica y económica para la implementación del portal web interactivo de Funcrees. Nuestro compromiso es entregar una solución robusta, premium y plenamente adaptada a las necesidades de la fundación y sus beneficiarios.</p>
+          <p style="margin-top: 1rem;">Cabe resaltar que **CORJAR Computers Solutions** ha dispuesto tarifas de colaboración solidaria para este proyecto, reduciendo significativamente el margen operativo tradicional como un aporte directo a la noble causa que lidera su institución en Sincelejo.</p>
+        </section>
+
+        <!-- Scope and Specs -->
+        <h3 class="doc-section-title">Alcance del Proyecto Web Entregado</h3>
+        <ul class="doc-bullet-list">
+          <li class="doc-bullet-item">
+            <strong>Arquitectura Single Page Application (SPA)</strong>: Carga de secciones fluida e instantánea sin parpadeos, optimizando la experiencia en redes de conectividad móviles.
+          </li>
+          <li class="doc-bullet-item">
+            <strong>Módulo Integral de Accesibilidad Web</strong>: Con controles interactivos para tamaño de fuente (A+/A-), modo de contraste optimizado para baja visión, tipografía adaptada para dislexia y sintetizador de voz (TTS) en español para leer el contenido a adultos mayores.
+          </li>
+          <li class="doc-bullet-item">
+            <strong>Módulo de Apadrinamiento y Donaciones</strong>: Conexión directa del catálogo de abuelitos con formularios de recaudo adaptados a PSE, Wompi y transferencias directas.
+          </li>
+          <li class="doc-bullet-item">
+            <strong>Módulo de Actividades y Eventos</strong>: Venta y registro automatizado de entradas para Bingo Solidario y generación de códigos únicos de boletas.
+          </li>
+          <li class="doc-bullet-item">
+            <strong>Mapa Administrativo y Contacto</strong>: Panel de localización interactiva en Sincelejo y formulario integrado de alianzas.
+          </li>
+        </ul>
+
+        <!-- Hosting Specs -->
+        <h3 class="doc-section-title">Infraestructura y Alojamiento Propuesto</h3>
+        <p style="margin-bottom: 1rem;">Para el correcto funcionamiento en línea del portal web y su backend, se propone la adquisición de la infraestructura de Hostinger Business (o similar), la cual brinda excelentes garantías de seguridad y velocidad:</p>
+        <ul class="doc-bullet-list">
+          <li class="doc-bullet-item"><strong>Capacidad Premium</strong>: Almacenamiento de 200 GB SSD NVMe para carga ultra rápida de imágenes de la fundación.</li>
+          <li class="doc-bullet-item"><strong>Seguridad SSL Gratis</strong>: Certificado de seguridad HTTPS ilimitado para transferencias de donantes seguras.</li>
+          <li class="doc-bullet-item"><strong>Dominio Corporativo</strong>: Registro de dominio corporativo (.org o .com) por 1 año incluido.</li>
+          <li class="doc-bullet-item"><strong>Cuentas de Correo</strong>: Hasta 100 correos corporativos (ej. direccion@funcrees.org).</li>
+          <li class="doc-bullet-item"><strong>Copias de Seguridad</strong>: Backups diarios automáticos ante contingencias.</li>
+        </ul>
+
+        <!-- Economic Proposal Table -->
+        <h3 class="doc-section-title">Resumen de Inversión y Costos</h3>
+        <table class="cost-table">
+          <thead>
+            <tr>
+              <th style="width: 55%;">Concepto / Descripción</th>
+              <th style="width: 20%;" class="text-right">Unidad/Frecuencia</th>
+              <th style="width: 25%;" class="text-right">Valor Total (COP)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <strong>Desarrollo Web e Integración de Accesibilidad</strong><br>
+                <span style="font-size: 0.75rem; color:#64748b;">Diseño responsivo, maquetación SPA, panel TTS, sistema de apadrinamiento, emisión de boletas y configuración de backend.</span>
+              </td>
+              <td class="text-right">Pago Único</td>
+              <td class="text-right" id="cell-desarrollo">$2.000.000</td>
+            </tr>
+            <tr>
+              <td>
+                <strong>Alojamiento Web (Hosting Hostinger Business)</strong><br>
+                <span style="font-size: 0.75rem; color:#64748b;" id="text-desc-hosting">Servidor corporativo con 200 GB SSD, SSL y soporte de base de datos (12 meses).</span>
+              </td>
+              <td class="text-right" id="cell-periodo-hosting">Anual</td>
+              <td class="text-right" id="cell-hosting">$329.000</td>
+            </tr>
+            <tr>
+              <td>
+                <strong>Registro de Dominio Corporativo (.org/.com)</strong><br>
+                <span style="font-size: 0.75rem; color:#64748b;">Dirección oficial en la web por un año calendario.</span>
+              </td>
+              <td class="text-right">Anual</td>
+              <td class="text-right" id="cell-dominio">$49.000</td>
+            </tr>
+            <tr id="row-soporte">
+              <td>
+                <strong>Servicio de Soporte y Mantenimiento Incluido</strong><br>
+                <span style="font-size: 0.75rem; color:#64748b;">Monitoreo de caídas, copias de seguridad de donaciones y soporte técnico general.</span>
+              </td>
+              <td class="text-right" id="cell-soporte-periodo">3 Meses</td>
+              <td class="text-right" id="cell-soporte-total">$450.000</td>
+            </tr>
+            <tr id="row-descuento">
+              <td>
+                <strong>Descuento Especial / Aporte Solidario CORJAR</strong><br>
+                <span style="font-size: 0.75rem; color:#16a34a; font-weight: 600;">Subsidio para la dignificación de los abuelitos de Sincelejo.</span>
+              </td>
+              <td class="text-right" style="color:#16a34a; font-weight:600;">Descuento</td>
+              <td class="text-right" id="cell-descuento" style="color:#16a34a; font-weight:600;">-$500.000</td>
+            </tr>
+            <tr class="cost-table-total-row">
+              <td>Inversión Total Estimada (Neto)</td>
+              <td></td>
+              <td class="text-right" id="cell-total-neto">$2.328.000</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Terms -->
+        <section class="doc-terms">
+          <strong>Condiciones de Pago y Entrega:</strong><br>
+          1. <strong>Forma de Pago:</strong> 50% anticipado para inicio del despliegue en servidor corporativo y 50% a la entrega y capacitación de uso del backend.<br>
+          2. <strong>Tiempos:</strong> El despliegue, configuración del dominio e inducción de correos corporativos se realizará en 5 días hábiles a partir de la firma del convenio.<br>
+          3. <strong>Garantía:</strong> Soporte de garantía por defectos de código cubierto por 12 meses calendario.
+        </section>
+
+        <!-- Signatures -->
+        <footer class="doc-signature">
+          <div class="sig-line">
+            <span class="sig-name">Representante Funcrees</span><br>
+            Aceptado / Firma del Cliente
+          </div>
+          <div class="sig-line">
+            <span class="sig-name" id="sig-contractor-name">Ing. de Proyectos CORJAR</span><br>
+            CORJAR Computers Solutions
+          </div>
+        </footer>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    // Hosting pricing mapping based on Hostinger plans typically found in Colombia
+    const HOSTING_PLANS = {
+      business_12: {
+        name: "Hostinger Business (12 Meses)",
+        period: "Anual",
+        cost: 329000,
+        desc: "Servidor corporativo con 200 GB SSD, SSL y soporte de base de datos (12 meses)."
+      },
+      business_24: {
+        name: "Hostinger Business (24 Meses)",
+        period: "Por 2 Años",
+        cost: 590000,
+        desc: "Servidor corporativo con 200 GB SSD, SSL y soporte de base de datos (24 meses)."
+      },
+      business_48: {
+        name: "Hostinger Business (48 Meses)",
+        period: "Por 4 Años",
+        cost: 990000,
+        desc: "Servidor corporativo con 200 GB SSD, SSL y soporte de base de datos (48 meses)."
+      },
+      custom: {
+        name: "Servicio de Hosting",
+        period: "Personalizado",
+        cost: 329000,
+        desc: "Alojamiento web y servidor corporativo adaptado."
+      }
+    };
+
+    function changeHostingPlan(planKey) {
+      const plan = HOSTING_PLANS[planKey];
+      if (!plan) return;
+      
+      const hostInput = document.getElementById('val-hosting');
+      hostInput.value = plan.cost;
+      
+      if (planKey !== 'custom') {
+        document.getElementById('text-desc-hosting').textContent = plan.desc;
+        document.getElementById('cell-periodo-hosting').textContent = plan.period;
+      } else {
+        document.getElementById('text-desc-hosting').textContent = "Servidor corporativo para alojamiento web.";
+        document.getElementById('cell-periodo-hosting').textContent = "Periodo";
+      }
+
+      updateValues();
+    }
+
+    function updateValues() {
+      // Get inputs
+      const desarrollo = parseFloat(document.getElementById('val-desarrollo').value) || 0;
+      const descuento = parseFloat(document.getElementById('val-descuento').value) || 0;
+      const hosting = parseFloat(document.getElementById('val-hosting').value) || 0;
+      const dominio = parseFloat(document.getElementById('val-dominio').value) || 0;
+      const soporteMensual = parseFloat(document.getElementById('val-soporte').value) || 0;
+      const mesesSoporte = parseInt(document.getElementById('val-meses-soporte').value) || 0;
+
+      // Calculate support total
+      const soporteTotal = soporteMensual * mesesSoporte;
+
+      // Update table cells
+      document.getElementById('cell-desarrollo').textContent = formatCOP(desarrollo);
+      document.getElementById('cell-hosting').textContent = formatCOP(hosting);
+      document.getElementById('cell-dominio').textContent = formatCOP(dominio);
+
+      // Handle support display row
+      const rowSoporte = document.getElementById('row-soporte');
+      if (mesesSoporte > 0) {
+        rowSoporte.style.display = 'table-row';
+        document.getElementById('cell-soporte-periodo').textContent = mesesSoporte + " Meses";
+        document.getElementById('cell-soporte-total').textContent = formatCOP(soporteTotal);
+      } else {
+        rowSoporte.style.display = 'none';
+      }
+
+      // Handle discount display row
+      const rowDescuento = document.getElementById('row-descuento');
+      if (descuento > 0) {
+        rowDescuento.style.display = 'table-row';
+        document.getElementById('cell-descuento').textContent = "-" + formatCOP(descuento);
+      } else {
+        rowDescuento.style.display = 'none';
+      }
+
+      // Calculate Total Neto
+      const totalNeto = (desarrollo + hosting + dominio + soporteTotal) - descuento;
+      document.getElementById('cell-total-neto').textContent = formatCOP(totalNeto);
+    }
+
+    function formatCOP(number) {
+      return "$" + number.toLocaleString('es-CO');
+    }
+
+    // Set document date to current
+    const dateOpts = { year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('doc-date').textContent = new Date().toLocaleDateString('es-CO', dateOpts);
+
+    // Initial calculation on load
+    updateValues();
+  </script>
+</body>
+</html>

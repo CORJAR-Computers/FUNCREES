@@ -1,0 +1,15 @@
+{
+  "name": "funcrees",
+  "version": "1.0.0",
+  "description": "> **Fundación Crece Una Esperanza Social** > *Soluciones Sociales Innovadoras para un Impacto Positivo y Duradero.* > NIT: 902036173-3 | Sincelejo, Sucre, Colombia",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/unit.test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jsdom": "^25.0.0"
+  }
+}

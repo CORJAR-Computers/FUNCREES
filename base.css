@@ -1,0 +1,225 @@
+/* Google Fonts Import moved to <link> tag in index.html for better rendering performance */
+/* See index.html <head> for font-display: swap */
+
+/* ─── Reset and Core Variables ─────────────────────────────── */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Brand Color Palette (HSL-based for theme blending) */
+  --primary-hue: 120;
+  --primary-sat: 24%;
+  --primary-light: 45%; /* #578c57 */
+
+  --primary: hsl(var(--primary-hue), var(--primary-sat), var(--primary-light));
+  --primary-dark: hsl(var(--primary-hue), 30%, 25%);
+  --primary-soft: hsl(var(--primary-hue), 25%, 92%);
+  --primary-trans: hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+
+  --secondary: hsl(200, 60%, 14%); /* Deep Navy #0e232e */
+  --secondary-light: hsl(200, 40%, 24%);
+  --accent: hsl(150, 40%, 42%); /* Mint Accent #419572 */
+
+  --bg-primary: hsl(40, 25%, 97%); /* Warm Sand */
+  --bg-secondary: hsl(120, 20%, 95%); /* Soft Sage */
+  --bg-card: hsl(0, 0%, 100%);
+  --bg-footer: hsl(200, 60%, 10%);
+
+  --hero-overlay: linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(240,250,240,0.9) 100%);
+
+  --text-main: hsl(200, 40%, 12%);
+  --text-muted: hsl(200, 15%, 42%);
+  --text-white: hsl(0, 0%, 100%);
+
+  --border-color: hsl(200, 15%, 90%);
+  --focus-ring: 0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.4);
+
+  /* Fonts */
+  --font-family-title: 'Outfit', 'Inter', sans-serif;
+  --font-family-body: 'Inter', sans-serif;
+  --font-family-dyslexia: 'Comic Sans MS', sans-serif;
+
+  --font-body: var(--font-family-body);
+  --font-title: var(--font-family-title);
+
+  /* Font Scaling (for accessibility font sizing) */
+  --font-scale: 1;
+
+  /* Borders & Shadows */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-round: 50%;
+
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.12), 0 10px 10px -5px rgba(0, 0, 0, 0.06);
+  --shadow-floating: 0 15px 30px rgba(12, 35, 48, 0.15);
+
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: all 0.15s ease;
+
+  /* Gold accent — "Detalles Dorados" — Excelencia institucional */
+  --gold:            hsl(43, 65%, 47%);
+  --gold-light:      hsl(43, 80%, 65%);
+  --gold-dark:       hsl(43, 60%, 35%);
+  --gold-trans:      hsla(43, 65%, 47%, 0.15);
+
+  /* Institutional Greens — Logo "Psicología del Color" */
+  --green-light-brand: hsl(120, 38%, 58%);   /* Verde Claro — frescura, renovación */
+  --green-mid-brand:   hsl(134, 36%, 45%);   /* Verde Medio — esperanza, florecimiento */
+  --green-dark-brand:  hsl(120, 33%, 24%);   /* Verde Oscuro — solidez, valores firmes */
+}
+
+/* ─── Base HTML / Body ────────────────────────────────────── */
+
+html {
+  scroll-behavior: smooth;
+  font-size: calc(16px * var(--font-scale));
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  color: var(--text-main);
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+/* ─── Global Keyframes ────────────────────────────────────── */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes eventoFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes scrollCarousel {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes leaf-drift {
+  0% {
+    transform: translateY(0) rotate(0deg) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-120px) rotate(360deg) translateX(50px);
+    opacity: 0;
+  }
+}
+
+@keyframes floatIcon {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+@keyframes pulse-wa {
+  0% {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), 0 0 0 0px rgba(37, 211, 102, 0.7);
+  }
+  70% {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), 0 0 0 15px rgba(37, 211, 102, 0);
+  }
+  100% {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), 0 0 0 0px rgba(37, 211, 102, 0);
+  }
+}
+
+/* ─── prefers-reduced-motion (WCAG 2.1 AA) ────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .carousel-track {
+    animation: none !important;
+  }
+  .leaf-svg {
+    animation: none !important;
+    display: none !important;
+  }
+}

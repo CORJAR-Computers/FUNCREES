@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirmación de Donación — Funcrees Colombia</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f7f4;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f7f4;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.08);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #2d502d 0%, #578c57 100%);padding:40px 40px 30px;text-align:center;">
+              <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:700;letter-spacing:1px;">FUNCREES</h1>
+              <p style="color:rgba(255,255,255,0.85);margin:6px 0 0;font-size:14px;">Crece Una Esperanza · Sincelejo, Sucre</p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:40px;">
+
+              <h2 style="color:#2d502d;font-size:22px;margin:0 0 16px;">¡Gracias por tu generosidad, {{ nombre }}! 🤝</h2>
+
+              <p style="color:#444;line-height:1.7;margin:0 0 24px;">
+                Tu <strong>{{ tipo_label }}</strong> ha sido registrada exitosamente en nuestro sistema.
+                Tu apoyo hace posible que nuestros abuelitos reciban atención digna, alimentación caliente y afecto cada día.
+              </p>
+
+              <!-- Receipt Box -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0f7f0;border-left:4px solid #578c57;border-radius:0 8px 8px 0;padding:20px;margin-bottom:28px;">
+                <tr>
+                  <td style="padding:4px 0;">
+                    <p style="margin:0;color:#555;font-size:14px;"><strong style="color:#2d502d;">Referencia:</strong> {{ referencia }}</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:4px 0;">
+                    <p style="margin:0;color:#555;font-size:14px;"><strong style="color:#2d502d;">Tipo:</strong> {{ tipo_label }}</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:4px 0;">
+                    <p style="margin:0;color:#555;font-size:14px;"><strong style="color:#2d502d;">Monto:</strong> {{ monto }}</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:4px 0;">
+                    <p style="margin:0;color:#555;font-size:14px;"><strong style="color:#2d502d;">Estado:</strong> ✅ Confirmado</p>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="color:#444;line-height:1.7;margin:0 0 32px;">
+                Adjunto a este correo encontrarás tu <strong>certificado de donación</strong> en formato PDF.
+                Este documento tiene validez como soporte contable de tu aporte solidario ante la DIAN.
+              </p>
+
+              <!-- CTA Button -->
+              <table cellpadding="0" cellspacing="0" style="margin:0 auto 32px;">
+                <tr>
+                  <td style="background-color:#578c57;border-radius:8px;padding:14px 32px;text-align:center;">
+                    <a href="{{ frontend_url }}" style="color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;">
+                      Visitar Funcrees Colombia →
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="color:#888;font-size:13px;line-height:1.6;border-top:1px solid #eee;padding-top:20px;margin:0;">
+                Este correo fue generado automáticamente. Si tienes dudas sobre tu donación, escríbenos a
+                <a href="mailto:fundacioncreceunaesperanza@gmail.com" style="color:#578c57;">fundacioncreceunaesperanza@gmail.com</a>
+                o al WhatsApp <a href="https://wa.me/573137924439" style="color:#578c57;">+57 313 792 4439</a>.
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#f9fdf9;padding:24px 40px;text-align:center;border-top:1px solid #e8f5e9;">
+              <p style="color:#888;font-size:12px;margin:0;">
+                <strong style="color:#2d502d;">Fundación Crece Una Esperanza Social (FUNCREESCOLOMBIA)</strong><br>
+                NIT: 902036173-3 · Carrera 15b #41c - 07, Sincelejo, Sucre, Colombia<br>
+                © 2025 Funcrees Colombia. Todos los derechos reservados.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
