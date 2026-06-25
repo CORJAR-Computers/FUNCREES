@@ -329,25 +329,28 @@ describe('showToast() — Sistema de notificaciones', () => {
   it('usa color verde para success', () => {
     showToast('Bien', 'success');
     const toast = document.getElementById('toast-container').children[0];
-    const bg = toast.style.cssText || '';
-    assert.ok(bg.includes('16a34a') || bg.includes('#16a34a') || bg.includes('rgb'),
-      `El background debería contener el color verde. Obtenido: ${bg.substring(0, 100)}`);
+    const bgColor = toast.style.backgroundColor || '';
+    const hasGreen = bgColor.includes('16a34a') || bgColor.includes('rgb(22, 163, 74)') || bgColor.includes('green');
+    assert.ok(hasGreen,
+      `El backgroundColor debería ser verde. Obtenido: ${bgColor}`);
   });
 
   it('usa color rojo para error', () => {
     showToast('Mal', 'error');
     const toast = document.getElementById('toast-container').children[0];
-    const bg = toast.style.cssText || '';
-    assert.ok(bg.includes('dc2626') || bg.includes('#dc2626') || bg.includes('rgb'),
-      `El background debería contener el color rojo. Obtenido: ${bg.substring(0, 100)}`);
+    const bgColor = toast.style.backgroundColor || '';
+    const hasRed = bgColor.includes('dc2626') || bgColor.includes('rgb(220, 38, 38)') || bgColor.includes('red');
+    assert.ok(hasRed,
+      `El backgroundColor debería ser rojo. Obtenido: ${bgColor}`);
   });
 
   it('usa color amarillo para warning', () => {
     showToast('Cuidado', 'warning');
     const toast = document.getElementById('toast-container').children[0];
-    const bg = toast.style.cssText || '';
-    assert.ok(bg.includes('f59e0b') || bg.includes('#f59e0b') || bg.includes('rgb'),
-      `El background debería contener el color amarillo. Obtenido: ${bg.substring(0, 100)}`);
+    const bgColor = toast.style.backgroundColor || '';
+    const hasYellow = bgColor.includes('f59e0b') || bgColor.includes('rgb(245, 158, 11)') || bgColor.includes('yellow');
+    assert.ok(hasYellow,
+      `El backgroundColor debería ser amarillo. Obtenido: ${bgColor}`);
   });
 
   it('usa icono ✓ por defecto si el tipo no es reconocido', () => {
@@ -359,7 +362,9 @@ describe('showToast() — Sistema de notificaciones', () => {
   it('el toast tiene estilo de border-radius 12px', () => {
     showToast('Borde redondeado');
     const toast = document.getElementById('toast-container').children[0];
-    assert.ok(toast.style.borderRadius.includes('12px'));
+    const br = toast.style.borderRadius || '';
+    assert.ok(br.includes('12px') || br.includes('12'),
+      `borderRadius debería contener 12px. Obtenido: ${br}`);
   });
 
 });

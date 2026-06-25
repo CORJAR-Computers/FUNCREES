@@ -29,3 +29,13 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+      - name: Show test summary
+        if: failure()
+        run: |
+          echo "=== Node version ==="
+          node --version
+          echo "=== npm version ==="
+          npm --version
+          echo "=== Test output ==="
+          node --test --test-reporter spec "./tests/*.test.js" 2>&1 | tail -50
