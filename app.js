@@ -435,7 +435,7 @@ function initNavigation() {
     }
 
     // Cleanup para evitar memory leaks
-    window.__cleanupIntervalsOnNav && window.__cleanupIntervalsOnNav();
+    cleanupMapObserver();
   }
 
   // Manejar navegación con historial (botón Atrás/Adelante del navegador)
@@ -574,21 +574,18 @@ function initAccessibility() {
   });
 
   // High Contrast
-  const btnContrastToggle = document.getElementById('btn-contrast-toggle');
   btnContrastToggle.addEventListener('click', () => {
     appAccessibilityState.highContrast = !appAccessibilityState.highContrast;
     saveAndApplyAccSettings();
   });
 
   // Dyslexia Font
-  const btnDyslexiaToggle = document.getElementById('btn-dyslexia-toggle');
   btnDyslexiaToggle.addEventListener('click', () => {
     appAccessibilityState.dyslexiaFont = !appAccessibilityState.dyslexiaFont;
     saveAndApplyAccSettings();
   });
 
   // Voice Reader (TTS Simulator)
-  const btnVoiceToggle = document.getElementById('btn-voice-toggle');
   btnVoiceToggle.addEventListener('click', () => {
     appAccessibilityState.ttsEnabled = !appAccessibilityState.ttsEnabled;
     saveAndApplyAccSettings();
@@ -977,12 +974,7 @@ function cleanupIntervals() {
 window.addEventListener('beforeunload', cleanupIntervals);
 
 // Limpieza adicional cuando se navega entre secciones SPA
-const origNavigateTo = window.__navigateTo;
-window.__cleanupIntervalsOnNav = function() {
-  // No limpiamos el countdown en navegación normal
-  // Solo limpiamos el MutationObserver del mapa
-  cleanupMapObserver();
-};
+
 
 // Update countdown timers every minute
 function updateEventCountdowns() {
@@ -1029,7 +1021,7 @@ const modalsState = {
   activeAbuelitoId: null
 };
 
-window.openAbuelitoStoryModal = function(id) {
+function openAbuelitoStoryModal(id) {
   const abuelito = ABUELITOS_DATA.find(x => x.id === id);
   if (!abuelito) return;
 
@@ -1092,7 +1084,7 @@ window.openAbuelitoStoryModal = function(id) {
   }, 100);
 };
 
-window.openProjectModal = function(id) {
+function openProjectModal(id) {
   const proj = PROYECTOS_DATA.find(x => x.id === id);
   if (!proj) return;
 
@@ -1136,7 +1128,7 @@ window.openProjectModal = function(id) {
   }
 };
 
-window.closeActiveModal = function() {
+function closeActiveModal() {
   const modalBackdrop = document.getElementById('global-modal-backdrop');
   modalBackdrop.classList.remove('active');
   modalBackdrop.removeAttribute('role');
@@ -1157,7 +1149,7 @@ let checkoutModalState = {
   preselectedAbuelito: ''
 };
 
-window.openDonationModal = function(type = 'apadrinamiento', abuelitoId = '') {
+function openDonationModal(type = 'apadrinamiento', abuelitoId = '') {
   checkoutModalState.type = type;
   checkoutModalState.preselectedAbuelito = abuelitoId;
   checkoutModalState.amountSelected = '50000';
@@ -1166,14 +1158,14 @@ window.openDonationModal = function(type = 'apadrinamiento', abuelitoId = '') {
   renderCheckoutModal();
 };
 
-window.triggerSponsorshipFromStory = function(abuelitoId) {
+function triggerSponsorshipFromStory(abuelitoId) {
   closeActiveModal();
   setTimeout(() => {
     openDonationModal('apadrinamiento', abuelitoId);
   }, 250);
 };
 
-window.triggerGeneralDonationFromProject = function() {
+function triggerGeneralDonationFromProject() {
   closeActiveModal();
   setTimeout(() => {
     openDonationModal('donacion');
@@ -1414,7 +1406,7 @@ function renderCheckoutModal() {
 }
 
 // Interactive helper setters for checkout form
-window.setCheckoutAmount = function(amount) {
+function setCheckoutAmount(amount) {
   checkoutModalState.amountSelected = amount;
   // Update button active states without re-rendering entire modal
   document.querySelectorAll('.amount-btn').forEach(btn => {
@@ -1425,13 +1417,13 @@ window.setCheckoutAmount = function(amount) {
   if (customInput) customInput.value = '';
 };
 
-window.setCustomCheckoutAmount = function(val) {
+function setCustomCheckoutAmount(val) {
   checkoutModalState.amountSelected = val;
   // Deselect all preset amount buttons when custom value is entered
   document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
 };
 
-window.setCheckoutGateway = function(gw) {
+function setCheckoutGateway(gw) {
   checkoutModalState.gateway = gw;
   // Update gateway item active states without re-rendering
   document.querySelectorAll('.gateway-item').forEach(item => {
@@ -1439,7 +1431,7 @@ window.setCheckoutGateway = function(gw) {
   });
 };
 
-window.processSimulationCheckout = async function() {
+async function processSimulationCheckout() {
   const amount = parseFloat(checkoutModalState.amountSelected);
   const nombre = document.getElementById('checkout-nombre-input')?.value.trim();
   const email = document.getElementById('checkout-email-input')?.value.trim();
@@ -1576,7 +1568,7 @@ al +57 313 792 4439 para confirmar tu aporte.
   }
 };
 
-window.submitFormSimulation = async function(e, formName) {
+async function submitFormSimulation(e, formName) {
   e.preventDefault();
 
   const form = e.target;
@@ -1643,7 +1635,7 @@ let ticketsCheckoutState = {
   gateway: 'pse'
 };
 
-window.openTicketModal = function(eventId) {
+function openTicketModal(eventId) {
   const ev = EVENTOS_DATA.find(x => x.id === eventId);
   if (!ev) return;
 
@@ -1740,7 +1732,7 @@ function renderTicketsCheckout() {
   }
 }
 
-window.updateTicketQty = function(diff) {
+function updateTicketQty(diff) {
   const newQty = ticketsCheckoutState.quantity + diff;
   if (newQty >= 1 && newQty <= 10) {
     ticketsCheckoutState.quantity = newQty;
@@ -1758,7 +1750,7 @@ window.updateTicketQty = function(diff) {
   }
 };
 
-window.setTicketGateway = function(gw) {
+function setTicketGateway(gw) {
   ticketsCheckoutState.gateway = gw;
   // Update gateway item active states without re-rendering
   document.querySelectorAll('#ticket-gateway-list .gateway-item').forEach(item => {
@@ -1766,7 +1758,7 @@ window.setTicketGateway = function(gw) {
   });
 };
 
-window.processTicketsCheckout = function() {
+function processTicketsCheckout() {
   const ev = EVENTOS_DATA.find(x => x.id === ticketsCheckoutState.eventId);
   
   if (ticketsCheckoutState.gateway === 'whatsapp') {
