@@ -7,7 +7,7 @@
   "scripts": {
     "start": "npx serve . -p 5500 --no-clipboard",
     "dev:kill": "npx kill-port 5500 8000 --yes",
-    "dev": "npm run dev:kill && concurrently --names \"BACKEND,FRONTEND\" --prefix-colors \"blue,green\" \"cd backend && venv\\Scripts\\python manage.py runserver 0.0.0.0:8000\" \"npx serve . -p 5500 --no-clipboard\"",
+    "dev": "npm run dev:kill && concurrently --kill-others --names \"BACKEND,FRONTEND\" --prefix-colors \"blue,green\" \"cd backend && venv\\Scripts\\python manage.py runserver 0.0.0.0:8000\" \"npx serve . -p 5500 --no-clipboard\"",
     "dev:win": "npm run dev:kill && start \"BACKEND\" cmd /c start_backend.bat && npx serve . -p 5500 --no-clipboard",
     "test": "node --test \"./tests/*.test.js\"",
     "test:watch": "node --test --watch \"./tests/*.test.js\"",

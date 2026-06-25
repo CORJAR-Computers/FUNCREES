@@ -1,6 +1,6 @@
 ﻿# 🌱 FUNCREES Colombia — Plataforma Web Institucional
 
-[![Tests](https://github.com/aleksei-corom/FUNCREES/actions/workflows/test.yml/badge.svg)](https://github.com/aleksei-corom/FUNCREES/actions)
+[![Tests](https://github.com/CORJAR-Computers/FUNCREES/actions/workflows/test.yml/badge.svg)](https://github.com/CORJAR-Computers/FUNCREES/actions)
 
 > **Fundación Crece Una Esperanza Social**
 > *Soluciones Sociales Innovadoras para un Impacto Positivo y Duradero.*
@@ -20,11 +20,18 @@ Plataforma web institucional de alta fidelidad para la **Fundación Funcrees Col
 e:/FUNCREES/
 │
 ├── 📄 index.html              # Frontend SPA principal (6 vistas integradas)
-├── 🎨 styles.css              # Sistema de diseño HSL premium + temas accesibilidad
-├── ⚡ app.js                  # Motor JavaScript (SPA, TTS, pasarelas de pago)
+├── 🎨 styles.css              # Entry point (importa los 4 archivos CSS)
+├── 🎨 base.css                # Reset, variables CSS, keyframes
+├── 🎨 components.css          # Estilos de componentes (~2500 líneas)
+├── 🎨 themes.css              # Modo oscuro, alto contraste, dislexia
+├── 🎨 responsive.css          # Todos los media queries
+├── ⚡ app.js                  # Motor JavaScript (IIFE, 21 exports en window)
 ├── 📑 propuesta.html          # Generador de propuesta comercial CORJAR
+├── 📦 package.json            # Scripts npm (dev, test, test:coverage, etc.)
+├── 🔒 package-lock.json       # Lockfile de dependencias npm
 ├── 📦 requirements.txt        # Dependencias Python del backend
 ├── 🚀 start.bat               # Script de arranque rápido del servidor
+├── ⚙️ start_backend.bat       # Batch file para backend en Windows
 ├── 📖 README.md               # Este archivo
 │
 ├── 📁 assets/                 # Recursos visuales del sitio
@@ -34,9 +41,9 @@ e:/FUNCREES/
 │
 ├── 📁 backend/                # API REST con Django 5.x
 │   ├── manage.py              # Punto de entrada de Django
-│   ├── db.sqlite3             # Base de datos SQLite (desarrollo local)
 │   ├── populate_db.py         # Script de datos semilla (seed data)
 │   ├── .env                   # Variables de entorno (NO subir a Git)
+│   ├── 📁 venv/               # Entorno virtual Python (NO subir a Git)
 │   │
 │   ├── 📁 core/               # Configuración central del proyecto Django
 │   │   ├── settings.py        # Configuración global (DB, CORS, Unfold, DRF)
@@ -72,7 +79,12 @@ e:/FUNCREES/
 │       ├── admin.py           # Panel admin de mensajes
 │       └── migrations/        # Migraciones de base de datos
 │
-└── 📁 venv/                   # Entorno virtual Python (NO subir a Git)
+├── 📁 .github/workflows/      # CI: GitHub Action (push/PR a main)
+│   └── test.yml               # Tests con Node 20/22 matrix
+│
+├── 📁 tests/                  # Tests unitarios
+│   ├── unit.test.js           # 45 tests (sanitizeHTML, parseCOP, showToast, exports)
+│   └── iife-encapsulation.test.js  # 44 tests (encapsulación IIFE)
 `
 
 ---
@@ -200,46 +212,74 @@ ombre, historia, 	estimonio: Datos biográficos
 ## 🚀 Instrucciones de Instalación y Ejecución Local
 
 ### Pre-requisitos
-- Python 3.11 o superior instalado en Windows
-- El entorno virtual ya está creado en e:/FUNCREES/venv/
+- **Python** 3.11 o superior instalado en Windows
+- **Node.js** 20+ (v26.3.0 recomendado)
+- **npm** incluido con Node.js
+- Entorno virtual Python en `backend/venv/`
 
-### Inicio Rápido
-`ash
-# Opción 1: Doble clic en start.bat (desde el Explorador de Windows)
+### Inicio Rápido (Recomendado)
+```bash
+# Instalar dependencias del frontend
+npm install
+
+# Iniciar backend + frontend simultáneamente
+npm run dev
+```
+
+> `npm run dev` libera puertos automáticamente e inicia ambos servidores.
+> Frontend: http://localhost:5500 · Backend: http://localhost:8000
+
+### Opciones Alternativas de Inicio
+```bash
+# Opción 1: Solo backend (Django)
+cd backend && venv\Scripts\python manage.py runserver
+
+# Opción 2: Solo frontend (servidor estático)
+npm start
+
+# Opción 3: Desarrollo en ventanas separadas (Windows)
+npm run dev:win
+
+# Opción 4: Doble clic en start.bat (Explorador de Windows)
 start.bat
-
-# Opción 2: Manual desde PowerShell
-cd e:/FUNCREES
-venv\Scripts\activate
-cd backend
-python manage.py runserver
-`
+```
 
 ### Primera Configuración (Solo una vez)
-`ash
-# Activar entorno virtual
-cd e:/FUNCREES
-venv\Scripts\activate
-
-# Instalar dependencias
+```bash
+# Backend: activar entorno virtual e instalar dependencias
+cd e:/FUNCREES/backend
+python -m venv venv
+call venv\Scripts\activate
 pip install -r requirements.txt
-
-# Ejecutar migraciones
-cd backend
 python manage.py migrate
-
-# Cargar datos de ejemplo (50 beneficiarios)
-python populate_db.py
-
-# Crear administrador
+python populate_db.py          # Cargar datos de ejemplo
 python manage.py createsuperuser
-`
+
+# Frontend: instalar dependencias npm
+cd ..
+npm install
+```
+
+### Scripts de Desarrollo Disponibles
+
+| Script | Comando | Descripción |
+|---|---|---|
+| **Desarrollo** | `npm run dev` | Mata puertos + inicia backend (8000) y frontend (5500) simultáneamente |
+| **Desarrollo (Windows)** | `npm run dev:win` | Igual que `dev` pero abre backend en ventana cmd separada |
+| **Solo frontend** | `npm start` | Sirve el frontend estático en el puerto 5500 |
+| **Matar puertos** | `npm run dev:kill` | Libera los puertos 5500 y 8000 |
+| **Tests** | `npm test` | Ejecuta los 89 tests (node --test) |
+| **Tests (watch)** | `npm run test:watch` | Re-ejecuta tests automáticamente al detectar cambios |
+| **Cobertura** | `npm run test:coverage` | Genera reporte de cobertura de tests |
 
 ### URLs Locales
-- **Frontend**: Abrir e:/FUNCREES/index.html en el navegador
+- **Frontend**: http://localhost:5500/
 - **Backend API**: http://localhost:8000/api/
 - **Panel Admin**: http://localhost:8000/admin/
 - **Propuesta Comercial**: Abrir e:/FUNCREES/propuesta.html en el navegador
+
+> ℹ️ `npm run dev` ejecuta `dev:kill` automáticamente para liberar puertos antes de iniciar.
+> Si un proceso falla, el otro se detiene gracias a `--kill-others` en concurrently.
 
 ---
 
@@ -288,6 +328,7 @@ ENCRYPTION_KEY=<clave-fernet-base64>
 | v0.1.0 | Jun 2026 | Prototipo frontend SPA completo |
 | v0.2.0 | Jun 2026 | Backend REST API Django con SQLite local |
 | v0.3.0 | Jun 2026 | Propuesta comercial interactiva CORJAR |
+| v0.4.0 | Jun 2026 | Refactor: IIFE encapsulation, CSS dividido, 89 tests, CI/CD, scripts dev |
 | v1.0.0 | Pendiente | Despliegue en producción con PostgreSQL y pasarelas reales |
 
 ---
