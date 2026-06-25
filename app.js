@@ -924,8 +924,8 @@ function renderEvents() {
       countdownHTML = '<div class="evento-permanent-badge"><i class="fa-solid fa-infinity"></i> Siempre Activo</div>';
     }
 
-    const dateDay = ev.fecha.split(' ')[1] || 'Activa';
-    const dateMonth = ev.fecha.split(' ')[0] || 'Camp.';
+    const dateDay = (ev.fecha || '').split(' ')[1] || 'Activa';
+    const dateMonth = (ev.fecha || '').split(' ')[0] || 'Camp.';
 
     return `
     <div class="evento-card" data-category="${ev.category}">

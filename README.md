@@ -1,5 +1,7 @@
 ﻿# 🌱 FUNCREES Colombia — Plataforma Web Institucional
 
+[![Tests](https://github.com/aleksei-corom/FUNCREES/actions/workflows/test.yml/badge.svg)](https://github.com/aleksei-corom/FUNCREES/actions)
+
 > **Fundación Crece Una Esperanza Social**
 > *Soluciones Sociales Innovadoras para un Impacto Positivo y Duradero.*
 > NIT: 902036173-3 | Sincelejo, Sucre, Colombia
