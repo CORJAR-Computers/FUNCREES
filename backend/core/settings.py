@@ -124,25 +124,10 @@ DATABASES = {
 # ============================================
 
 # En DEBUG=True se permiten todos los orígenes (desarrollo local)
-# En DEBUG=False se usa la lista blanca de CORS_ALLOWED_ORIGINS
-# En DEBUG=True se permiten orígenes locales específicos
-# En DEBUG=False se usa la lista blanca de CORS_ALLOWED_ORIGINS
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
-    CSRF_TRUSTED_ORIGINS = [
-        'http://localhost:8000',
-        'http://127.0.0.1:8000',
-        'http://localhost:5500',
-        'http://127.0.0.1:5500',
-    ]
-    # En DEBUG, también permitir cualquier origin local
-    CORS_ALLOWED_ORIGINS = [
-        'http://localhost:5500',
-        'http://127.0.0.1:5500',
-        'http://localhost:8000',
-        'http://127.0.0.1:8000',
-        'http://localhost:3000',
-    ]
+    CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000', 'http://localhost:5500', 'http://127.0.0.1:5500', 'http://localhost:3000']
+    CORS_ALLOWED_ORIGINS = []
 else:
     CORS_ALLOW_ALL_ORIGINS = False
     CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS')
