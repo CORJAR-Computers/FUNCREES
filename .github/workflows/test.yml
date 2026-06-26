@@ -30,7 +30,10 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Show test summary
+      - name: Coverage report
+        run: npm run test:coverage
+
+      - name: Show test summary (on failure)
         if: failure()
         run: |
           echo "=== Node version ==="
@@ -38,4 +41,4 @@ jobs:
           echo "=== npm version ==="
           npm --version
           echo "=== Test output ==="
-          node --test --test-reporter spec "./tests/*.test.js" 2>&1 | tail -50
+          node --test --test-reporter spec ./tests/*.test.js 2>&1 | tail -50
