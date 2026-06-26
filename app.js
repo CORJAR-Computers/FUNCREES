@@ -2198,12 +2198,90 @@ function initTestimonialCarousel() {
   // Start auto-play
   startAutoPlay();
 
-  // Pause on hover
+  // Pause on hover (tanto en viewport como en los botones, para que el hover
+  // en un botón también pause el auto-play y no compita con el click).
   const carousel = document.getElementById('testimonial-carousel');
-  if (carousel) {
-    carousel.addEventListener('mouseenter', stopAutoPlay);
-    carousel.addEventListener('mouseleave', startAutoPlay);
+  const carouselContainer = document.querySelector('.testimonial-container');
+  if (carouselContainer) {
+    carouselContainer.addEventListener('mouseenter', stopAutoPlay);
+    carouselContainer.addEventListener('mouseleave', startAutoPlay);
   }
+
+  // Inicializa la barra de progreso de scroll.
+  updateTestimonialProgress(track);
+
+  // Sync currentIndex cuando el usuario hace scroll manual en el track.
+  // Usa requestAnimationFrame + debounce ligero para no saturar.
+  let scrollRaf = null;
+  if (track) {
+    track.addEventListener('scroll', () => {
+      if (scrollRaf) return;
+      scrollRaf = requestAnimationFrame(() => {
+        scrollRaf = null;
+        const cards = track.querySelectorAll('.testimonial-card');
+        if (!cards.length) return;
+        const trackCenter = track.scrollLeft + track.clientWidth / 2;
+        let closestIdx = 0;
+        let closestDist = Infinity;
+        cards.forEach((card, i) => {
+          const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+          const dist = Math.abs(cardCenter - trackCenter);
+          if (dist < closestDist) {
+            closestDist = dist;
+            closestIdx = i;
+          }
+        });
+        if (closestIdx !== testimonialState.currentIndex) {
+          testimonialState.currentIndex = closestIdx;
+          dots.querySelectorAll('.testimonial-dot').forEach((dot, i) => {
+            dot.classList.toggle('active', i === closestIdx);
+          });
+        }
+        // Actualiza la barra de progreso en cada frame.
+        updateTestimonialProgress(track);
+      });
+    }, { passive: true });
+  }
+
+  // Recalcula el progreso al cambiar el tamaño de viewport (responsive).
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    if (resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => updateTestimonialProgress(track), 150);
+  });
+}
+
+/**
+ * Actualiza el ancho y posición de la barra de progreso del carrusel de
+ * testimonios en función del scrollLeft actual y el ancho de contenido total.
+ * - El "thumb" de la barra representa la porción visible de tarjetas.
+ * - Se desplaza lateralmente a medida que el usuario hace scroll.
+ */
+function updateTestimonialProgress(track) {
+  if (!track) return;
+  const bar = document.getElementById('testimonial-progress-bar');
+  if (!bar) return;
+
+  const maxScroll = track.scrollWidth - track.clientWidth;
+  const scrolled = track.scrollLeft;
+
+  // Si todo el contenido cabe sin scroll, la barra ocupa el 100%.
+  if (maxScroll <= 0) {
+    bar.style.width = '100%';
+    bar.style.transform = 'translateX(0)';
+    return;
+  }
+
+  // Calcula qué fracción del contenido es visible (para el ancho del thumb)
+  // y qué fracción ya fue desplazada (para la posición del thumb).
+  const visibleRatio = track.clientWidth / track.scrollWidth;
+  const thumbWidth = Math.max(0.15, Math.min(1, visibleRatio)); // mínimo 15%
+  const progress = scrolled / maxScroll;
+  const maxOffset = 1 - thumbWidth;
+  const offset = progress * maxOffset;
+
+  bar.style.width = (thumbWidth * 100) + '%';
+  bar.style.transform = `translateX(${offset * 100}%)`;
 }
 
 function slideTestimonial(direction) {
@@ -2229,7 +2307,28 @@ function goToTestimonial(index) {
   const dots = document.querySelectorAll('.testimonial-dot');
 
   if (track) {
-    track.style.transform = `translateX(-${index * 100}%)`;
+    // CRÍTICO: NO usar scrollIntoView — su opción `block` mueve el scroll
+    // VERTICAL de la página entera para traer la tarjeta al viewport, lo que
+    // provoca un auto-scroll no deseado cada vez que el auto-play (cada 5s)
+    // llama a esta función. En su lugar usamos track.scrollTo({ left })
+    // que SÓLO afecta el scroll horizontal del track, jamás el vertical.
+    const cards = track.querySelectorAll('.testimonial-card');
+    const card = cards[index];
+    if (card) {
+      // Calculamos el scrollLeft necesario para centrar la tarjeta en el
+      // track usando coordenadas absolutas (getBoundingClientRect), que es
+      // robusto frente a cualquier offsetParent o padding del track.
+      const trackRect = track.getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
+      const delta = (cardRect.left - trackRect.left) -
+                    (track.clientWidth - cardRect.width) / 2;
+      const maxScroll = track.scrollWidth - track.clientWidth;
+      const targetLeft = Math.max(0, Math.min(track.scrollLeft + delta, maxScroll));
+      track.scrollTo({
+        left: targetLeft,
+        behavior: 'smooth'
+      });
+    }
   }
 
   // Update dots
@@ -2398,4 +2497,701 @@ window.updateMapTheme = updateMapTheme;
 window.sanitizeHTML = sanitizeHTML;
 window.parseCOP = parseCOP;
 
+})();
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TASK 3a — COOKIE CONSENT BANNER (GDPR + Ley 1581 Colombia)
+// ═══════════════════════════════════════════════════════════════════════════
+/* ============================================================================
+   COOKIE CONSENT BANNER — GDPR + Ley 1581 de 2012 (Colombia)
+   ----------------------------------------------------------------------------
+   Añadir al final de /home/z/my-project/public/funcrees/app.js.
+
+   Módulo autónomo (IIFE), vanilla JS, sin dependencias externas.
+   - Persiste el consentimiento en localStorage bajo la clave
+     `funcrees_cookie_consent_v1`.
+   - Aplica el consentimiento a Google Analytics / Facebook Pixel
+     si están presentes.
+   - Emite el evento personalizado `funcrees:cookie-consent` en `document`
+     para que otros módulos puedan reaccionar al estado de consentimiento.
+   - Expone `window.FUNCREES_COOKIE_BANNER.open()` para reabrir el banner
+     desde el enlace "Política de Cookies" del footer, y auto-vincula
+     cualquier elemento con `data-action="open-cookie-settings"`.
+   ========================================================================== */
+(function () {
+  'use strict';
+
+  /* ─── Constantes de configuración ─────────────────────────── */
+  var STORAGE_KEY      = 'funcrees_cookie_consent_v1';
+  var CONSENT_VERSION  = 1;
+  var SHOW_DELAY_MS    = 1200;   // Retardo antes de mostrar (no estorbar 1er paint).
+  var HIDE_ANIM_MS     = 400;    // Coincide con la transición CSS de ocultado.
+
+  /* ─── Referencias al DOM ──────────────────────────────────── */
+  var banner        = document.getElementById('cookie-banner');
+  if (!banner) return; // No hay banner en esta página; salir silenciosamente.
+
+  var prefsPanel    = document.getElementById('cookie-prefs');
+  var configBtn     = banner.querySelector('[data-action="toggle-prefs"]');
+  var acceptBtn     = banner.querySelector('[data-action="accept-all"]');
+  var essentialBtn  = banner.querySelector('[data-action="accept-essential"]');
+  var saveBtn       = banner.querySelector('[data-action="save-prefs"]');
+
+  /* Botón que disparó la apertura (para restaurar el foco al cerrar). */
+  var lastTrigger = null;
+
+  /* ─── Utilidades de almacenamiento ────────────────────────── */
+
+  function readConsent() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      var parsed = JSON.parse(raw);
+      if (!parsed || parsed.version !== CONSENT_VERSION) return null;
+      return parsed;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function writeConsent(consent) {
+    var payload = {
+      version:    CONSENT_VERSION,
+      timestamp:  new Date().toISOString(),
+      essential:  true,
+      analytics:  !!consent.analytics,
+      marketing:  !!consent.marketing
+    };
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch (e) { /* almacenamiento no disponible: continuar igualmente */ }
+    return payload;
+  }
+
+  /* ─── Aplicación del consentimiento a servicios externos ──── */
+
+  function applyConsent(consent) {
+    // 1) Google Analytics: si el usuario NO consintió analíticas,
+    //    desactivar GA vía la bandera global `ga-disable-<ID>`.
+    //    El ID se toma de window.__FUNCREES_CONFIG__.GA_ID si existe,
+    //    o se usa un placeholder hasta que se integre GA real.
+    if (!consent.analytics) {
+      var gaId = (window.__FUNCREES_CONFIG__ && window.__FUNCREES_CONFIG__.GA_ID)
+                 || 'G-XXXXXXX';
+      try { window['ga-disable-' + gaId] = true; } catch (e) {}
+    }
+
+    // 2) Facebook Pixel: si el usuario NO consintió marketing,
+    //    revocar el consentimiento previo del píxel si está cargado.
+    if (!consent.marketing) {
+      try {
+        if (typeof window.fbq === 'function') {
+          window.fbq('consent', 'revoke');
+        }
+      } catch (e) {}
+    }
+
+    // 3) Notificar al resto de la aplicación con un CustomEvent.
+    try {
+      var evt = new CustomEvent('funcrees:cookie-consent', { detail: consent });
+      document.dispatchEvent(evt);
+    } catch (e) { /* CustomEvent no soportado (IE legacy): ignorar */ }
+  }
+
+  /* ─── Mostrar / ocultar banner ────────────────────────────── */
+
+  function showBanner() {
+    banner.hidden = false;
+    banner.classList.remove('cookie-banner--hidden');
+  }
+
+  function hideBanner(cb) {
+    banner.classList.add('cookie-banner--hidden');
+    window.setTimeout(function () {
+      banner.hidden = true;
+      // Restaurar el foco al elemento que abrió el banner (si lo hubo).
+      if (lastTrigger && typeof lastTrigger.focus === 'function') {
+        try { lastTrigger.focus(); } catch (e) {}
+        lastTrigger = null;
+      }
+      if (typeof cb === 'function') cb();
+    }, HIDE_ANIM_MS);
+  }
+
+  /* ─── Panel de preferencias ───────────────────────────────── */
+
+  function setPrefsPanel(open) {
+    if (!prefsPanel || !configBtn) return;
+    if (open) {
+      prefsPanel.hidden = false;
+      configBtn.setAttribute('aria-expanded', 'true');
+    } else {
+      prefsPanel.hidden = true;
+      configBtn.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  function togglePrefsPanel() {
+    if (!prefsPanel) return;
+    setPrefsPanel(prefsPanel.hidden === true);
+  }
+
+  function readPrefsFromUI() {
+    var aEl = banner.querySelector('[data-cookie-pref="analytics"]');
+    var mEl = banner.querySelector('[data-cookie-pref="marketing"]');
+    return {
+      essential: true,
+      analytics: aEl ? !!aEl.checked : false,
+      marketing: mEl ? !!mEl.checked : false
+    };
+  }
+
+  function writePrefsToUI(consent) {
+    var aEl = banner.querySelector('[data-cookie-pref="analytics"]');
+    var mEl = banner.querySelector('[data-cookie-pref="marketing"]');
+    if (aEl) aEl.checked = !!consent.analytics;
+    if (mEl) mEl.checked = !!consent.marketing;
+  }
+
+  /* ─── Manejadores de los botones del banner ───────────────── */
+
+  function handleAcceptAll() {
+    var consent = writeConsent({ essential: true, analytics: true, marketing: true });
+    applyConsent(consent);
+    hideBanner();
+  }
+
+  function handleAcceptEssential() {
+    var consent = writeConsent({ essential: true, analytics: false, marketing: false });
+    applyConsent(consent);
+    hideBanner();
+  }
+
+  function handleSavePrefs() {
+    var consent = writeConsent(readPrefsFromUI());
+    applyConsent(consent);
+    hideBanner();
+  }
+
+  if (acceptBtn)    acceptBtn.addEventListener('click', handleAcceptAll);
+  if (essentialBtn) essentialBtn.addEventListener('click', handleAcceptEssential);
+  if (saveBtn)      saveBtn.addEventListener('click', handleSavePrefs);
+  if (configBtn)    configBtn.addEventListener('click', togglePrefsPanel);
+
+  /* ─── Accesibilidad: trampa de foco + tecla ESC ───────────── */
+
+  var FOCUSABLE_SELECTOR = 'button, [href], input, [tabindex]:not([tabindex="-1"])';
+
+  function getFocusable() {
+    return Array.prototype.slice.call(banner.querySelectorAll(FOCUSABLE_SELECTOR))
+      .filter(function (el) {
+        return !el.disabled && el.offsetParent !== null;
+      });
+  }
+
+  function handleKeydown(e) {
+    if (banner.hidden) return;
+
+    // ESC cierra SOLO el panel de preferencias (no el banner completo).
+    if (e.key === 'Escape' || e.key === 'Esc') {
+      if (prefsPanel && prefsPanel.hidden === false) {
+        e.preventDefault();
+        setPrefsPanel(false);
+        if (configBtn) configBtn.focus();
+      }
+      return;
+    }
+
+    // Trampa de foco Tab / Shift+Tab dentro del banner.
+    if (e.key === 'Tab') {
+      var focusables = getFocusable();
+      if (focusables.length === 0) return;
+      var first = focusables[0];
+      var last  = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  }
+
+  document.addEventListener('keydown', handleKeydown);
+
+  /* ─── API pública: reabrir el banner desde el footer ──────── */
+
+  window.FUNCREES_COOKIE_BANNER = {
+    open: function (opts) {
+      opts = opts || {};
+      if (opts.trigger) lastTrigger = opts.trigger;
+      // Sincronizar los toggles con el último consentimiento guardado.
+      var stored = readConsent();
+      if (stored) writePrefsToUI(stored);
+      if (opts.showPrefs) setPrefsPanel(true);
+      showBanner();
+    },
+    close:      function () { hideBanner(); },
+    getConsent: function () { return readConsent(); },
+    reset:      function () {
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    }
+  };
+
+  /* ─── Auto-vincular elementos [data-action="open-cookie-settings"]
+          (delegación de eventos — funciona para enlaces del footer y
+          cualquier enlace "Política de Cookies" dentro del banner).      */
+
+  document.addEventListener('click', function (e) {
+    var target = e.target;
+    while (target && target !== document) {
+      if (target.matches && target.matches('[data-action="open-cookie-settings"]')) {
+        e.preventDefault();
+        window.FUNCREES_COOKIE_BANNER.open({ trigger: target, showPrefs: true });
+        return;
+      }
+      target = target.parentNode;
+    }
+  });
+
+  /* ─── Inicialización ──────────────────────────────────────── */
+
+  function init() {
+    var stored = readConsent();
+    if (stored) {
+      // Consentimiento previo válido: aplicarlo y no mostrar banner.
+      writePrefsToUI(stored);
+      applyConsent(stored);
+      banner.hidden = true;
+      return;
+    }
+    // Sin consentimiento previo: mostrar tras un breve retardo.
+    banner.hidden = true;
+    window.setTimeout(showBanner, SHOW_DELAY_MS);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TASK 3b — NAV UX: reading progress + scroll-to-top + header shrink
+// ═══════════════════════════════════════════════════════════════════════════
+/* ============================================================
+   NAV UX ENHANCEMENTS (Task 3b — Agente B)
+   Módulo IIFE vanilla JS — sin dependencias externas.
+
+   Funciones de init:
+     - initScrollToTop()      → vincula el botón #scroll-top-btn
+     - initReadingProgress()  → localiza el fill de la barra
+     - initHeaderShrink()     → localiza el .header
+
+   Un ÚNICO listener de scroll pasivo + rAF throttle alimenta las
+   3 mejoras (sin jank, sin scroll handlers duplicados).
+
+   API pública:
+     window.FUNCREES_NAV.scrollTop()  → scroll suave a top
+
+   Punto de inserción: concatenar al final de app.js, o cargar
+   como <script> tras app.js (es autónomo: registra su propio
+   DOMContentLoaded listener si el documento aún está cargando).
+   ============================================================ */
+
+(function() {
+  'use strict';
+
+  /* ─── Constantes de configuración ────────────────────────── */
+  var HEADER_SHRINK_THRESHOLD = 80;   // px de scroll para activar header shrink
+  var SCROLL_BTN_THRESHOLD    = 600;  // px de scroll para mostrar el botón
+
+  /* ─── Estado interno (caché de nodos y flags) ────────────── */
+  var ticking    = false;
+  var progressEl = null;
+  var headerEl   = null;
+  var scrollBtn  = null;
+  var headerShrinkOn  = false;
+  var scrollBtnVisible = false;
+
+  /* matchMedia live — .matches se reevalúa en cada llamada, así
+     que respeta cambios en caliente de la preferencia del usuario. */
+  var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  /* ─── Handler ÚNICO de scroll (rAF-throttled, passive) ─────
+     Una sola función actualiza:
+       1) Ancho de la barra de progreso de lectura
+       2) Clase .header--scrolled del header
+       3) Visibilidad del botón scroll-to-top
+     Esto evita registrar 2-3 listeners de scroll separados que
+     causarían jank en dispositivos móviles. */
+  function updateOnScroll() {
+    ticking = false;
+
+    var scrollY = window.scrollY || window.pageYOffset || 0;
+
+    /* (1) Barra de progreso de lectura */
+    if (progressEl) {
+      var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      var pct = docHeight > 0
+        ? Math.min(100, Math.max(0, (scrollY / docHeight) * 100))
+        : 0;
+      progressEl.style.width = pct.toFixed(2) + '%';
+    }
+
+    /* (2) Header shrink — solo togglear la clase cuando cambia
+           el estado (evita reflow innecesario en cada frame) */
+    if (headerEl) {
+      var shouldShrink = scrollY > HEADER_SHRINK_THRESHOLD;
+      if (shouldShrink !== headerShrinkOn) {
+        headerEl.classList.toggle('header--scrolled', shouldShrink);
+        headerShrinkOn = shouldShrink;
+      }
+    }
+
+    /* (3) Visibilidad del botón scroll-to-top — toggle de clase
+           + gestión de tabindex/aria-hidden para a11y de teclado:
+           si está oculto, NO debe ser focusable (mejor UX con Tab). */
+    if (scrollBtn) {
+      var shouldShow = scrollY > SCROLL_BTN_THRESHOLD;
+      if (shouldShow !== scrollBtnVisible) {
+        scrollBtn.classList.toggle('scroll-top--visible', shouldShow);
+        if (shouldShow) {
+          scrollBtn.removeAttribute('tabindex');
+          scrollBtn.setAttribute('aria-hidden', 'false');
+        } else {
+          scrollBtn.setAttribute('tabindex', '-1');
+          scrollBtn.setAttribute('aria-hidden', 'true');
+        }
+        scrollBtnVisible = shouldShow;
+      }
+    }
+  }
+
+  /* Wrapper que pide un frame y marca ticking para evitar
+     encolar más rAFs mientras uno ya está pendiente. */
+  function onScroll() {
+    if (!ticking) {
+      window.requestAnimationFrame(updateOnScroll);
+      ticking = true;
+    }
+  }
+
+  /* ─── Scroll suave a la parte superior ─────────────────────
+     Respeta prefers-reduced-motion: si el usuario prefiere
+     movimiento reducido, usamos scrollTo(0,0) instantáneo
+     en lugar de behavior:'smooth'. */
+  function scrollTopSmooth() {
+    if (prefersReducedMotion.matches) {
+      window.scrollTo(0, 0);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  /* ─── Init: Scroll-to-top button ─────────────────────────── */
+  function initScrollToTop() {
+    scrollBtn = document.getElementById('scroll-top-btn');
+    if (!scrollBtn) return;
+
+    scrollBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      scrollTopSmooth();
+    });
+
+    /* Atajos de teclado extra (más allá del Enter/Espacio nativo
+       del <button>):
+         - "Home" cuando el botón tiene foco → ya hace scroll nativo
+         No añadimos más para no interferir con otros atajos del sitio. */
+  }
+
+  /* ─── Init: Reading progress bar ─────────────────────────── */
+  function initReadingProgress() {
+    progressEl = document.getElementById('reading-progress-bar');
+    if (!progressEl) return;
+    /* Inicialización explícita (también la hace updateOnScroll
+       en el primer tick, pero esto evita un flash inicial al 100%) */
+    progressEl.style.width = '0%';
+  }
+
+  /* ─── Init: Header shrink ────────────────────────────────── */
+  function initHeaderShrink() {
+    headerEl = document.querySelector('.header');
+    if (!headerEl) return;
+  }
+
+  /* ─── Init principal ─────────────────────────────────────── */
+  function init() {
+    initScrollToTop();
+    initReadingProgress();
+    initHeaderShrink();
+
+    /* Listener ÚNICO pasivo — alimenta las 3 mejoras.
+       passive:true → el browser no espera a nuestro handler
+       para hacer scroll (mejor rendimiento, no bloquea scroll). */
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+
+    /* Sincronización inicial con el estado actual del scroll.
+       Importante si el usuario recarga la página con un #hash
+       que ya lo posicionó en medio del documento. */
+    updateOnScroll();
+  }
+
+  /* Arranque: tolera carga antes o después de DOMContentLoaded
+     (concatenado al final de app.js — app.js ya está dentro de
+     su propio DOMContentLoaded, pero ser defensivos no cuesta). */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  /* ─── API pública para acceso programático ─────────────────
+     Permite invocar el scroll-to-top desde otros módulos
+     (p.ej. el banner de cookies al cerrarse, o un CTA "subir"). */
+  window.FUNCREES_NAV = {
+    scrollTop: scrollTopSmooth
+  };
+})();
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TASK 3c — ACCESIBILIDAD: skip-link + focus-visible + reduced-motion
+// ═══════════════════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════════
+   AGENT C — Task 3c · Accesibilidad · JavaScript
+   ─────────────────────────────────────────────────────────────────
+   Vanilla JS · sin dependencias · IIFE.
+   Cargar DESPUÉS de app.js para poder interceptar window.startAutoPlay.
+   Si se carga antes, el polling se encarga de esperar a que exista.
+
+   Expone globalmente (window.FuncreesA11y):
+     · prefersReducedMotion() -> boolean
+     · initSkipLink()
+     · initReducedMotionAutoPlayGuard()
+
+   Funciones internas auto-ejecutadas en DOMContentLoaded:
+     - instala el skip-link
+     - envuelve startAutoPlay y resetAutoPlay con un guard que respeta
+       prefers-reduced-motion
+   ════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ─── Util: detección robusta de prefers-reduced-motion ────────
+     1) MatchMedia nativo (preferencia del SO / navegador).
+     2) Fallback: si matchMedia no existe o falla, devolvemos false
+        (no penalizamos al usuario por falta de API). */
+  function prefersReducedMotion() {
+    try {
+      if (window.matchMedia) {
+        return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      }
+    } catch (e) {
+      /* Algunos navegadores antiguos lanzan si la query es inválida. */
+    }
+    return false;
+  }
+
+  /* ─── 1) SKIP-LINK ─────────────────────────────────────────────
+     Intercepta el click del enlace "Saltar al contenido principal".
+     - preventDefault() para evitar que el navegador añada #main-content
+       a la URL (mantiene el historial limpio).
+     - Mueve el foco programáticamente al <main id="main-content">.
+     - Llama scrollIntoView({block:'start'}) como refuerzo visual.
+     - El elemento destino tiene tabindex="-1" (añadido vía HTML) para
+       garantizar que .focus() funcione en Safari/iOS. */
+  function initSkipLink() {
+    var skipLinks = document.querySelectorAll('[data-skip-target]');
+    if (!skipLinks.length) return;
+
+    Array.prototype.forEach.call(skipLinks, function (link) {
+      link.addEventListener('click', function (evt) {
+        var href = link.getAttribute('href') || '';
+        if (href.charAt(0) !== '#') return;
+
+        var target = document.querySelector(href);
+        if (!target) return;
+
+        evt.preventDefault();
+
+        // Asegura tabindex=-1 si por algún motivo falta (defensivo).
+        if (!target.hasAttribute('tabindex')) {
+          target.setAttribute('tabindex', '-1');
+        }
+
+        // Mueve el foco. Si el elemento está oculto visualmente, .focus()
+        // aún puede desplazar el viewport; forzamos el scroll al inicio
+        // del contenido para que el usuario vea el inicio de la página.
+        try {
+          target.focus({ preventScroll: true });
+        } catch (err) {
+          // Navegadores sin la opción preventScroll.
+          target.focus();
+        }
+
+        // Refuerzo visual: lleva el destino al tope del viewport.
+        // Respetamos prefers-reduced-motion (sin animación suave).
+        if (target.scrollIntoView) {
+          target.scrollIntoView({
+            block: 'start',
+            behavior: prefersReducedMotion() ? 'auto' : 'smooth'
+          });
+        }
+
+        // Actualiza el hash de la URL SIN recargar ni añadir entrada
+        // al historial (mejor UX para usuarios de lector de pantalla).
+        try {
+          history.replaceState(null, '', href);
+        } catch (err) {
+          /* Safari privado puede lanzar; ignoramos. */
+        }
+      });
+    });
+  }
+
+  /* ─── 2) GUARD DE AUTO-PLAY PARA REDUCED-MOTION ────────────────
+     Envuelve window.startAutoPlay y window.resetAutoPlay para que,
+     si el usuario prefiere movimiento reducido, el carrusel de
+     testimonios NO arranque solo (sólo se mueve al click).
+
+     Estrategia:
+     a) Si startAutoPlay ya existe al cargar este script, lo envuelve
+        inmediatamente.
+     b) Si aún no existe (app.js cargó después), hace polling ligero
+        (rAF) hasta que aparezca y entonces lo envuelve.
+     c) Además, si reduced-motion está activo y el carrusel ya arrancó
+        antes de este guard, llamamos a stopAutoPlay() para detenerlo.
+     d) Re-evalúa al cambiar la preferencia del sistema (algunos SO
+        permiten alternar en caliente). */
+  var __wrapped = { start: false, reset: false };
+
+  function wrapStartAutoPlay() {
+    if (__wrapped.start) return;
+    var original = window.startAutoPlay;
+    if (typeof original !== 'function') return;
+
+    window.startAutoPlay = function funcreesReducedMotionStartAutoPlay() {
+      if (prefersReducedMotion()) {
+        // No arrancamos el intervalo. Si había uno previo, lo paramos.
+        if (typeof window.stopAutoPlay === 'function') {
+          window.stopAutoPlay();
+        }
+        return;
+      }
+      return original.apply(this, arguments);
+    };
+
+    // Conserva metadatos por si otra lib los inspecciona.
+    window.startAutoPlay.__wrappedByA11y = true;
+    window.startAutoPlay.__original = original;
+    __wrapped.start = true;
+
+    // Si el sistema ya estaba en reduced-motion y el carrusel corría,
+    // lo detenemos ahora (caso: app.js inicializó antes que nosotros).
+    if (prefersReducedMotion() && typeof window.stopAutoPlay === 'function') {
+      window.stopAutoPlay();
+    }
+  }
+
+  function wrapResetAutoPlay() {
+    if (__wrapped.reset) return;
+    var original = window.resetAutoPlay;
+    if (typeof original !== 'function') return;
+
+    window.resetAutoPlay = function funcreesReducedMotionResetAutoPlay() {
+      if (prefersReducedMotion()) {
+        // reset = stop + start. En reduced-motion equivalente a stop.
+        if (typeof window.stopAutoPlay === 'function') {
+          window.stopAutoPlay();
+        }
+        return;
+      }
+      return original.apply(this, arguments);
+    };
+
+    window.resetAutoPlay.__wrappedByA11y = true;
+    window.resetAutoPlay.__original = original;
+    __wrapped.reset = true;
+  }
+
+  // Polling ligero: si app.js aún no cargó startAutoPlay, espera.
+  // Usa requestAnimationFrame con timeout máximo de 10 s (~600 frames).
+  function waitForAutoPlayAndWrap() {
+    wrapStartAutoPlay();
+    wrapResetAutoPlay();
+    if (__wrapped.start && __wrapped.reset) return;
+
+    var start = performance.now();
+    function tick() {
+      wrapStartAutoPlay();
+      wrapResetAutoPlay();
+      if ((__wrapped.start && __wrapped.reset) ||
+          performance.now() - start > 10000) {
+        return;
+      }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // Re-evalúa en caliente si el usuario cambia la preferencia del SO.
+  // (Algunos SO permiten alternar "reducir movimiento" sin recargar.)
+  function watchMotionPreference() {
+    try {
+      var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+      if (mq.addEventListener) {
+        mq.addEventListener('change', function (ev) {
+          if (ev.matches) {
+            // Activó reduced-motion: detén cualquier auto-play en curso.
+            if (typeof window.stopAutoPlay === 'function') {
+              window.stopAutoPlay();
+            }
+          } else {
+            // Desactivó: si el carrusel está inicializado y el ratón NO
+            // está encima, arráncalo de nuevo (respeta el hover-pause).
+            var container = document.querySelector('.testimonial-container');
+            var hovered = container && container.matches(':hover');
+            if (!hovered && typeof window.startAutoPlay === 'function') {
+              window.startAutoPlay();
+            }
+          }
+        });
+      } else if (mq.addListener) {
+        // Safari < 14.
+        mq.addListener(function () { /* no-op: el guard se reevalúa en cada llamada */ });
+      }
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  function initReducedMotionAutoPlayGuard() {
+    waitForAutoPlayAndWrap();
+    watchMotionPreference();
+  }
+
+  /* ─── Arranque ──────────────────────────────────────────────── */
+  function boot() {
+    initSkipLink();
+    initReducedMotionAutoPlayGuard();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+
+  /* ─── API pública (por si otro módulo quiere reaprovechar) ─── */
+  window.FuncreesA11y = {
+    prefersReducedMotion: prefersReducedMotion,
+    initSkipLink: initSkipLink,
+    initReducedMotionAutoPlayGuard: initReducedMotionAutoPlayGuard
+  };
 })();

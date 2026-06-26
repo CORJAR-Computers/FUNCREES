@@ -487,7 +487,7 @@
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
   gap: 4rem;
-  a
+}
 
 /* ─── PROYECTOS (PAGE 3) ──────────────────────────────────── */
 
@@ -1238,18 +1238,52 @@
   width: 100%;
   display: flex;
   position: relative;
+  overflow: hidden; /* evita que los logos duplicados desborden el layout */
+  /* Degradado en los bordes para un acabado premium del scroll infinito */
+  mask-image: linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%);
 }
 
 .carousel-track {
   display: flex;
   gap: 4rem;
   width: max-content;
-  animation: scrollCarousel 20s linear infinite;
+  /* Scroll infinito: la animación translateX(0 -> -50%) requiere que el contenido
+     esté duplicado exactamente (6 aliados × 2 = 12). El -50% muestra la primera mitad
+     y al reiniciar el loop el resultado es visualmente continuo. */
+  animation: scrollCarousel 25s linear infinite;
   align-items: center;
+  padding: 0 2rem;
+  /* Sin will-change la animación puede tartamudear en algunos navegadores */
+  will-change: transform;
 }
 
 .carousel-track:hover {
   animation-play-state: paused;
+}
+
+/* Cada badge debe conservar su tamaño y no comprimirse */
+.aliado-badge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.85;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  filter: grayscale(0.2); /* ligero grayscale para uniformar logos a color */
+}
+
+.aliado-badge:hover {
+  opacity: 1;
+  transform: scale(1.08);
+  filter: grayscale(0);
+}
+
+.aliado-logo {
+  display: block;
+  height: 44px;
+  width: auto;
+  max-width: 160px;
 }
 
 .logo-item {
@@ -1434,12 +1468,12 @@
 
 .accessibility-widget {
   position: fixed;
-  bottom: 2rem;
-  right: 2rem;
+  bottom: 1.5rem;
+  left: 1.5rem; /* movido a la izquierda para no solaparse con el WhatsApp (derecha) */
   z-index: 900;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 1rem;
 }
 
@@ -1470,6 +1504,7 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   width: 320px;
+  max-width: calc(100vw - 3rem); /* evita desbordamiento en mobile */
   padding: 1.75rem;
   display: none;
   flex-direction: column;
@@ -1867,9 +1902,12 @@ body.modal-open {
   max-width: 1280px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr 1.2fr 0.8fr;
-  gap: 4rem;
-  margin-bottom: 4rem;
+  /* 3 columnas balanceadas: logo+desc ancha, dos columnas de enlaces iguales.
+     grid-auto-rows evita que las columnas cortas queden flotando sin alinear. */
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 3.5rem;
+  margin-bottom: 3rem;
+  align-items: start;
 }
 
 .footer-logo-desc {
@@ -1893,26 +1931,29 @@ body.modal-open {
 
 .footer-socials {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
 }
 
 .social-link {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: var(--radius-round);
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, 0.08);
   color: var(--text-white);
   display: flex;
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  font-size: 1.1rem;
+  font-size: 1rem;
   transition: var(--transition);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .social-link:hover {
   background-color: var(--primary);
   transform: translateY(-3px);
+  border-color: var(--primary);
 }
 
 .footer-links-col {
@@ -1982,11 +2023,13 @@ body.modal-open {
 .footer-bottom {
   max-width: 1280px;
   margin: 0 auto;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding-top: 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap; /* evita descuadre en pantallas medianas */
+  gap: 1rem;
   font-size: 0.8rem;
   color: var(--primary-soft);
 }
@@ -1995,10 +2038,11 @@ body.modal-open {
 
 .whatsapp-float {
   position: fixed;
-  bottom: 2rem;
-  right: 6.5rem;
-  width: 60px;
-  height: 60px;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  /* Tamaño fijo explícito + overflow hidden para que el SVG nunca desborde */
+  width: 56px;
+  height: 56px;
   background-color: #25d366;
   color: white;
   border-radius: 50%;
@@ -2011,23 +2055,29 @@ body.modal-open {
   text-decoration: none;
   transition: transform 0.3s ease, background-color 0.3s ease;
   animation: pulse-wa 2s infinite;
+  overflow: hidden; /* evita que el SVG gigante se salga del círculo */
 }
 
 .whatsapp-float:hover {
-  transform: scale(1.1);
+  transform: scale(1.08);
   background-color: #20ba5a;
 }
 
 .whatsapp-float svg {
-  width: 30px;
-  height: 30px;
+  /* Constraints estrictos: el SVG nunca puede superar el tamaño del contenedor.
+     !important para sobreescribir cualquier atributo HTML width/height del SVG. */
+  width: 30px !important;
+  height: 30px !important;
+  max-width: 30px;
+  max-height: 30px;
   fill: currentColor;
   display: block;
+  flex-shrink: 0;
 }
 
 .whatsapp-tooltip {
   position: absolute;
-  right: 75px;
+  right: 70px;
   background-color: #0e232e;
   color: white;
   padding: 0.5rem 1rem;
@@ -2039,6 +2089,7 @@ body.modal-open {
   visibility: hidden;
   transition: opacity 0.3s, visibility 0.3s;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  pointer-events: none;
 }
 
 .whatsapp-float:hover .whatsapp-tooltip {
@@ -2559,7 +2610,7 @@ body.modal-open {
 .ptag-consultoria    { background: hsla(220, 60%, 50%, 0.12); color: hsl(220, 60%, 33%); }
 .ptag-ninez          { background: hsla(350, 70%, 55%, 0.12); color: hsl(350, 60%, 38%); }
 .ptag-emprendimiento { background: hsla(43, 65%, 47%, 0.12);  color: var(--gold-dark); }
-.ptag-bienestar-animal { background: hsla(16
+.ptag-bienestar-animal { background: hsla(16, 70%, 55%, 0.12); color: hsl(16, 60%, 38%); }
 
 /* ─── TESTIMONIAL CAROUSEL ─────────────────────────────────── */
 
@@ -2591,19 +2642,57 @@ body.modal-open {
 
 .testimonial-carousel {
   position: relative;
+  /* El contenedor debe ocultar el overflow vertical para que solo se vea scroll horizontal */
   overflow: hidden;
   border-radius: var(--radius-lg);
 }
 
+/* El viewport es el único contenedor con overflow:hidden.
+   Los botones ya NO viven aquí dentro, son hermanos externos. */
+.testimonial-viewport {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  /* Máscara gradiente en los bordes: las tarjetas se difuminan al llegar
+     a los extremos, evitando el corte brusco y dando un acabado premium. */
+  mask-image: linear-gradient(to right, transparent 0, #000 4%, #000 96%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 4%, #000 96%, transparent 100%);
+}
+
 .testimonial-track {
   display: flex;
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
+  /* CRÍTICO: las tarjetas NO deben envolverse (wrap), deben quedar en una sola fila horizontal */
+  flex-wrap: nowrap;
+  gap: 1.5rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  /* Scrollbar oculto: el indicador de progreso visual lo sustituye.
+     Mantenemos scrollbar-width: none para Firefox y ocultamos el de WebKit. */
+  scrollbar-width: none;
+  padding: 1rem 3.5rem 1.5rem; /* padding lateral generoso para que las tarjetas
+                                  no queden pegadas a los botones ni a la máscara */
+  /* Asegura que el track no se comprima y las tarjetas mantengan su ancho */
+  width: 100%;
+  transition: none;
+  will-change: scroll-position;
+}
+
+/* Ocultar scrollbar en navegadores WebKit/Chromium */
+.testimonial-track::-webkit-scrollbar {
+  display: none;
 }
 
 .testimonial-card {
-  min-width: 100%;
-  padding: 3rem 3.5rem;
+  /* Cada tarjeta ocupa un ancho fijo para mostrar varias a la vez.
+     flex: 0 0 auto evita que se compriman; min-width garantiza el scroll horizontal. */
+  min-width: 320px;
+  max-width: 360px;
+  flex: 0 0 320px;
+  scroll-snap-align: center;
+  padding: 2.5rem 2rem;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
@@ -2679,51 +2768,106 @@ body.modal-open {
 }
 
 .testimonial-btn {
+  /* Los botones son hermanos del viewport, posicionados respecto a
+     .testimonial-container (position:relative). NUNCA se cortan. */
   position: absolute;
-  top: 50%;
+  top: calc(50% - 1.5rem); /* compensa el offset del header + dots */
   transform: translateY(-50%);
-  width: 50px;
-  height: 50px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  background: var(--bg-card);
+  /* Glassmorphism: fondo translúcido + backdrop-filter */
+  background: hsla(0, 0%, 100%, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 2px solid var(--border-color);
   color: var(--secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
-  z-index: 10;
-  transition: all 0.3s ease;
-  box-shadow: var(--shadow-md);
-  opacity: 0.9;
+  font-size: 1.1rem;
+  z-index: 20;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              background-color 0.3s ease,
+              color 0.3s ease,
+              box-shadow 0.3s ease,
+              border-color 0.3s ease,
+              opacity 0.3s ease;
+  box-shadow: 0 6px 20px rgba(12, 35, 48, 0.12), 0 2px 6px rgba(12, 35, 48, 0.08);
+  opacity: 0.95;
+  /* Tamaño mínimo de touch target garantizado (WCAG 2.5.5) */
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .testimonial-btn:hover {
   background: var(--primary);
   color: var(--text-white);
   border-color: var(--primary);
-  transform: translateY(-50%) scale(1.1);
-  box-shadow: 0 8px 25px var(--primary-trans);
+  transform: translateY(-50%) scale(1.08);
+  box-shadow: 0 10px 28px var(--primary-trans), 0 4px 10px rgba(12, 35, 48, 0.15);
+  opacity: 1;
+}
+
+.testimonial-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.35),
+              0 6px 20px rgba(12, 35, 48, 0.12);
 }
 
 .testimonial-btn:active {
-  transform: translateY(-50%) scale(0.95);
+  transform: translateY(-50%) scale(0.94);
 }
 
+.testimonial-btn i {
+  pointer-events: none;
+  transition: transform 0.3s ease;
+}
+
+.testimonial-btn-prev:hover i {
+  transform: translateX(-2px);
+}
+
+.testimonial-btn-next:hover i {
+  transform: translateX(2px);
+}
+
+/* Botones posicionados a los bordes del contenedor, SIEMPRE visibles */
 .testimonial-btn-prev {
-  left: -25px;
+  left: -8px;
 }
 
 .testimonial-btn-next {
-  right: -25px;
+  right: -8px;
+}
+
+/* Indicador de progreso de scroll (barra inferior) */
+.testimonial-progress {
+  max-width: 240px;
+  margin: 1rem auto 0;
+  height: 4px;
+  background: var(--border-color);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.testimonial-progress-bar {
+  height: 100%;
+  width: 33%;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+  border-radius: 999px;
+  transition: width 0.25s ease-out, transform 0.25s ease-out;
+  transform-origin: left center;
+  box-shadow: 0 0 8px var(--primary-trans);
 }
 
 .testimonial-dots {
   display: flex;
   justify-content: center;
   gap: 0.75rem;
-  margin-top: 2.5rem;
+  margin-top: 1.75rem;
 }
 
 .testimonial-dot {
@@ -2745,4 +2889,942 @@ body.modal-open {
   background: var(--primary);
   width: 55px;
   box-shadow: 0 2px 8px var(--primary-trans);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TASK 3a — COOKIE CONSENT BANNER (GDPR + Ley 1581 Colombia)
+   ═══════════════════════════════════════════════════════════════════════════ */
+/* ============================================================================
+   COOKIE CONSENT BANNER — GDPR + Ley 1581 de 2012 (Colombia)
+   ----------------------------------------------------------------------------
+   Añadir al final de /home/z/my-project/public/funcrees/components.css.
+   Usa variables globales definidas en base.css:
+     --bg-footer, --primary, --primary-dark, --primary-hue/sat/light,
+     --text-white, --radius-sm, --radius-lg, --shadow-lg,
+     --font-body, --font-title, --transition.
+   ========================================================================== */
+
+/* ─── Contenedor principal del banner ───────────────────────── */
+
+.cookie-banner {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 1.5rem;          /* Misma esquina que el widget de accesibilidad,    */
+                         /* pero con z-index superior para no quedar tapado.   */
+  z-index: 950;          /* Por encima de .accessibility-widget (900) y       */
+                         /* .whatsapp-float (899).                            */
+  max-width: 380px;
+  width: calc(100vw - 3rem);
+
+  /* Fondo navy oscuro translúcido + blur (lenguaje visual del sitio). */
+  background: hsla(200, 60%, 10%, 0.96);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+
+  color: var(--text-white);
+  border: 1px solid hsla(200, 40%, 24%, 0.6);
+  border-radius: var(--radius-lg);
+
+  /* Elevación extra por encima de --shadow-lg. */
+  box-shadow: var(--shadow-lg), 0 25px 50px -12px rgba(0, 0, 0, 0.45);
+
+  padding: 1.5rem;
+  font-family: var(--font-body);
+
+  animation: cookieBannerSlideIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Estado oculto: desliza hacia abajo + fade out. */
+.cookie-banner--hidden {
+  transform: translateY(150%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.4s ease-in, opacity 0.4s ease-in;
+  animation: none;
+}
+
+@keyframes cookieBannerSlideIn {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Estructura interna ────────────────────────────────────── */
+
+.cookie-banner__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.cookie-banner__header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.cookie-banner__icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: hsla(var(--primary-hue), var(--primary-sat), 45%, 0.18);
+  border-radius: var(--radius-sm);
+  color: var(--primary);
+}
+
+.cookie-banner__icon svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+}
+
+.cookie-banner__title {
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-white);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.cookie-banner__desc {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: hsla(0, 0%, 100%, 0.82);
+  margin: 0;
+}
+
+.cookie-banner__link {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.cookie-banner__link:hover {
+  color: hsl(var(--primary-hue), 30%, 62%);
+}
+
+/* ─── Botones ───────────────────────────────────────────────── */
+
+.cookie-banner__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.cookie-btn {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  padding: 0.6rem 1rem;
+  border: 1px solid transparent;
+  line-height: 1.2;
+  transition: transform 0.2s ease, background-color 0.2s ease,
+              box-shadow 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Anillo de foco accesible (WCAG 2.1 AA: 3px, color primario al 60%). */
+.cookie-btn:focus-visible {
+  outline: 3px solid hsla(var(--primary-hue), var(--primary-sat),
+                          var(--primary-light), 0.6);
+  outline-offset: 2px;
+}
+
+.cookie-btn-accept {
+  background-color: var(--primary);
+  color: var(--text-white);
+  flex: 1 1 auto;
+  box-shadow: 0 4px 10px -2px hsla(var(--primary-hue), var(--primary-sat), 30%, 0.45);
+}
+
+.cookie-btn-accept:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px -4px hsla(var(--primary-hue), var(--primary-sat), 30%, 0.55);
+}
+
+.cookie-btn-essential {
+  background-color: transparent;
+  color: var(--text-white);
+  border-color: hsla(0, 0%, 100%, 0.35);
+  flex: 1 1 auto;
+}
+
+.cookie-btn-essential:hover {
+  background-color: hsla(0, 0%, 100%, 0.08);
+  border-color: hsla(0, 0%, 100%, 0.6);
+  transform: translateY(-2px);
+}
+
+.cookie-btn-config {
+  background: none;
+  color: hsla(0, 0%, 100%, 0.78);
+  padding-left: 0.4rem;
+  padding-right: 0.4rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  flex: 0 0 auto;
+}
+
+.cookie-btn-config:hover {
+  color: var(--text-white);
+  transform: translateY(-1px);
+}
+
+.cookie-btn-config[aria-expanded="true"] {
+  color: var(--primary);
+}
+
+/* ─── Panel de preferencias ─────────────────────────────────── */
+
+.cookie-prefs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid hsla(0, 0%, 100%, 0.12);
+  animation: cookiePrefsSlide 0.3s ease both;
+}
+
+/* El atributo [hidden] nativo tiene menor especificidad que display:flex,
+   por lo que lo reforzamos explícitamente. */
+.cookie-prefs[hidden] {
+  display: none !important;
+}
+
+@keyframes cookiePrefsSlide {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.cookie-prefs__row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cookie-prefs__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+}
+
+.cookie-prefs__label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-white);
+}
+
+.cookie-prefs__desc {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: hsla(0, 0%, 100%, 0.65);
+}
+
+/* ─── Switch toggle accesible ───────────────────────────────── */
+
+.cookie-switch {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-block;
+  width: 42px;
+  height: 24px;
+  cursor: pointer;
+  margin-top: 0.15rem;
+}
+
+.cookie-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+.cookie-switch__track {
+  position: absolute;
+  inset: 0;
+  background-color: hsla(0, 0%, 0%, 0.35);
+  border: 1px solid hsla(0, 0%, 100%, 0.2);
+  border-radius: 999px;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+.cookie-switch__track::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  background-color: var(--text-white);
+  border-radius: 50%;
+  transform: translateY(-50%);
+  transition: left 0.25s ease, background-color 0.25s ease;
+}
+
+/* Estado "on" — verde primario. */
+.cookie-switch input:checked ~ .cookie-switch__track {
+  background-color: var(--primary);
+  border-color: var(--primary-dark);
+}
+
+.cookie-switch input:checked ~ .cookie-switch__track::after {
+  left: 21px;
+}
+
+/* Anillo de foco cuando el checkbox invisible recibe foco. */
+.cookie-switch input:focus-visible ~ .cookie-switch__track {
+  outline: 3px solid hsla(var(--primary-hue), var(--primary-sat),
+                          var(--primary-light), 0.6);
+  outline-offset: 2px;
+}
+
+/* Switch bloqueado (cookies esenciales). */
+.cookie-switch--locked {
+  cursor: not-allowed;
+}
+
+.cookie-switch--locked .cookie-switch__track {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+  opacity: 0.85;
+}
+
+.cookie-switch--locked input {
+  cursor: not-allowed;
+}
+
+/* Texto solo para lectores de pantalla. */
+.cookie-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Botón "Guardar preferencias". */
+.cookie-btn-save {
+  background-color: var(--primary);
+  color: var(--text-white);
+  width: 100%;
+  margin-top: 0.25rem;
+}
+
+.cookie-btn-save:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px -4px hsla(var(--primary-hue), var(--primary-sat), 30%, 0.5);
+}
+
+/* ─── Responsive (<576px) ───────────────────────────────────── */
+
+@media (max-width: 576px) {
+  .cookie-banner {
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    max-width: none;
+    width: auto;
+    padding: 1.15rem;
+  }
+
+  .cookie-banner__actions {
+    flex-direction: column;
+  }
+
+  .cookie-btn-accept,
+  .cookie-btn-essential {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+}
+
+/* ─── Movimiento reducido (WCAG 2.1 AA) ────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .cookie-banner,
+  .cookie-prefs {
+    animation: none !important;
+  }
+
+  .cookie-banner--hidden {
+    transition: none !important;
+  }
+
+  .cookie-btn,
+  .cookie-switch__track,
+  .cookie-switch__track::after {
+    transition: none !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TASK 3b — NAV UX: reading progress bar + scroll-to-top + header shrink
+   ═══════════════════════════════════════════════════════════════════════════ */
+/* ============================================================
+   NAV UX ENHANCEMENTS (Task 3b — Agente B)
+   Añadir al FINAL de components.css.
+
+   Contiene:
+   1) Reading progress bar (barra superior, fija, encima del header)
+   2) Scroll-to-top floating button (esquina inferior derecha,
+      a la izquierda del botón de WhatsApp)
+   3) Header shrink on scroll (.header--scrolled)
+
+   Variables CSS reutilizadas de base.css:
+   --primary, --primary-dark, --accent, --secondary, --text-white,
+   --border-color, --primary-trans, --primary-hue/sat/light,
+   --radius-sm, --radius-round, --shadow-md, --transition.
+   ============================================================ */
+
+
+/* ─── 1) READING PROGRESS BAR ───────────────────────────────
+   Barra fina de 3px (2px en mobile) fijada en la parte superior
+   del viewport. El ancho del fill se actualiza vía rAF desde
+   3b-nav-ux.js. Track transparente, fill con gradiente de marca.
+   z-index 999 = por encima del header (z-index 100) pero por
+   debajo del modal (z-index 9999). */
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  z-index: 999;
+  background: transparent;     /* track invisible */
+  pointer-events: none;        /* no intercepta clics del header */
+  /* Pequeño degradado sutil en el track para integrar con el header */
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+}
+
+.reading-progress__bar {
+  height: 100%;
+  width: 0%;                   /* JS actualiza este valor */
+  background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 6px var(--primary-trans);
+  /* Transición corta para suavizar actualizaciones de rAF
+     (60fps) sin percibirse "saltos". En reduced-motion se anula. */
+  transition: width 0.1s linear;
+  will-change: width;
+}
+
+/* Mobile: barra más fina (2px) para no restar espacio de viewport */
+@media (max-width: 576px) {
+  .reading-progress { height: 2px; }
+  .reading-progress__bar { border-radius: 0 1px 1px 0; }
+}
+
+
+/* ─── 2) SCROLL-TO-TOP BUTTON ───────────────────────────────
+   Botón flotante 48×48px con glassmorphism (igual que .testimonial-btn):
+   fondo hsla(0,0%,100%,0.85) + backdrop-filter blur(8px).
+   Posicionado a la IZQUIERDA del WhatsApp float:
+     WhatsApp:        bottom:1.5rem; right:1.5rem;  width:56px;
+     Scroll-to-top:   bottom:1.5rem; right:5rem;     width:48px;
+   → gap horizontal entre ambos ≈ 0.44rem (7px) — suficiente para
+     no solaparse y mantener agrupación visual. */
+.scroll-top {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 5rem;
+  z-index: 898;                /* debajo de WhatsApp (899) y cookie banner (950) */
+  width: 48px;
+  height: 48px;
+  min-width: 44px;             /* WCAG 2.5.5 — touch target mínimo 44×44 */
+  min-height: 44px;
+  padding: 0;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-round);
+  /* Glassmorphism */
+  background: hsla(0, 0%, 100%, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--secondary);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(12, 35, 48, 0.12),
+              0 2px 6px rgba(12, 35, 48, 0.08);
+  /* Estado inicial: oculto (aparece tras 600px de scroll) */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(16px) scale(0.85);
+  /* transition + visibility retardada al ocultar para evitar parpadeo */
+  transition: opacity 0.3s ease,
+              transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              background-color 0.3s ease,
+              color 0.3s ease,
+              box-shadow 0.3s ease,
+              border-color 0.3s ease,
+              visibility 0s linear 0.3s;
+}
+
+/* Estado visible — el JS añade .scroll-top--visible cuando scrollY > 600 */
+.scroll-top--visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  /* visibility inmediata al aparecer (sin retardo) */
+  transition: opacity 0.3s ease,
+              transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              background-color 0.3s ease,
+              color 0.3s ease,
+              box-shadow 0.3s ease,
+              border-color 0.3s ease,
+              visibility 0s;
+}
+
+/* Hover: escala + cambio a color primario (coherente con .testimonial-btn:hover) */
+.scroll-top:hover {
+  background: var(--primary);
+  color: var(--text-white);
+  border-color: var(--primary);
+  transform: translateY(0) scale(1.08);
+  box-shadow: 0 10px 28px var(--primary-trans),
+              0 4px 10px rgba(12, 35, 48, 0.15);
+}
+
+/* Foco visible (WCAG 2.4.7) — anillo de 4px con color primario al 45% */
+.scroll-top:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.45),
+              0 6px 20px rgba(12, 35, 48, 0.12);
+}
+
+/* Mantener visibilidad del tooltip en foco teclado */
+.scroll-top:focus-visible .scroll-top__tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.scroll-top:active {
+  transform: translateY(0) scale(0.94);
+}
+
+/* El icono no debe interceptar eventos del botón */
+.scroll-top i,
+.scroll-top svg {
+  pointer-events: none;
+  line-height: 1;
+}
+
+/* Tooltip "Volver arriba" — estilo consistente con .whatsapp-tooltip */
+.scroll-top__tooltip {
+  position: absolute;
+  right: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--secondary);
+  color: var(--text-white);
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+}
+
+/* Flechita del tooltip apuntando a la derecha */
+.scroll-top__tooltip::after {
+  content: '';
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 5px solid transparent;
+  border-left-color: var(--secondary);
+}
+
+.scroll-top:hover .scroll-top__tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Mobile: achicar y bajar un poco para no tapar contenido */
+@media (max-width: 576px) {
+  .scroll-top {
+    width: 44px;
+    height: 44px;
+    bottom: 1rem;
+    right: 4.5rem;             /* mantiene la separación del WhatsApp */
+    font-size: 1rem;
+  }
+  /* En pantallas muy estrechas el tooltip es ruido — ocultarlo */
+  .scroll-top__tooltip { display: none; }
+}
+
+
+/* ─── 3) HEADER SHRINK ON SCROLL ───────────────────────────
+   La clase .header--scrolled la añade el JS cuando scrollY > 80.
+   Reduce padding vertical, altura del logo, tamaño de fuentes de
+   navegación y refuerza la sombra. */
+
+/* Transición explícita (no usar var(--transition) global porque
+   hace animar TODAS las propiedades y causaría jank en scroll) */
+.header {
+  transition: padding 0.3s ease,
+              box-shadow 0.3s ease,
+              background-color 0.3s ease;
+}
+.header-container {
+  transition: padding 0.3s ease;
+}
+.logo-img,
+.header .logo-wrapper img {
+  transition: height 0.3s ease, transform 0.3s ease;
+}
+.logo-title,
+.logo-subtitle,
+.nav-link {
+  transition: font-size 0.3s ease, color 0.3s ease, padding 0.3s ease;
+}
+
+/* Estado "shrink" */
+.header--scrolled {
+  background-color: hsla(0, 0%, 100%, 0.92);
+  box-shadow: var(--shadow-md);
+  border-bottom-color: var(--border-color);
+}
+
+.header--scrolled .header-container {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+/* Logo: pasar de 50px → 38px.
+   El index.html tiene style="height:50px" inline en el <img>,
+   por eso necesitamos !important aquí. */
+.header--scrolled .logo-img,
+.header--scrolled .logo-wrapper img {
+  height: 38px !important;
+  width: auto;
+}
+
+.header--scrolled .logo-title {
+  font-size: 1.15rem;          /* de 1.3rem → 1.15rem */
+}
+
+.header--scrolled .logo-subtitle {
+  font-size: 0.68rem;          /* de 0.75rem → 0.68rem */
+  letter-spacing: 0.4px;
+}
+
+.header--scrolled .nav-link {
+  font-size: 0.88rem;          /* de 0.95rem → 0.88rem */
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+}
+
+
+/* ─── DARK MODE SUPPORT ────────────────────────────────────
+   body.dark-mode existe en themes.css (línea 194). Aseguramos
+   contraste del botón scroll-top y del header shrink. */
+body.dark-mode .scroll-top {
+  background: hsla(200, 40%, 18%, 0.85);
+  color: var(--text-white);
+  border-color: hsla(200, 40%, 24%, 0.6);
+}
+
+body.dark-mode .scroll-top:hover {
+  background: var(--primary);
+  color: var(--text-white);
+}
+
+body.dark-mode .scroll-top__tooltip {
+  background: var(--primary-dark);
+}
+
+body.dark-mode .scroll-top__tooltip::after {
+  border-left-color: var(--primary-dark);
+}
+
+body.dark-mode .header--scrolled {
+  background-color: hsla(200, 40%, 12%, 0.92);
+}
+
+
+/* ─── HIGH-CONTRAST MODE SUPPORT ───────────────────────────
+   body.high-contrast existe en themes.css (línea 4). */
+body.high-contrast .scroll-top {
+  background: hsla(0, 0%, 0%, 0.9);
+  color: var(--text-white);
+  border-color: var(--gold);
+}
+
+body.high-contrast .scroll-top:hover {
+  background: var(--gold-dark);
+  border-color: var(--gold);
+}
+
+body.high-contrast .scroll-top:focus-visible {
+  box-shadow: 0 0 0 4px var(--gold),
+              0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+body.high-contrast .reading-progress__bar {
+  background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 100%);
+}
+
+
+/* ─── REDUCED MOTION (WCAG 2.3.3) ──────────────────────────
+   El bloque global @media (prefers-reduced-motion: reduce) en
+   base.css (línea 213) ya fuerza transition-duration: 0.01ms
+   !important en TODO. Estas reglas explícitas son refuerzo:
+   - barra de progreso: ancho instantáneo (sin transición suave)
+   - botón: aparece/desaparece sin slide-up ni scale
+   - tooltip: sin transición de opacidad
+   - header: sin transición de padding/box-shadow */
+@media (prefers-reduced-motion: reduce) {
+  .reading-progress__bar {
+    transition: none;
+    will-change: auto;
+  }
+
+  .scroll-top,
+  .scroll-top--visible,
+  .scroll-top:hover,
+  .scroll-top:active {
+    transition: opacity 0.01ms linear, visibility 0.01ms linear;
+    transform: none !important;
+  }
+
+  .scroll-top__tooltip {
+    transition: none;
+  }
+
+  .header,
+  .header-container,
+  .logo-img,
+  .header .logo-wrapper img,
+  .logo-title,
+  .logo-subtitle,
+  .nav-link {
+    transition: none;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TASK 3c — ACCESIBILIDAD: skip-link + focus-visible + reduced-motion
+   ═══════════════════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════════
+   AGENT C — Task 3c · Accesibilidad · Hoja de estilos
+   Archivo de destino: apénd de components.css (orden de carga:
+   index.html carga base.css → components.css → themes.css →
+   responsive.css). Por especificidad, las reglas que viven aquí
+   ganan a las de base.css y empatan con components.css; las de
+   themes.css ya tienen body.high-contrast / body.dark-mode como
+   ancestro, así que ganan cuando corresponde.
+   ════════════════════════════════════════════════════════════════
+   Índice:
+     1) Skip-link
+     2) Foco global :focus-visible  (anillo consistente WCAG 2.1 SC 2.4.7)
+     3) Mouse fallback :focus:not(:focus-visible)
+     4) High-contrast theme — foco reforzado (4px, dorado)
+     5) Dark mode — ajuste fino del anillo
+     6) prefers-reduced-motion: reduce — mejoras adicionales
+   ════════════════════════════════════════════════════════════════ */
+
+
+/* ─── 1) SKIP-LINK ────────────────────────────────────────────────
+   SC 2.4.1 Bypass Blocks (Nivel A). Permite que el usuario de teclado
+   salte toda la cabecera y navegación y llegue directamente al <main>.
+   Posicionado fuera de pantalla por defecto; al recibir foco se
+   desliza hasta top:0 con transición suave (respetando reduced-motion).
+   ───────────────────────────────────────────────────────────────── */
+.skip-link {
+  position: absolute;
+  top: -100px;            /* fuera del viewport visual */
+  left: 0;
+  z-index: 9999;          /* por encima de header (z-index:100) y modales */
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--primary);
+  color: var(--text-white);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  border-radius: 0 0 var(--radius-sm) 0; /* pega a la esquina superior-izq */
+  box-shadow: var(--shadow-md);
+  transition: top 0.2s ease;
+}
+
+/* Al recibir foco (teclado o programático) se desliza al viewport. */
+.skip-link:focus,
+.skip-link:focus-visible {
+  top: 0;
+  outline: 3px solid var(--gold);     /* doble refuerzo: anillo visible */
+  outline-offset: 2px;
+}
+
+/* ─── 2) FOCO GLOBAL :focus-visible ───────────────────────────────
+   SC 2.4.7 Foco visible (Nivel AA). Aplica un anillo consistente a
+   TODOS los interactivos del sitio. Los componentes que ya tienen su
+   propio :focus-visible (p. ej. .testimonial-btn, .evento-search-input)
+   son MÁS ESPECÍFICOS y ganan por especificidad: no los rompemos.
+   ───────────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px; /* el outline "sigue" la curva, no queda rectangular */
+}
+
+/* Selectores cubiertos explícitamente para navegadores antiguos que no
+   implementan :focus-visible (todos los modernos sí, pero reforzamos). */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible,
+[contenteditable="true"]:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ─── 3) MOUSE FALLBACK ───────────────────────────────────────────
+   Mejor práctica moderna: el anillo SOLO aparece para usuarios de
+   teclado (:focus-visible). Los clicks de ratón generan :focus sin
+   :focus-visible — los ocultamos para no distraer.
+   Importante: los inputs de texto SÍ suelen querer mostrar foco al
+   recibir click (porque se queda en modo edición), por eso NO se
+   aplica el none a input/textarea/select — solo a enlaces y botones.
+   ───────────────────────────────────────────────────────────────── */
+a:focus:not(:focus-visible),
+button:focus:not(:focus-visible),
+summary:focus:not(:focus-visible),
+[tabindex]:focus:not(:focus-visible) {
+  outline: none;
+}
+
+
+/* ─── 4) HIGH-CONTRAST THEME — FOCO REFORZADO ─────────────────────
+   SC 1.4.6 Contraste ( Mejorado) — implícito en el tema high-contrast.
+   El anillo pasa a 4px y usa color dorado/amarillo (#FFD400), que
+   tiene contraste máximo sobre fondo negro. Hereda del body.high-contrast
+   que ya reescribe --primary a #ffff00 en themes.css, pero aquí lo
+   reforzamos con un tono dorado más saturado y un offset mayor para
+   máxima visibilidad de usuarios con baja visión.
+   ───────────────────────────────────────────────────────────────── */
+body.high-contrast :focus-visible {
+  outline: 4px solid #ffd400;        /* dorado saturado */
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+body.high-contrast .skip-link:focus,
+body.high-contrast .skip-link:focus-visible {
+  background-color: #ffff00 !important;
+  color: #000000 !important;
+  outline: 4px solid #ffffff !important; /* blanco sobre amarillo = doble contraste */
+  outline-offset: 3px;
+}
+
+/* ─── 5) DARK MODE — AJUSTE FINO DEL ANILLO ───────────────────────
+   En dark mode --primary es un verde claro; el anillo se ve bien pero
+   lo reforzamos con un leve halo dorado para que destaque sobre fondos
+   oscuros saturados. No usamos !important para no pisar high-contrast.
+   ───────────────────────────────────────────────────────────────── */
+body.dark-mode :focus-visible {
+  outline-color: var(--gold-light);
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   6) prefers-reduced-motion: reduce — MEJORAS ADICIONALES
+   ════════════════════════════════════════════════════════════════
+   base.css ya desactiva animaciones/transition a 0.01ms y ya apaga
+   .carousel-track y .leaf-svg. Aquí añadimos los puntos que faltaban:
+
+   - scroll-behavior (ya está en `*` pero reforzamos en html)
+   - .whatsapp-float (pulse-wa)
+   - hover transforms que mueven elementos (cards, botones flotantes…)
+   - transiciones de transform en hero leaves y iconos flotantes
+   - smooth-scroll JS-driven (lo maneja 3c-a11y.js)
+
+   Filosofía WCAG 2.1 SC 2.3.3 Animación de Interacciones (Nivel AAA)
+   y SC 2.3.1 Tres Flashes — no forzar movimiento al usuario.
+   ════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+
+  /* Smooth-scroll del navegador: instantáneo. */
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  /* WhatsApp: cero pulso. */
+  .whatsapp-float {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Carrusel de aliados: ya apagado en base.css, pero reforzamos por
+     si se reescribe el animation vía JS o por tema. */
+  .carousel-track {
+    animation: none !important;
+  }
+
+  /* Hover transforms: los desactivamos para que las tarjetas no se
+     "levanten" al pasar el ratón (pueden inducir mareo en usuarios
+     con trastornos vestibulares). Sí conservamos cambios de color
+     y sombra — sólo quitamos el desplazamiento espacial. */
+  .quick-card:hover,
+  .mv-card:hover,
+  .valor-card:hover,
+  .proyecto-card:hover,
+  .abuelito-card:hover,
+  .evento-card:hover,
+  .testimonial-card:hover,
+  .btn:hover,
+  .nav-link:hover,
+  .logo-wrapper:hover .logo-img,
+  .theme-toggle:hover,
+  .whatsapp-float:hover,
+  .testimonial-btn:hover,
+  .aliado-badge:hover {
+    transform: none !important;
+  }
+
+  /* Floating iconos decorativos del hero: cero deriva. */
+  .leaf-svg,
+  .hero-bg-leaves * {
+    animation: none !important;
+  }
+
+  /* Asegura que cualquier scroll JS-driven (testimonials, smooth-scroll
+     a secciones) sea instantáneo. Si el JS usa scrollTo({behavior:'smooth'})
+     el navegador ignora 'auto' — por eso existe el guard en 3c-a11y.js. */
+  * {
+    scroll-behavior: auto !important;
+  }
 }

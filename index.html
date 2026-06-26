@@ -49,11 +49,27 @@
     })();
   </script>
 
-  <!-- Stylesheets -->
-  <link rel="stylesheet" href="styles.css">
+  <!-- Stylesheets (carga directa en vez de @import para mejor rendimiento y compatibilidad) -->
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="themes.css">
+  <link rel="stylesheet" href="responsive.css">
 </head>
 
 <body>
+
+  <!-- Skip-link — WCAG 2.1 SC 2.4.1 (Bypass Blocks, Nivel A).
+       Primer elemento focusable del body. Visualmente oculto hasta que
+       recibe foco de teclado (Tab), entonces se desliza desde arriba. -->
+  <a href="#main-content" class="skip-link" data-skip-target>
+    Saltar al contenido principal
+  </a>
+
+  <!-- Reading progress bar — barra de progreso de lectura fija arriba.
+       pointer-events:none para no interferir con el header. -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-progress-bar"></div>
+  </div>
 
   <!-- ==========================================
        HEADER & NAVIGATION
@@ -101,7 +117,7 @@
   <!-- ==========================================
        MAIN CONTENT (SPA VIEWS)
        ========================================== -->
-  <main class="main-content">
+  <main class="main-content" id="main-content" tabindex="-1">
 
     <!-- PAGE 1: INICIO (HOME) -->
     <section id="inicio" class="view-section active">
@@ -246,19 +262,25 @@
               solidaridad.</p>
           </div>
 
-          <div class="testimonial-carousel" id="testimonial-carousel">
+          <!-- El viewport (overflow:hidden) SÓLO envuelve al track.
+               Los botones viven FUERA del viewport, como hermanos, dentro de
+               .testimonial-container (position:relative). Así nunca se cortan. -->
+          <div class="testimonial-viewport" id="testimonial-carousel">
             <div class="testimonial-track" id="testimonial-track">
               <!-- Populated by JS -->
             </div>
-            <button class="testimonial-btn testimonial-btn-prev" id="testimonial-prev" aria-label="Testimonio anterior">
-              <i class="fa-solid fa-chevron-left"></i>
-            </button>
-            <button class="testimonial-btn testimonial-btn-next" id="testimonial-next"
-              aria-label="Testimonio siguiente">
-              <i class="fa-solid fa-chevron-right"></i>
-            </button>
           </div>
-          <div class="testimonial-dots" id="testimonial-dots"></div>
+          <button class="testimonial-btn testimonial-btn-prev" id="testimonial-prev" aria-label="Testimonio anterior">
+            <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+          </button>
+          <button class="testimonial-btn testimonial-btn-next" id="testimonial-next"
+            aria-label="Testimonio siguiente">
+            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+          </button>
+          <div class="testimonial-dots" id="testimonial-dots" role="tablist" aria-label="Seleccionar testimonio"></div>
+          <div class="testimonial-progress" aria-hidden="true">
+            <div class="testimonial-progress-bar" id="testimonial-progress-bar"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -1019,6 +1041,7 @@
           <li><a class="footer-link" href="#">Políticas de Privacidad</a></li>
           <li><a class="footer-link" href="#">Términos y Condiciones</a></li>
           <li><a class="footer-link" href="#">Rendición de Cuentas Anual</a></li>
+          <li><a class="footer-link" href="#" data-action="open-cookie-settings">Política de Cookies</a></li>
           <li><a class="footer-link" href="#">Certificado de Existencia y Representación</a></li>
         </ul>
       </div>
@@ -1095,18 +1118,130 @@
   <!-- Leaflet.js for Interactive Map -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- Javascript -->
-  <script src="app.js"></script>
+  <!-- NOTA: app.js se carga al FINAL del body (justo antes de </body>) para
+       garantizar que TODOS los elementos del DOM existen cuando el JS se
+       ejecuta. Esto es critical para los módulos que buscan elementos al
+       final del body (#cookie-banner, #scroll-top-btn, etc.). -->
+
+  <!-- Scroll-to-top floating button (a la izquierda del WhatsApp).
+       Inicia con tabindex=-1 y aria-hidden=true; el JS los quita al
+       volverse visible, para que el usuario no Tab-ee un botón invisible. -->
+  <button type="button"
+          id="scroll-top-btn"
+          class="scroll-top"
+          aria-label="Volver arriba"
+          title="Volver arriba"
+          aria-hidden="true"
+          tabindex="-1">
+    <i class="fa-solid fa-chevron-up" aria-hidden="true"></i>
+    <span class="scroll-top__tooltip" aria-hidden="true">Volver arriba</span>
+  </button>
 
   <!-- WhatsApp Float with inline SVG -->
   <a href="https://wa.me/573137924439?text=Hola%20Fundaci%C3%B3n%20FUNCREESCOLOMBIA%2C%20quisiera%20saber%20m%C3%A1s%20sobre%20c%C3%B3mo%20puedo%20apoyar."
     target="_blank" class="whatsapp-float" aria-label="Contactar por WhatsApp" title="Chatear con nosotros">
-    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
       <path
         d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.835-3.321c1.644.976 3.51 1.49 5.409 1.491 5.541 0 10.051-4.506 10.054-10.047a9.92 9.92 0 0 0-2.93-7.11 9.925 9.925 0 0 0-7.114-2.923C6.722 2.093 2.212 6.6 2.209 12.14c0 1.95.509 3.856 1.478 5.525L2.732 21.69l4.16-1.011zm12.022-7.234c-.329-.164-1.948-.961-2.247-1.07-.3-.11-.518-.164-.735.164-.217.329-.841 1.07-1.031 1.288-.19.218-.38.245-.71.082-.329-.164-1.389-.512-2.647-1.633-.978-.873-1.637-1.95-1.829-2.28-.192-.329-.02-.507.145-.671.148-.147.329-.384.494-.576.164-.192.219-.329.329-.548.11-.219.055-.411-.028-.576-.082-.164-.735-1.771-1.007-2.43-.265-.636-.53-.55-.735-.56-.19-.007-.408-.007-.626-.007-.218 0-.571.082-.871.411-.3.329-1.147 1.122-1.147 2.736 0 1.614 1.174 3.175 1.338 3.394.164.22 2.313 3.532 5.6 4.951.782.338 1.39.54 1.868.692.788.25 1.505.215 2.07.13.63-.094 1.948-.795 2.222-1.564.275-.769.275-1.428.193-1.563-.083-.136-.3-.219-.629-.383z" />
     </svg>
     <span class="whatsapp-tooltip">¿Cómo podemos ayudarte?</span>
   </a>
+
+  <!-- ==========================================================================
+       COOKIE CONSENT BANNER (GDPR + Ley 1581 de 2012 Colombia)
+       Se muestra al cargar si no hay consentimiento previo en localStorage.
+       Cumple: consentimiento explícito, granular, revocable, 3 categorías.
+       ========================================================================== -->
+  <div class="cookie-banner" id="cookie-banner" role="dialog" aria-modal="false"
+       aria-labelledby="cookie-title" aria-describedby="cookie-desc" hidden>
+
+    <div class="cookie-banner__inner">
+
+      <div class="cookie-banner__header">
+        <span class="cookie-banner__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" focusable="false">
+            <path d="M21.6 11.2c-.3-.2-.7-.2-1-.1-.4.1-.8 0-1.1-.3-.3-.3-.4-.7-.3-1.1.1-.4 0-.8-.3-1.1-.3-.3-.7-.4-1.1-.3-.4.1-.8 0-1.1-.3-.3-.3-.4-.7-.3-1.1.1-.4 0-.8-.3-1.1-.3-.3-.7-.4-1.1-.3-.4.1-.8 0-1.1-.3-.3-.3-.4-.7-.3-1.1.1-.4 0-.8-.3-1.1-.5-.5-1.3-.5-1.8 0L8.6 5.6c-3.1 1.5-5.2 4.7-5.2 8.4 0 5.2 4.2 9.4 9.4 9.4 4.1 0 7.6-2.6 8.9-6.3.1-.3.3-.6.6-.7.4-.2.6-.6.6-1V12c0-.3-.1-.6-.3-.8zM12 21c-3.9 0-7-3.1-7-7 0-3 1.9-5.5 4.5-6.5.2.4.6.7 1.1.8.4.1.7.4.8.8.1.4.4.7.8.8.4.1.7.4.8.8.1.4.4.7.8.8.4.1.7.4.8.8.1.4.4.7.8.8.4.1.7.4.8.8.1.4.4.7.8.8.3.1.6.3.8.6C19.5 18.5 16.1 21 12 21z"/>
+            <circle cx="9" cy="14" r="1.2"/>
+            <circle cx="12" cy="17" r="1.2"/>
+            <circle cx="15" cy="14" r="1.2"/>
+          </svg>
+        </span>
+        <h3 class="cookie-banner__title" id="cookie-title">Cookies &amp; Privacidad</h3>
+      </div>
+
+      <p class="cookie-banner__desc" id="cookie-desc">
+        Usamos cookies esenciales para el funcionamiento del sitio y cookies analíticas
+        para mejorar tu experiencia. Tu consentimiento es voluntario y puedes cambiarlo
+        cuando quieras. Ver nuestra
+        <a href="#" class="cookie-banner__link" data-action="open-cookie-settings">Política de Cookies</a>.
+      </p>
+
+      <div class="cookie-banner__actions">
+        <button type="button" class="cookie-btn cookie-btn-accept" data-action="accept-all">
+          Aceptar todas
+        </button>
+        <button type="button" class="cookie-btn cookie-btn-essential" data-action="accept-essential">
+          Solo esenciales
+        </button>
+        <button type="button" class="cookie-btn cookie-btn-config"
+                data-action="toggle-prefs" aria-expanded="false" aria-controls="cookie-prefs">
+          Configurar
+        </button>
+      </div>
+
+      <div class="cookie-prefs" id="cookie-prefs" hidden>
+
+        <div class="cookie-prefs__row">
+          <div class="cookie-prefs__info">
+            <span class="cookie-prefs__label">Cookies esenciales</span>
+            <span class="cookie-prefs__desc">Necesarias para el funcionamiento básico del sitio. No se pueden desactivar.</span>
+          </div>
+          <label class="cookie-switch cookie-switch--locked">
+            <input type="checkbox" checked disabled
+                   aria-label="Cookies esenciales (siempre activadas)"
+                   data-cookie-pref="essential">
+            <span class="cookie-switch__track" aria-hidden="true"></span>
+            <span class="cookie-sr-only">Siempre activadas</span>
+          </label>
+        </div>
+
+        <div class="cookie-prefs__row">
+          <div class="cookie-prefs__info">
+            <span class="cookie-prefs__label">Cookies analíticas</span>
+            <span class="cookie-prefs__desc">Nos ayudan a entender cómo usas el sitio para mejorarlo de forma anónima.</span>
+          </div>
+          <label class="cookie-switch">
+            <input type="checkbox" aria-label="Activar cookies analíticas"
+                   data-cookie-pref="analytics">
+            <span class="cookie-switch__track" aria-hidden="true"></span>
+          </label>
+        </div>
+
+        <div class="cookie-prefs__row">
+          <div class="cookie-prefs__info">
+            <span class="cookie-prefs__label">Cookies de marketing</span>
+            <span class="cookie-prefs__desc">Permiten mostrar contenido y publicidad relevantes a tus intereses.</span>
+          </div>
+          <label class="cookie-switch">
+            <input type="checkbox" aria-label="Activar cookies de marketing"
+                   data-cookie-pref="marketing">
+            <span class="cookie-switch__track" aria-hidden="true"></span>
+          </label>
+        </div>
+
+        <button type="button" class="cookie-btn cookie-btn-save" data-action="save-prefs">
+          Guardar preferencias
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+  <!-- /COOKIE CONSENT BANNER -->
+
+  <!-- Javascript — cargado al FINAL del body para que todos los elementos
+       del DOM (#cookie-banner, #scroll-top-btn, etc.) existan cuando se ejecute. -->
+  <script src="app.js"></script>
 
 </body>
 
