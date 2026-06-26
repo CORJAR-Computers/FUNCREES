@@ -1,9 +1,26 @@
 import hashlib
+import hmac
 import requests
 from django.conf import settings
 import logging
 
 logger = logging.getLogger(__name__)
+
+# Propiedades FIJAS definidas por Wompi que componen el string a firmar para
+# verificar la autenticidad de un webhook. Orden IMPORTANTE: debe coincidir
+# exactamente con el que Wompi usa al generar la firma.
+# NOTA DE SEGURIDAD: esta lista es HARDCODED (no se lee del payload). En una
+# versión anterior el código iteraba sobre `payload.signature.properties`,
+# pero ese campo viaja en el payload y es controlable por el atacante, lo que
+# permite forjar firmas válidas (p.ej. enviando una lista vacía).
+# El último elemento, `integrity_signature`, NO viene del payload: es el
+# secreto compartido (`WOMPI_INTEGRITY_SECRET`) configurado en settings.
+WOMPI_SIGNATURE_PROPERTIES = [
+    'reference',
+    'amount_in_cents',
+    'currency',
+    'integrity_signature',
+]
 
 
 def _get_wompi_config():
@@ -31,29 +48,49 @@ def generate_integrity_signature(reference: str, amount_cop: float) -> str:
 def verify_webhook_signature(payload: dict, received_signature: str) -> bool:
     """
     Verifica que el webhook entrante provenga realmente de Wompi.
-    Wompi firma los eventos con propiedades específicas.
+
+    Seguridad:
+    - Construye el string a firmar a partir de propiedades FIJAS definidas por
+      Wompi (WOMPI_SIGNATURE_PROPERTIES). Las tres primeras se leen del
+      `payload.data.transaction`; la última, `integrity_signature`, es el
+      secreto compartido (`WOMPI_INTEGRITY_SECRET`) y se toma de settings,
+      NO del payload. Jamás se itera sobre `payload.signature.properties`,
+      ya que ese campo es controlado por el atacante y podría manipularse para
+      forjar una firma válida (por ejemplo, enviando una lista vacía).
+    - Usa `hmac.compare_digest` para comparación en tiempo constante y prevenir
+      timing attacks sobre la firma esperada.
+    - Retorna `bool` (True sólo si la firma esperada coincide con la recibida).
     """
+    # Guard temprano: received_signature debe ser un string no vacío.
+    if not received_signature or not isinstance(received_signature, str):
+        return False
+
     try:
         cfg = _get_wompi_config()
-        signature_data = payload.get('signature', {})
-        properties = signature_data.get('properties', [])
-        data = payload.get('data', {})
-        sent_at = payload.get('sent_at', '')
+        data = payload.get('data', {}) or {}
+        transaction = data.get('transaction', {}) or {}
 
-        string_to_sign = ""
-        for prop in properties:
-            keys = prop.split('.')
-            value = data
-            for key in keys:
-                value = value.get(key, {}) if isinstance(value, dict) else value
-            string_to_sign += str(value) if value else ""
+        # Resolución de cada propiedad FIJA a su valor concreto:
+        # - Las tres primeras se leen del payload (data.transaction).
+        # - `integrity_signature` se resuelve al secreto compartido de settings.
+        values = []
+        for prop in WOMPI_SIGNATURE_PROPERTIES:
+            if prop == 'integrity_signature':
+                # Secreto compartido: NO viene en el payload.
+                values.append(cfg['integrity_secret'] or '')
+            else:
+                values.append(str(transaction.get(prop, '') or ''))
 
-        string_to_sign += f"{sent_at}{cfg['integrity_secret']}"
-        expected_signature = hashlib.sha256(string_to_sign.encode('utf-8')).hexdigest()
+        # Concatenación en el orden definido por WOMPI_SIGNATURE_PROPERTIES.
+        string_to_sign = ''.join(values)
+        expected_signature = hashlib.sha256(
+            string_to_sign.encode('utf-8')
+        ).hexdigest()
 
-        return expected_signature == received_signature
-    except Exception as e:
-        logger.error(f"Error verificando firma de Wompi: {e}")
+        # Seguridad: comparación en tiempo constante para prevenir timing attacks.
+        return hmac.compare_digest(expected_signature, received_signature)
+    except Exception:
+        logger.error("Error verificando firma de Wompi", exc_info=True)
         return False
 
 

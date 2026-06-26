@@ -15,11 +15,17 @@ def send_donation_email(donation, pdf_buffer: bytes):
         to_email = [donation.donante_email]
 
         # Contexto para el template
+        # Precisión: usar formato Decimal seguro (no int() que trunca centavos).
+        # Formato colombiano: '.' para miles, ',' para decimales.
+        _monto_str = (
+            f"{donation.monto:,.2f}"
+            .replace(',', 'X').replace('.', ',').replace('X', '.')
+        )
         context = {
             'nombre': donation.donante_nombre,
             'tipo_label': donation.get_tipo_display(),
             'referencia': donation.referencia,
-            'monto': f"${int(donation.monto):,} COP".replace(',', '.'),
+            'monto': f"${_monto_str} COP",
             'frontend_url': getattr(settings, 'FRONTEND_URL', 'https://funcreescolombia.org')
         }
 

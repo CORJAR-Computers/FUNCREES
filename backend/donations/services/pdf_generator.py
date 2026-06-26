@@ -1,6 +1,9 @@
 import io
+from decimal import Decimal
+
 import qrcode
-from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.utils import ImageReader
 from reportlab.lib.units import cm
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
@@ -9,6 +12,21 @@ from django.conf import settings
 GREEN_DARK = colors.HexColor('#2d502d')
 GREEN_MID = colors.HexColor('#578c57')
 GREEN_LIGHT = colors.HexColor('#e8f5e9')
+
+
+def _format_cop(monto) -> str:
+    """
+    Formatea un monto Decimal/float/int como moneda COP sin truncar centavos.
+
+    Patrón colombiano: '.' para miles, ',' para decimales. Ej: 1234.5 -> "1.234,50".
+    Se convierte explícitamente a Decimal para garantizar precisión (float puede
+    perder centavos en montos grandes) y se formatea con 2 decimales fijos.
+    """
+    dec = Decimal(str(monto))
+    # f-string con formato `,f` usa separador de miles y 2 decimales en locale C.
+    s = f"{dec:,.2f}"
+    # Intercambiar ',' y '.' al estilo colombiano.
+    return s.replace(',', 'X').replace('.', ',').replace('X', '.')
 
 def generate_donation_certificate(nombre, documento, monto, referencia, tipo, fecha) -> bytes:
     """Genera un certificado de donación en PDF y lo retorna en bytes."""
@@ -74,7 +92,8 @@ def generate_donation_certificate(nombre, documento, monto, referencia, tipo, fe
     # --- Monto ---
     c.setFillColor(GREEN_DARK)
     c.setFont("Helvetica-Bold", 26)
-    formatted_monto = f"${int(monto):,} COP".replace(',', '.')
+    # Precisión: usar _format_cop (Decimal-safe, no int() que trunca centavos).
+    formatted_monto = f"${_format_cop(monto)} COP"
     c.drawCentredString(width / 2.0, height - 515, formatted_monto)
 
     # --- Datos extra ---
@@ -140,7 +159,8 @@ def generate_event_ticket(comprador, evento_titulo, numero_ticket, codigo_verifi
     c.setFillColor(colors.HexColor('#555555'))
     c.setFont("Helvetica", 8)
     c.drawString(5.5 * cm, ticket_height - 2.5 * cm, f"Comprador: {comprador}")
-    c.drawString(5.5 * cm, ticket_height - 3.2 * cm, f"Valor: ${int(monto):,} COP".replace(',', '.'))
+    # Precisión: usar _format_cop (Decimal-safe, no int() que trunca centavos).
+    c.drawString(5.5 * cm, ticket_height - 3.2 * cm, f"Valor: ${_format_cop(monto)} COP")
     if fecha:
         c.drawString(5.5 * cm, ticket_height - 3.9 * cm, f"Fecha Evento: {fecha.strftime('%d/%m/%Y')}")
     c.drawString(5.5 * cm, ticket_height - 4.6 * cm, f"Código: {codigo_verificacion}")
@@ -148,25 +168,31 @@ def generate_event_ticket(comprador, evento_titulo, numero_ticket, codigo_verifi
     # --- Código QR ---
     frontend_url = getattr(settings, 'FRONTEND_URL', 'https://funcrees.org')
     qr_url = f"{frontend_url}/verificar-ticket?code={codigo_verificacion}"
-    
+
     # Generar QR Image
     qr = qrcode.QRCode(box_size=4, border=1)
     qr.add_data(qr_url)
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
-    
-    # Save to temp memory
-    import tempfile
-    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tf:
-        img.save(tf, format="PNG")
-        tf.flush()
-        # Dibujar en el PDF
-        c.drawImage(tf.name, ticket_width - 3.5 * cm, ticket_height / 2 - 1.5 * cm, width=3*cm, height=3*cm)
-    
-    import os
-    os.remove(tf.name)
+
+    # Usar BytesIO en memoria (sin archivo temporal en disco) para evitar fugas
+    # de archivos en /tmp si algo falla entre la escritura y el cleanup.
+    qr_buf = io.BytesIO()
+    try:
+        img.save(qr_buf, format="PNG")
+        qr_buf.seek(0)
+        # reportlab puede dibujar directamente desde un file-like object.
+        c.drawImage(
+            ImageReader(qr_buf),
+            ticket_width - 3.5 * cm,
+            ticket_height / 2 - 1.5 * cm,
+            width=3 * cm,
+            height=3 * cm,
+        )
+    finally:
+        qr_buf.close()
 
     c.showPage()
     c.save()
-    
+
     return buffer.getvalue()

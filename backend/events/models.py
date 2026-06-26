@@ -1,5 +1,5 @@
 import uuid
-import random
+import secrets
 import string
 from django.db import models
 
@@ -33,7 +33,17 @@ class Event(models.Model):
         return self.titulo
 
 def generate_verification_code():
-    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+    """
+    Genera un código de verificación de 10 caracteres alfanuméricos.
+
+    Seguridad: usa `secrets` (CSPRNG) en lugar de `random` (PRNG no cripto).
+    El código actúa como secreto compartido entre el comprador y la Fundación
+    para consultar la boleta en /api/tickets/<codigo>/, por lo que debe ser
+    impredecible. `random.choices` es vulnerable a predicción si un atacante
+    puede observar varios códigos generados consecutivos.
+    """
+    alphabet = string.ascii_uppercase + string.digits
+    return ''.join(secrets.choice(alphabet) for _ in range(10))
 
 class Ticket(models.Model):
     SELECCION_CHOICES = [

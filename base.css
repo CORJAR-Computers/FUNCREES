@@ -28,7 +28,9 @@
   --bg-card: hsl(0, 0%, 100%);
   --bg-footer: hsl(200, 60%, 10%);
 
-  --hero-overlay: linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(240,250,240,0.9) 100%);
+  /* Banner: overlay oscuro translúcido para que la imagen de fondo se vea vibrante
+     y el texto blanco permanezca legible (contraste WCAG AA > 7:1). */
+  --hero-overlay: linear-gradient(135deg, rgba(20,45,30,0.55) 0%, rgba(8,25,35,0.78) 100%);
 
   --text-main: hsl(200, 40%, 12%);
   --text-muted: hsl(200, 15%, 42%);

@@ -162,7 +162,7 @@ async function loadDataFromAPI() {
         historia: ab.historia,
         img: ab.foto_url
       }));
-      console.log(`✅ API: ${ABUELITOS_DATA.length} beneficiarios cargados`);
+      // Log de éxito omitido en producción para no generar ruido en consola del usuario
     }
 
     if (eventsRes.ok) {
@@ -179,7 +179,7 @@ async function loadDataFromAPI() {
         dateObj: ev.fecha && ev.hora ? new Date(`${ev.fecha}T${ev.hora}`).toISOString() : null,
         category: ev.categoria
       }));
-      console.log(`✅ API: ${EVENTOS_DATA.length} eventos cargados`);
+      // Log de éxito omitido en producción para no generar ruido en consola del usuario
     }
   } catch (err) {
     if (err.name === 'AbortError') {
@@ -499,6 +499,17 @@ function initNavigation() {
   if (btnUneteAliado) {
     btnUneteAliado.addEventListener('click', () => {
       document.querySelector('[data-target="donaciones-aliados"]').click();
+    });
+  }
+
+  // Bind "Apadrinar Hoy" CTA in hero card (replaces inline onclick for CSP-friendly handling)
+  const btnApadrinarRapido = document.getElementById('btn-apadrinar-rapido');
+  if (btnApadrinarRapido) {
+    btnApadrinarRapido.addEventListener('click', () => {
+      const action = btnApadrinarRapido.getAttribute('data-action') || 'apadrinamiento';
+      if (typeof openDonationModal === 'function') {
+        openDonationModal(action);
+      }
     });
   }
 }

@@ -21,34 +21,27 @@ def health_check(request):
     Endpoint de health check para monitoreo del servidor.
     Usado por Hostinger y servicios de monitoreo para verificar
     que el servidor esté funcionando correctamente.
+
+    Seguridad: NO expone `settings.DEBUG` ni el mensaje de error de la BD
+    en la respuesta JSON, ya que esa información puede filtrar detalles
+    internos (configuración, versiones, mensajes SQL) a un atacante.
+    Solo retorna 'ok' o 'error'.
     """
     import django.db
     try:
         # Verificar conexión real a la base de datos
         django.db.connection.ensure_connection()
-        db_status = "connected"
-    except Exception as e:
-        db_status = f"error: {str(e)[:50]}"
-        return JsonResponse({
-            "status": "unhealthy",
-            "version": "1.0.0",
-            "debug": settings.DEBUG,
-            "database": db_status,
-            "timestamp": __import__('datetime').datetime.now().isoformat()
-        }, status=503)
+    except Exception:
+        # No exponer el mensaje de error original.
+        return JsonResponse({"status": "error"}, status=503)
 
-    return JsonResponse({
-        "status": "healthy",
-        "version": "1.0.0",
-        "debug": settings.DEBUG,
-        "database": db_status,
-        "timestamp": __import__('datetime').datetime.now().isoformat()
-    })
+    return JsonResponse({"status": "ok"})
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    # Health check: una sola ruta (api/health/) para evitar duplicados que
+    # confunden a los servicios de monitoreo y complican la rotación de logs.
     path('api/health/', health_check, name='health-check'),
-    path('health/', health_check, name='health-check-alt'),
 ]

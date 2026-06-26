@@ -18,6 +18,10 @@ backend/staticfiles/
 backend/logs/
 backend/db.sqlite3
 backend/db.sqlite3-journal
+# Clave Fernet de desarrollo (generada automáticamente por settings.py cuando
+# DEBUG=True y no hay ENCRYPTION_KEY en .env). NO debe subirse a git: contiene
+# el secreto que cifra datos sensibles (donante_documento, teléfono, tokens).
+backend/.dev_key
 
 # ─── Environment ──────────────────────────
 .env

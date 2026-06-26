@@ -126,13 +126,12 @@
 
         <!-- Hero real background image: elderly people in community -->
         <div class="hero-bg-img"
-          style="background-image: url('assets/Foto%20Fundación.png'); background-size: cover; background-position: center;">
+          style="background-image: url('assets/Foto%20Fundación.png');">
         </div>
         <!-- Theme-aware overlay for readability -->
-        <div style="position:absolute;inset:0;background:var(--hero-overlay);z-index:1;transition:background 0.3s;">
-        </div>
+        <div class="hero-overlay" aria-hidden="true"></div>
 
-        <div class="hero-container" style="position:relative;z-index:2;">
+        <div class="hero-container">
           <div class="hero-content">
             <span class="hero-tag">
               <i class="fa-solid fa-seedling"></i> Sincelejo, Sucre
@@ -150,9 +149,9 @@
             <span class="hero-card-stat">+120</span>
             <p class="hero-card-desc">Reciben atención nutricional, médica preventiva, talleres recreativos y terapias
               físicas de manera constante.</p>
-            <hr style="border: none; border-top: 1px solid var(--border-color); margin: 0.5rem 0;">
-            <button class="btn btn-secondary" style="padding:0.5rem 1rem; font-size:0.8rem;"
-              onclick="openDonationModal('apadrinamiento')">
+            <hr class="hero-card-divider">
+            <button class="btn btn-secondary hero-card-cta" id="btn-apadrinar-rapido"
+              data-action="apadrinamiento">
               Apadrinar Hoy 🤝
             </button>
           </div>

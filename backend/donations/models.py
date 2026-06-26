@@ -1,9 +1,14 @@
 import uuid
+import logging
 from django.db import models
 from django.conf import settings
 from cryptography.fernet import Fernet
 import base64
 import os
+
+# Usamos el logger 'donations' (definido en LOGGING de settings.py) para que
+# los errores de desencriptación queden en el archivo de log de donaciones.
+logger = logging.getLogger('donations')
 
 # Helper for symmetric encryption using Fernet
 def get_fernet():
@@ -25,7 +30,26 @@ class EncryptedCharField(models.CharField):
             f = get_fernet()
             return f.decrypt(value.encode('utf-8')).decode('utf-8')
         except Exception:
-            return value
+            # Seguridad: NUNCA devolver el ciphertext como si fuera plaintext.
+            # Si el desencriptado falla, lo más probable es:
+            #   (a) corrupción del valor almacenado,
+            #   (b) rotación de ENCRYPTION_KEY (la clave actual no es la que
+            #       se usó para cifrar este valor), o
+            #   (c) el valor aún está en plaintext pendiente de la migración
+            #       0002_fix (que cifra los tokens de tarjeta existentes).
+            # En cualquiera de estos casos, devolver el ciphertext crudo sería
+            # peor: la UI lo mostraría como si fuera dato válido (p.ej. un
+            # teléfono ilegible expuesto al usuario), enmascarando el problema.
+            # Por eso devolvemos None y registramos el error con el nombre del
+            # campo para facilitar el diagnóstico.
+            logger.error(
+                "Decryption failed for field: %s. Possible causes: corrupted "
+                "value, ENCRYPTION_KEY rotation, or data may be plaintext "
+                "pending migration 0002_fix.",
+                self.name,
+                exc_info=True,
+            )
+            return None
 
 class Donation(models.Model):
     TIPO_CHOICES = [
