@@ -83,8 +83,11 @@ e:/FUNCREES/
 │   └── test.yml               # Tests con Node 20/22 matrix
 │
 ├── 📁 tests/                  # Tests unitarios
-│   ├── unit.test.js           # 45 tests (sanitizeHTML, parseCOP, showToast, exports)
-│   └── iife-encapsulation.test.js  # 44 tests (encapsulación IIFE)
+│   ├── unit.test.js               # 45 tests (sanitizeHTML, parseCOP, showToast)
+│   ├── iife-encapsulation.test.js  # 44 tests (encapsulación IIFE)
+│   └── interactions.test.js        # 46 tests (modales, checkout, filtros)
+│
+├── 📄 .gitattributes           # Forzar LF en JS para CI cross-platform
 `
 
 ---
@@ -268,7 +271,7 @@ npm install
 | **Desarrollo (Windows)** | `npm run dev:win` | Igual que `dev` pero abre backend en ventana cmd separada |
 | **Solo frontend** | `npm start` | Sirve el frontend estático en el puerto 5500 |
 | **Matar puertos** | `npm run dev:kill` | Libera los puertos 5500 y 8000 |
-| **Tests** | `npm test` | Ejecuta los 89 tests (node --test) |
+| **Tests** | `npm test` | Ejecuta los 135 tests (node --test) |
 | **Tests (watch)** | `npm run test:watch` | Re-ejecuta tests automáticamente al detectar cambios |
 | **Cobertura** | `npm run test:coverage` | Genera reporte de cobertura de tests |
 
@@ -329,6 +332,7 @@ ENCRYPTION_KEY=<clave-fernet-base64>
 | v0.2.0 | Jun 2026 | Backend REST API Django con SQLite local |
 | v0.3.0 | Jun 2026 | Propuesta comercial interactiva CORJAR |
 | v0.4.0 | Jun 2026 | Refactor: IIFE encapsulation, CSS dividido, 89 tests, CI/CD, scripts dev |
+| v0.4.1 | Jun 2026 | 46 tests de interacción (modales, checkout, filtros), CI fix (glob en Linux), .gitattributes, workflow optimizado |
 | v1.0.0 | Pendiente | Despliegue en producción con PostgreSQL y pasarelas reales |
 
 ---
@@ -345,4 +349,4 @@ ENCRYPTION_KEY=<clave-fernet-base64>
 - Email: fundacioncreceunaesperanza@gmail.com
 
 ---
-*Versión v0.3.0 · Junio 2026 · Todos los derechos reservados © CORJAR Computers Solutions*
+*Versión v0.4.1 · Junio 2026 · Todos los derechos reservados © CORJAR Computers Solutions*
