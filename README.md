@@ -1,4 +1,4 @@
-﻿# 🌱 FUNCREES Colombia — Plataforma Web Institucional
+# 🌱 FUNCREES Colombia — Plataforma Web Institucional
 
 [![Tests](https://github.com/CORJAR-Computers/FUNCREES/actions/workflows/test.yml/badge.svg)](https://github.com/CORJAR-Computers/FUNCREES/actions)
 
@@ -16,34 +16,31 @@ Plataforma web institucional de alta fidelidad para la **Fundación Funcrees Col
 
 ## 🗂️ Estructura del Proyecto
 
-`
-e:/FUNCREES/
+```
+FUNCREES/
 │
 ├── 📄 index.html              # Frontend SPA principal (6 vistas integradas)
-├── 🎨 styles.css              # Entry point (importa los 4 archivos CSS)
 ├── 🎨 base.css                # Reset, variables CSS, keyframes
-├── 🎨 components.css          # Estilos de componentes (~2500 líneas)
+├── 🎨 components.css          # Estilos de componentes
 ├── 🎨 themes.css              # Modo oscuro, alto contraste, dislexia
 ├── 🎨 responsive.css          # Todos los media queries
 ├── ⚡ app.js                  # Motor JavaScript (IIFE, 21 exports en window)
 ├── 📑 propuesta.html          # Generador de propuesta comercial CORJAR
 ├── 📦 package.json            # Scripts npm (dev, test, test:coverage, etc.)
-├── 🔒 package-lock.json       # Lockfile de dependencias npm
 ├── 📦 requirements.txt        # Dependencias Python del backend
-├── 🚀 start.bat               # Script de arranque rápido del servidor
-├── ⚙️ start_backend.bat       # Batch file para backend en Windows
 ├── 📖 README.md               # Este archivo
+├── 📖 DEPLOY.md               # Guía de deployment para el cliente
 │
 ├── 📁 assets/                 # Recursos visuales del sitio
-│   ├── Logo.png               # Logotipo oficial de Fundación Funcrees Colombia
-│   ├── Foto Fundación.png     # Fotografía institucional principal
-│   └── corjar_logo.png        # Logotipo CORJAR Computers Solutions
+│   ├── Logo.png               # Logotipo oficial
+│   └── Foto Fundación.png     # Fotografía institucional principal
 │
 ├── 📁 backend/                # API REST con Django 5.x
 │   ├── manage.py              # Punto de entrada de Django
 │   ├── populate_db.py         # Script de datos semilla (seed data)
 │   ├── .env                   # Variables de entorno (NO subir a Git)
-│   ├── 📁 venv/               # Entorno virtual Python (NO subir a Git)
+│   ├── .env.example           # Plantilla de variables de entorno
+│   ├── gunicorn.conf.py       # Configuración Gunicorn para producción
 │   │
 │   ├── 📁 core/               # Configuración central del proyecto Django
 │   │   ├── settings.py        # Configuración global (DB, CORS, Unfold, DRF)
@@ -52,288 +49,234 @@ e:/FUNCREES/
 │   │   └── wsgi.py            # Servidor WSGI (despliegue tradicional)
 │   │
 │   ├── 📁 beneficiaries/      # App: Gestión de adultos mayores beneficiarios
-│   │   ├── models.py          # Modelo Beneficiary (UUID, nombre, historia, foto, estado)
+│   │   ├── models.py          # Modelo Beneficiary (UUID, nombre, historia, foto)
 │   │   ├── views.py           # ViewSet REST para CRUD de beneficiarios
 │   │   ├── serializers.py     # Serializadores DRF
-│   │   ├── admin.py           # Panel admin (Unfold UI)
 │   │   └── migrations/        # Migraciones de base de datos
 │   │
 │   ├── 📁 donations/          # App: Donaciones, apadrinamiento y patrocinios
 │   │   ├── models.py          # Modelos: Donation, Sponsorship (cifrado Fernet)
 │   │   ├── views.py           # ViewSet REST para donaciones
 │   │   ├── serializers.py     # Serializadores DRF
-│   │   ├── admin.py           # Panel admin con vista de donaciones cifradas
+│   │   ├── services/          # Servicios externos
+│   │   │   ├── wompi.py       # Integración con pasarela de pagos Wompi
+│   │   │   ├── email_service.py # Servicio de envío de emails
+│   │   │   └── pdf_generator.py # Generación de certificados PDF
 │   │   └── migrations/        # Migraciones de base de datos
 │   │
 │   ├── 📁 events/             # App: Eventos solidarios y venta de boletas
 │   │   ├── models.py          # Modelos: Event, Ticket (código único generado)
 │   │   ├── views.py           # ViewSet REST para eventos y tickets
 │   │   ├── serializers.py     # Serializadores DRF
-│   │   ├── admin.py           # Panel admin para gestión de eventos
 │   │   └── migrations/        # Migraciones de base de datos
 │   │
-│   └── 📁 contact/            # App: Formulario de contacto y alianzas
-│       ├── models.py          # Modelo ContactMessage
-│       ├── views.py           # ViewSet REST para mensajes de contacto
-│       ├── serializers.py     # Serializadores DRF
-│       ├── admin.py           # Panel admin de mensajes
-│       └── migrations/        # Migraciones de base de datos
+│   ├── 📁 contact/            # App: Formulario de contacto y alianzas
+│   │   ├── models.py          # Modelo ContactMessage
+│   │   ├── views.py           # ViewSet REST para mensajes de contacto
+│   │   ├── serializers.py     # Serializadores DRF
+│   │   └── migrations/        # Migraciones de base de datos
+│   │
+│   ├── 📁 templates/          # Templates de email y páginas de error
+│   │   ├── emails/
+│   │   │   └── donation_confirmation.html
+│   │   ├── 404.html
+│   │   └── 500.html
+│   │
+│   └── 📁 scripts/            # Scripts utilitarios
+│       └── migrate_to_postgresql.py
+│
+├── 📁 tests/                  # Tests unitarios (135 tests)
+│   ├── unit.test.js           # 45 tests (sanitizeHTML, parseCOP, showToast)
+│   ├── iife-encapsulation.test.js # 44 tests (encapsulación IIFE)
+│   └── interactions.test.js   # 46 tests (modales, checkout, filtros)
 │
 ├── 📁 .github/workflows/      # CI: GitHub Action (push/PR a main)
 │   └── test.yml               # Tests con Node 20/22 matrix
 │
-├── 📁 tests/                  # Tests unitarios
-│   ├── unit.test.js               # 45 tests (sanitizeHTML, parseCOP, showToast)
-│   ├── iife-encapsulation.test.js  # 44 tests (encapsulación IIFE)
-│   └── interactions.test.js        # 46 tests (modales, checkout, filtros)
-│
-├── 📄 .gitattributes           # Forzar LF en JS para CI cross-platform
-`
+└── 📁 mejoras_FUNCREES/       # Documentación de mejoras de seguridad
+    ├── apply_frontend_patches.py
+    ├── RESUMEN_CAMBIOS_FRONTEND.md
+    └── backend/
+        └── (configuraciones de referencia)
+```
 
 ---
 
 ## 🛠️ Stack Tecnológico
 
 ### Frontend
+
 | Tecnología | Versión | Uso |
-|---|---|---|
+|------------|---------|-----|
 | **HTML5** | Semántico | Estructura SPA de 6 vistas integradas |
 | **CSS3 / Vanilla CSS** | Variables HSL | Sistema de diseño premium con glassmorphism |
 | **JavaScript (ES6+)** | Nativo | Motor SPA, TTS, pasarelas simuladas |
 | **Google Fonts** | Inter + Outfit | Tipografía moderna y accesible |
-| **Web Speech API** | Nativa | Lector de pantalla TTS en español |
-| **localStorage** | Nativa | Persistencia de configuración de accesibilidad |
+| **Leaflet.js** | 1.9.4 | Mapa interactivo de ubicación |
+| **FontAwesome** | 6.4.0 | Iconografía del sitio |
 
 ### Backend
+
 | Tecnología | Versión | Uso |
-|---|---|---|
-| **Python** | 3.11+ | Lenguaje base del servidor |
-| **Django** | ≥5.0, <5.2 | Framework web principal |
-| **Django REST Framework** | ≥3.14, <3.16 | API REST con ViewSets y serializadores |
-| **django-unfold** | ≥0.40.0 | Panel de administración moderno con branding |
-| **django-cors-headers** | ≥4.3, <4.5 | Gestión de peticiones CORS (frontend ↔ backend) |
-| **django-filter** | ≥24.2, <25.0 | Filtros avanzados en endpoints de la API |
-| **django-environ** | ≥0.11, <0.12 | Manejo seguro de variables de entorno |
-| **whitenoise** | ≥6.6, <7.0 | Servicio de archivos estáticos en producción |
-| **gunicorn** | ≥21.2, <23.0 | Servidor WSGI para producción |
-| **psycopg2-binary** | ≥2.9, <3.0 | Driver PostgreSQL para producción |
-| **cryptography (Fernet)** | — | Cifrado de datos sensibles (Ley Habeas Data 1581) |
-| **reportlab** | ≥4.1, <5.0 | Generación de recibos/certificados en PDF |
-| **qrcode** | ≥7.4, <8.0 | Generación de QR para boletas y recibos |
-| **requests** | ≥2.31, <3.0 | Integración con APIs externas (Wompi, PSE) |
+|------------|---------|-----|
+| **Python** | 3.10+ | Lenguaje base del servidor |
+| **Django** | ≥5.0, <5.3 | Framework web principal |
+| **Django REST Framework** | ≥3.14, <3.17 | API REST con ViewSets y serializadores |
+| **django-unfold** | ≥0.40.0 | Panel de administración moderno |
+| **django-cors-headers** | ≥4.3, <4.6 | Gestión de peticiones CORS |
+| **django-filter** | ≥24.2, <26.0 | Filtros avanzados en endpoints |
+| **django-environ** | ≥0.11, <0.13 | Manejo seguro de variables de entorno |
+| **whitenoise** | ≥6.6, <7.0 | Servicio de archivos estáticos |
+| **gunicorn** | ≥21.2, <24.0 | Servidor WSGI para producción |
+| **psycopg2-binary** | ≥2.9, <3.0 | Driver PostgreSQL |
+| **cryptography (Fernet)** | ≥41.0, <45.0 | Cifrado de datos sensibles (Ley 1581) |
+| **reportlab** | ≥4.1, <5.0 | Generación de certificados PDF |
+| **qrcode** | ≥7.4, <9.0 | Generación de QR para boletas |
 
 ### Base de Datos
-| Entorno | Motor | Estado |
-|---|---|---|
-| **Desarrollo local** | SQLite 3 | ✅ Activo (backend/db.sqlite3) |
-| **Producción (recomendado)** | PostgreSQL 15+ | 🔧 Pendiente configurar |
 
-> **¿Por qué PostgreSQL para producción?** PostgreSQL ofrece mejor manejo de concurrencia, soporte nativo para UUID, campos JSONB (usados en wompi_response), extensiones para búsqueda de texto completo en español y mayor estabilidad frente a múltiples escrituras simultáneas (crítico en campañas de donación).
+| Entorno | Motor | Estado |
+|---------|-------|--------|
+| **Desarrollo local** | SQLite 3 | ✅ Activo |
+| **Producción** | PostgreSQL 14+ | 🔧 Requerido |
+
+---
+
+## 🚀 Instrucciones de Instalación
+
+### Pre-requisitos
+
+- **Python** 3.10 o superior
+- **Node.js** 18+ (para tests y herramientas de desarrollo)
+- **PostgreSQL** 14+ (para producción)
+
+### Inicio Rápido (Desarrollo Local)
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/CORJAR-Computers/FUNCREES.git
+cd FUNCREES
+
+# 2. Configurar backend
+cd backend
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# venv\Scripts\activate   # Windows
+pip install -r requirements.txt
+
+# 3. Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus valores
+
+# 4. Ejecutar migraciones
+python manage.py migrate
+python populate_db.py  # Cargar datos de ejemplo
+
+# 5. Crear superusuario
+python manage.py createsuperuser
+
+# 6. Iniciar servidor
+python manage.py runserver
+```
+
+### Frontend (desarrollo)
+
+```bash
+# Desde la raíz del proyecto
+npm install
+npm start  # Abre http://localhost:5500
+```
+
+### Scripts Disponibles
+
+| Script | Comando | Descripción |
+|--------|---------|-------------|
+| **Desarrollo completo** | `npm run dev` | Inicia backend y frontend juntos |
+| **Solo frontend** | `npm start` | Sirve archivos estáticos en puerto 5500 |
+| **Tests** | `npm test` | Ejecuta los 135 tests unitarios |
+| **Tests (watch)** | `npm run test:watch` | Re-ejecuta tests al detectar cambios |
+| **Cobertura** | `npm run test:coverage` | Genera reporte de cobertura |
 
 ---
 
 ## 🔌 API Endpoints
 
-El backend expone una **REST API** en el prefijo /api/ con las siguientes colecciones:
-
-| Método | Endpoint | Descripción |
-|---|---|---|
-| GET | /api/beneficiaries/ | Lista todos los adultos mayores activos |
-| GET | /api/beneficiaries/{id}/ | Detalle de un beneficiario |
-| GET | /api/events/ | Lista de eventos solidarios activos |
-| POST | /api/tickets/ | Compra y generación de boleta con código único |
-| POST | /api/donations/ | Registrar una donación o apadrinamiento |
-| POST | /api/contact/ | Enviar mensaje de contacto / alianza |
-| GET | /admin/ | Panel de administración (Unfold UI) |
-
----
-
-## 🎨 Diseño y Accesibilidad (WCAG 2.1)
-
-### Sistema de Color HSL
-`
---primary:    hsl(148, 64%, 38%)   /* Verde Esperanza - Acción principal */
---secondary:  hsl(215, 60%, 24%)   /* Azul Noche - Fondos y énfasis */
---accent:     hsl(165, 55%, 68%)   /* Menta - Detalles y hover */
---bg-main:    hsl(140, 35%, 97%)   /* Crema - Fondo base */
-`
-
-### Funciones de Accesibilidad Implementadas
-- ✅ **Escalado de fuente**: Botones A+ / A- con valores rem que escalan todo el sitio
-- ✅ **Modo alto contraste**: Fondo negro profundo con textos amarillos de alta luminancia
-- ✅ **Fuente para dislexia**: Tipografía de peso asimétrico con mayor interletrado
-- ✅ **Lector de voz TTS**: Síntesis de voz en español (Web Speech API)
-- ✅ **Navegación por teclado**: tabIndex y aria-label en elementos interactivos
-- ✅ **HTML semántico**: Uso de main, section, nav, article, aside
+| Método | Endpoint | Descripción | Autenticación |
+|--------|----------|-------------|---------------|
+| GET | `/api/beneficiaries/` | Lista beneficiarios activos | Pública |
+| GET | `/api/beneficiaries/{id}/` | Detalle de beneficiario | Pública |
+| GET | `/api/events/` | Lista de eventos | Pública |
+| GET | `/api/events/{id}/` | Detalle de evento | Pública |
+| POST | `/api/donations/initiate/` | Iniciar proceso de donación | Pública |
+| POST | `/api/donations/webhook/` | Webhook de Wompi | Pública |
+| GET | `/api/donations/{referencia}/status/` | Estado de donación | Pública |
+| POST | `/api/contact/` | Enviar mensaje de contacto | Pública |
+| GET | `/api/health/` | Health check del servidor | Pública |
+| GET | `/admin/` | Panel de administración | Admin |
 
 ---
 
-## 💳 Sistema de Pagos (Simulado en Prototipo)
-
-| Pasarela | Estado en Prototipo | Integración Real |
-|---|---|---|
-| **PSE** (ACH Colombia) | Simulado (flujo completo) | Requiere cuenta en Wompi/PayU |
-| **Wompi** (Bancolombia) | Simulado (flujo completo) | Requiere cuenta comercial Wompi |
-| **Transferencia Bancolombia** | Simulado (instrucciones) | Verificación manual por WhatsApp |
-
-### Flujo de Apadrinamiento
-1. Usuario elige Apadrinar → Selecciona beneficiario
-2. Elige monto (SEMILLA /mes | RAÍZ /mes | LEGADO /mes en USD)
-3. Selecciona pasarela de pago
-4. Autoriza tratamiento de datos (Habeas Data — Ley 1581)
-5. Sistema simula procesamiento → Genera comprobante con QR
-
----
-
-## 🏗️ Modelos de Datos Principales
-
-### Beneficiary (Beneficiarios)
-- id: UUID (Primary Key)
-- 
-ombre, historia, 	estimonio: Datos biográficos
-- edad, ciudad, oto_url, ideo_url: Multimedia
-- ctivo, padrinado, padrinadores_count: Estado de apadrinamiento
-
-### Donation (Donaciones)
-- id: UUID (Primary Key)
-- eferencia: Código único de transacción
-- 	ipo: [general | apadrinamiento | patrocinio | boleta]
-- monto, donante_nombre, donante_email
-- donante_documento_cifrado: AES-128 Fernet (Cumplimiento Ley 1581)
-- metodo_pago: [PSE | Wompi | Bancolombia]
-- estado: [pendiente | procesando | completado | fallido | reembolsado]
-- eneficiario: ForeignKey → Beneficiary
-
-### Sponsorship (Apadrinamientos Recurrentes)
-- 	ipo: [debito_automatico | suscripcion_manual]
-- estado: [activo | pausado | cancelado | vencido]
-- monto_mensual, eneficiario → FK Beneficiary
-- wompi_subscription_id, echa_proximo_cobro
-
----
-
-## 🚀 Instrucciones de Instalación y Ejecución Local
-
-### Pre-requisitos
-- **Python** 3.11 o superior instalado en Windows
-- **Node.js** 20+ (v26.3.0 recomendado)
-- **npm** incluido con Node.js
-- Entorno virtual Python en `backend/venv/`
-
-### Inicio Rápido (Recomendado)
-```bash
-# Instalar dependencias del frontend
-npm install
-
-# Iniciar backend + frontend simultáneamente
-npm run dev
-```
-
-> `npm run dev` libera puertos automáticamente e inicia ambos servidores.
-> Frontend: http://localhost:5500 · Backend: http://localhost:8000
-
-### Opciones Alternativas de Inicio
-```bash
-# Opción 1: Solo backend (Django)
-cd backend && venv\Scripts\python manage.py runserver
-
-# Opción 2: Solo frontend (servidor estático)
-npm start
-
-# Opción 3: Desarrollo en ventanas separadas (Windows)
-npm run dev:win
-
-# Opción 4: Doble clic en start.bat (Explorador de Windows)
-start.bat
-```
-
-### Primera Configuración (Solo una vez)
-```bash
-# Backend: activar entorno virtual e instalar dependencias
-cd e:/FUNCREES/backend
-python -m venv venv
-call venv\Scripts\activate
-pip install -r requirements.txt
-python manage.py migrate
-python populate_db.py          # Cargar datos de ejemplo
-python manage.py createsuperuser
-
-# Frontend: instalar dependencias npm
-cd ..
-npm install
-```
-
-### Scripts de Desarrollo Disponibles
-
-| Script | Comando | Descripción |
-|---|---|---|
-| **Desarrollo** | `npm run dev` | Mata puertos + inicia backend (8000) y frontend (5500) simultáneamente |
-| **Desarrollo (Windows)** | `npm run dev:win` | Igual que `dev` pero abre backend en ventana cmd separada |
-| **Solo frontend** | `npm start` | Sirve el frontend estático en el puerto 5500 |
-| **Matar puertos** | `npm run dev:kill` | Libera los puertos 5500 y 8000 |
-| **Tests** | `npm test` | Ejecuta los 135 tests (node --test) |
-| **Tests (watch)** | `npm run test:watch` | Re-ejecuta tests automáticamente al detectar cambios |
-| **Cobertura** | `npm run test:coverage` | Genera reporte de cobertura de tests |
-
-### URLs Locales
-- **Frontend**: http://localhost:5500/
-- **Backend API**: http://localhost:8000/api/
-- **Panel Admin**: http://localhost:8000/admin/
-- **Propuesta Comercial**: Abrir e:/FUNCREES/propuesta.html en el navegador
-
-> ℹ️ `npm run dev` ejecuta `dev:kill` automáticamente para liberar puertos antes de iniciar.
-> Si un proceso falla, el otro se detiene gracias a `--kill-others` en concurrently.
-
----
-
-## 🔒 Seguridad y Cumplimiento Legal
+## 🔒 Seguridad
 
 | Medida | Implementación |
-|---|---|
-| **Ley 1581 (Habeas Data)** | Campos sensibles cifrados con AES-128 (Fernet) en BD |
-| **Variables de entorno** | SECRET_KEY, DATABASE_URL y claves de pasarelas en .env |
-| **CORS configurado** | django-cors-headers con lista blanca de orígenes |
+|--------|----------------|
+| **Cifrado de datos sensibles** | Fernet (AES-128) para documentos, teléfonos y tokens de tarjeta |
+| **Variables de entorno** | SECRET_KEY, DATABASE_URL, claves de Wompi en `.env` |
+| **CORS configurado** | Lista blanca explícita de orígenes permitidos |
 | **CSRF Protection** | Habilitado por defecto en Django |
-| **Autorización explícita** | Checkbox de consentimiento requerido antes de pago |
+| **Content Security Policy** | Configurada en `index.html` |
+| **Rate Limiting** | Throttling en endpoints públicos (donaciones, contacto) |
+| **HSTS** | Habilitado en producción (1 año) |
+| **Autorización de datos** | Checkbox de consentimiento requerido (Ley 1581) |
 
 ---
 
-## 🌐 Plan de Migración a Producción (Hostinger VPS)
+## 🧪 Tests
 
-### Infraestructura Recomendada
-`
-Hostinger Business VPS
-├── Ubuntu 22.04 LTS
-├── Nginx (reverse proxy + SSL termination)
-├── Gunicorn (servidor WSGI Python)
-├── PostgreSQL 15 (base de datos principal)
-├── Certbot (SSL/TLS gratuito — Let's Encrypt)
-└── Dominio: funcreescolombia.org (por confirmar)
-`
+El proyecto cuenta con **135 tests unitarios** organizados en 3 archivos:
 
-### Variables de Entorno para Producción (.env)
-`
-DEBUG=False
-SECRET_KEY=<clave-segura-generada>
-ALLOWED_HOSTS=funcreescolombia.org,www.funcreescolombia.org
-DATABASE_URL=postgresql://user:pass@localhost:5432/funcrees_db
-WOMPI_PUBLIC_KEY=<clave-publica-wompi>
-WOMPI_PRIVATE_KEY=<clave-privada-wompi>
-ENCRYPTION_KEY=<clave-fernet-base64>
-`
+| Archivo | Tests | Cubre |
+|---------|-------|-------|
+| `unit.test.js` | 45 | `sanitizeHTML()`, `parseCOP()`, `showToast()` |
+| `iife-encapsulation.test.js` | 44 | Encapsulación IIFE, exports, aislamiento global |
+| `interactions.test.js` | 46 | Modales, checkout, filtros, navegación |
+
+```bash
+# Ejecutar todos los tests
+npm test
+
+# Ejecutar con cobertura
+npm run test:coverage
+```
+
+---
+
+## 🌐 Deployment
+
+Para instrucciones detalladas de deployment en producción, consultar [DEPLOY.md](DEPLOY.md).
+
+### Resumen Rápido
+
+1. Configurar servidor Ubuntu 22.04 con Nginx, PostgreSQL, Python
+2. Clonar proyecto en `/var/www/funcrees`
+3. Configurar variables de entorno en `.env`
+4. Ejecutar migraciones y collectstatic
+5. Configurar Gunicorn como servicio systemd
+6. Configurar Nginx como reverse proxy
+7. Instalar certificado SSL con Certbot
 
 ---
 
 ## 📅 Historial de Versiones
 
 | Versión | Fecha | Descripción |
-|---|---|---|
-| v0.1.0 | Jun 2026 | Prototipo frontend SPA completo |
-| v0.2.0 | Jun 2026 | Backend REST API Django con SQLite local |
-| v0.3.0 | Jun 2026 | Propuesta comercial interactiva CORJAR |
-| v0.4.0 | Jun 2026 | Refactor: IIFE encapsulation, CSS dividido, 89 tests, CI/CD, scripts dev |
-| v0.4.1 | Jun 2026 | 46 tests de interacción (modales, checkout, filtros), CI fix (glob en Linux), .gitattributes, workflow optimizado |
-| v1.0.0 | Pendiente | Despliegue en producción con PostgreSQL y pasarelas reales |
+|---------|-------|-------------|
+| v1.0.0 | Julio 2026 | Producción: Backend Django + Frontend SPA (En preparación) |
+| v0.4.1 | Junio 2026 | Tests de interacción, CI/CD, .gitattributes |
+| v0.4.0 | Junio 2026 | IIFE encapsulation, CSS dividido, 89 tests |
+| v0.3.0 | Junio 2026 | Propuesta comercial interactiva |
+| v0.2.0 | Junio 2026 | Backend REST API Django |
+| v0.1.0 | Junio 2026 | Prototipo frontend SPA |
 
 ---
 
@@ -349,4 +292,9 @@ ENCRYPTION_KEY=<clave-fernet-base64>
 - Email: fundacioncreceunaesperanza@gmail.com
 
 ---
-*Versión v0.4.1 · Junio 2026 · Todos los derechos reservados © CORJAR Computers Solutions*
+
+## 📄 Licencia
+
+© 2026 Fundación Crece Una Esperanza Social. Todos los derechos reservados.
+
+*Desarrollado con ❤️ por CORJAR Computers Solutions*

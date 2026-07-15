@@ -128,10 +128,10 @@ function parseCOP(val) {
   let s = String(val).replace(/[^\d,\.]/g, ''); // Remove símbolos no numéricos
   // Si tiene coma decimal (formato 10.000,50)
   if (s.includes(',') && /,\d{1,2}$/.test(s)) {
-    s = s.replace('\.', '').replace(',', '.');
+    s = s.replace(/\./g, '').replace(',', '.');
   } else {
     // Formato colombiano: puntos como separadores de miles
-    s = s.replace('\.', '');
+    s = s.replace(/\./g, '');
   }
   const num = parseFloat(s);
   return isNaN(num) ? 0 : num;
@@ -183,9 +183,9 @@ async function loadDataFromAPI() {
     }
   } catch (err) {
     if (err.name === 'AbortError') {
-      console.warn("⚠️ API: Tiempo de espera agotado. Usando datos locales.");
+      // Silencioso: timeout esperado en producción cuando el backend no está disponible
     } else {
-      console.warn("⚠️ API: No se pudo conectar con el servidor. Usando datos locales.", err.message);
+      // Silencioso: fallback a datos hardcodeados cuando el backend no está disponible
     }
     // Mantener los datos hardcodeados como fallback
   }
