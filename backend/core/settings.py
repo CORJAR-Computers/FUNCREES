@@ -186,6 +186,14 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+# Cabeceras de seguridad HTTP globales
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+
+# Límites de carga de datos (mitigar ataques de denegación de servicio por subidas gigantes)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
+
 # ============================================
 # PASSWORD VALIDATION
 # ============================================
@@ -272,9 +280,11 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 50,
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
         'anon': '100/hour',
+        'user': '200/hour',
         'donate': '10/hour',
         'contact': '5/hour',
     }

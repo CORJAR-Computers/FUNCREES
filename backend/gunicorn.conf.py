@@ -18,9 +18,13 @@ bind = "0.0.0.0:8000"
 # ============================================
 # WORKER PROCESSES
 # ============================================
-# 2-4 workers per CPU core is recommended
-workers = multiprocessing.cpu_count() * 2 + 1
+# 2-4 workers per CPU core is recommended. Capped at 5 to prevent memory exhaustion on small VPS.
+workers = min(multiprocessing.cpu_count() * 2 + 1, 5)
 worker_class = "sync"
+
+# Reciclaje periódico de workers para evitar fugas de memoria acumulativas
+max_requests = 1000
+max_requests_jitter = 50
 
 # ============================================
 # TIMEOUTS

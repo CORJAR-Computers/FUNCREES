@@ -16,6 +16,17 @@ router.register(r'contact', ContactMessageViewSet, basename='contact')
 router.register(r'donations', DonationViewSet, basename='donation')
 
 
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.throttling import AnonRateThrottle
+
+class HealthCheckThrottle(AnonRateThrottle):
+    rate = '30/hour'
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+@throttle_classes([HealthCheckThrottle])
 def health_check(request):
     """
     Endpoint de health check para monitoreo del servidor.

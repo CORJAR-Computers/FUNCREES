@@ -20,52 +20,27 @@ logger = logging.getLogger(__name__)
 
 
 class DonationViewSet(viewsets.GenericViewSet):
-    """
-    ViewSet para donaciones.
-
-    Seguridad:
-    - permission_classes = [AllowAny] a nivel de clase: las donaciones son
-      públicas (cualquiera puede donar). El endpoint de estado también es
-      público porque se consulta con la referencia (secreto por URL).
-    - El webhook es público (lo llama Wompi sin sesión).
-    - El throttle scope 'donate' aplica solo al action `initiate`.
-    """
     queryset = Donation.objects.all()
     serializer_class = DonationSerializer
     permission_classes = [AllowAny]
-    # Throttle scope usado por ScopedRateThrottle en el action `initiate`.
     throttle_scope = 'donate'
     lookup_field = 'referencia'
 
     def get_client_ip(self, request):
-        """
-        Obtiene la IP real del cliente.
-
-        Seguridad: X-Forwarded-For puede contener una lista
-        `client, proxy1, proxy2`. Tomamos el ÚLTIMO valor (no el primero) bajo
-        el supuesto de que el proxy inverso confiable más cercano a Django
-        (p.ej. Nginx) es quien APENDIZA la IP del cliente que lo contactó al
-        final de la cadena. El primer valor, en cambio, podría estar
-        controlado por el cliente (spoofing) si un proxy intermedio no validó
-        la cabecera.
-        SUPONE: se ejecuta detrás de un proxy confiable que reescribe / valida
-        X-Forwarded-For. Si no hay proxy, se usa REMOTE_ADDR.
-        """
+        """Extrae la IP real del cliente, considerando proxies inversos."""
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
         if x_forwarded_for:
-            # Última IP de la cadena, sin espacios.
             return x_forwarded_for.split(',')[-1].strip()
         return request.META.get('REMOTE_ADDR')
 
     @action(
         detail=False,
         methods=['post'],
-        # Seguridad: las donaciones son públicas; throttle para limitar abuso.
         permission_classes=[AllowAny],
         throttle_classes=[ScopedRateThrottle],
     )
     def initiate(self, request):
-        """Inicia el proceso de pago y retorna la info para el widget de Wompi"""
+        """Inicia una nueva donación y crea la sesión de pago en Wompi."""
         serializer = InitiateDonationSerializer(data=request.data)
         if not serializer.is_valid():
             return Response({"errors": serializer.errors}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
@@ -74,10 +49,6 @@ class DonationViewSet(viewsets.GenericViewSet):
 
         if not data.get('autorizacion_datos'):
             return Response({"error": "Debe aceptar el tratamiento de datos."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Generar referencia (tipo-UUID)
-        prefijo = data.get('tipo', 'donacion')[:4].upper()
-        referencia = f"{prefijo}-{uuid.uuid4().hex[:8].upper()}"
 
         # --- Sanitización del nombre del donante ----------------------------
         # Elimina espacios excesivos y caracteres de control.
@@ -95,12 +66,11 @@ class DonationViewSet(viewsets.GenericViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-        # Seguridad: atomicidad — si la creación de la sesión de Wompi falla,
-        # se revierte la creación de la donación para evitar registros huérfanos
-        # en estado 'pendiente' que nunca tendrán pago asociado.
+        prefijo = data.get('tipo', 'donacion')[:4].upper()
+        referencia = f"{prefijo}-{uuid.uuid4().hex[:8].upper()}"
+
         try:
             with transaction.atomic():
-                # Crear registro pendiente
                 donation = Donation.objects.create(
                     referencia=referencia,
                     tipo=data.get('tipo'),
@@ -118,7 +88,6 @@ class DonationViewSet(viewsets.GenericViewSet):
                 frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5500')
                 redirect_url = f"{frontend_url}?pago=exitoso&ref={referencia}"
 
-                # Generar datos para Wompi (puede lanzar excepción si la API falla).
                 payment_session = create_payment_session(
                     reference=referencia,
                     amount_cop=float(donation.monto),
@@ -127,7 +96,6 @@ class DonationViewSet(viewsets.GenericViewSet):
                     redirect_url=redirect_url
                 )
         except Exception as e:
-            # transaction.atomic() ya revirtió la creación de la donación.
             # Se registra el tipo de excepción explícitamente para facilitar
             # la depuración y el monitoreo de errores recurrentes.
             logger.error(
@@ -149,7 +117,7 @@ class DonationViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['post'])
     @method_decorator(csrf_exempt)
     def webhook(self, request):
-        """Recibe notificaciones de Wompi sobre el estado del pago"""
+        """Recibe notificaciones de Wompi sobre cambios de estado de transacciones."""
         payload = request.data
         received_signature = payload.get('signature', {}).get('checksum')
 
@@ -174,15 +142,9 @@ class DonationViewSet(viewsets.GenericViewSet):
 
             if referencia:
                 try:
-                    # Seguridad: bloqueo pesimista + idempotencia.
-                    # select_for_update() dentro de transaction.atomic() evita
-                    # condiciones de carrera si Wompi reenvía el mismo webhook
-                    # (comportamiento habitual en pasarelas de pago).
                     with transaction.atomic():
                         donation = Donation.objects.select_for_update().get(referencia=referencia)
 
-                        # Idempotencia: si la donación ya está completada, no
-                        # reprocesar (Wompi puede reenviar el webhook).
                         if donation.estado == 'completado':
                             logger.info(
                                 f"Webhook idempotente: donación {referencia} ya "
@@ -205,9 +167,6 @@ class DonationViewSet(viewsets.GenericViewSet):
 
                         logger.info(f"Webhook: Donación {referencia} actualizada a {nuevo_estado}")
 
-                        # Si completó y no se ha enviado el certificado, generar
-                        # PDF y enviar email. Las fallas aquí NO deben romper el
-                        # webhook (Wompi espera 200 y reintentaría innecesariamente).
                         if nuevo_estado == 'completado' and not donation.certificado_enviado:
                             try:
                                 pdf_bytes = generate_donation_certificate(
@@ -222,8 +181,6 @@ class DonationViewSet(viewsets.GenericViewSet):
                                 donation.certificado_enviado = True
                                 donation.save(update_fields=['certificado_enviado'])
                             except Exception as ex:
-                                # Log del error pero NO propagar: el webhook ya
-                                # registró el pago como completado correctamente.
                                 logger.error(
                                     f"Error enviando certificado para donación "
                                     f"{referencia}: {ex}",
@@ -233,16 +190,21 @@ class DonationViewSet(viewsets.GenericViewSet):
                 except Donation.DoesNotExist:
                     logger.warning(f"Webhook: Donación no encontrada para referencia {referencia}")
 
-        # Siempre devolver 200 a Wompi para evitar reintentos innecesarios.
         return Response({"received": True}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['get'])
     def status(self, request, referencia=None):
-        """Consulta el estado de una donación.
+        """
+        Consulta el estado de una donación por su referencia.
 
-        Seguridad: público por diseño (la referencia actúa como secreto
-        compartido y se envía por URL). No expone datos sensibles más allá
-        de lo que el donante ya introdujo.
+        MODELO DE SEGURIDAD:
+        La referencia UUID funciona como un secreto compartido: solo se
+        entrega al donante después de iniciar la donación y no es predecible
+        (UUID v4 truncado + prefijo).  Esto es aceptable para una fundación
+        sin autenticación de usuarios, pero implica que cualquiera que
+        conozca la referencia puede consultar el estado.  Si en el futuro
+        se requiere acceso restringido, se deberá añadir autenticación
+        (ej: token temporal enviado por correo).
         """
         try:
             donation = self.get_object()

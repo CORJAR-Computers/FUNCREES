@@ -1,0 +1,66 @@
+<!--
+  ==============================================================================
+  REFERENCIA DE CABECERA (<head>) MEJORADA — index.html
+  ==============================================================================
+  Archivo de referencia que muestra ÚNICAMENTE las líneas modificadas en el
+  <head> del archivo index.html original del proyecto FUNCREES.
+
+  CAMBIOS APLICADOS:
+  ─────────────────
+  1. [MEDIO] Se agregó meta tag de Content-Security-Policy (CSP) después de
+     la etiqueta <meta charset>. Restringe la carga de recursos a orígenes
+     confiables y mitiga inyección de scripts y estilos no autorizados.
+
+  2. [ALTO]   Se agregó atributo integrity (SRI — Subresource Integrity) al
+     script de Leaflet JS cargado desde unpkg.com. Esto verifica que el
+     archivo descargado no haya sido manipulado. La hoja de estilos de
+     Leaflet YA tenía SRI, pero el script JS no.
+
+  3. [BAJO]   Se agregó meta tag de Referrer-Policy con valor
+     "strict-origin-when-cross-origin" para proteger la privacidad del
+     referente en navegaciones cruzadas.
+
+  CÓMO APLICAR ESTOS CAMBIOS:
+  ────────────────────────────
+  Abrir index.html y localizar las líneas indicadas por los comentarios
+  <!-- CAMBIO N -->. Reemplazar las líneas originales por las que aparecen
+  debajo de cada comentario.
+  ==============================================================================
+-->
+
+<head>
+    <meta charset="UTF-8">
+
+    <!-- ===================== CAMBIO 1: CSP meta tag (NUEVA LÍNEA) ===================== -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.wompi.co https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com https://randomuser.me https://raw.githubusercontent.com https://unpkg.com https://tile.openstreetmap.org https://basemaps.cartocdn.com; connect-src 'self' http://127.0.0.1:8000 https://funcreescolombia.org https://www.funcreescolombia.org; frame-src https://checkout.wompi.co;">
+
+    <!-- ===================== CAMBIO 3: Referrer-Policy meta tag (NUEVA LÍNEA) ===================== -->
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+
+    <!-- ... resto de meta tags existentes (viewport, description, Open Graph, etc.) ... -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="...">
+    <!-- etc. -->
+
+    <!-- Título existente (sin cambios) -->
+    <title>...</title>
+
+    <!-- Preconnect y fonts (sin cambios) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=..." rel="stylesheet">
+
+    <!-- Leaflet CSS — Ya tiene SRI, SIN CAMBIOS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+
+    <!-- ===================== CAMBIO 2: Leaflet JS CON SRI ===================== -->
+    <!-- ANTES (SIN SRI):
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    -->
+    <!-- DESPUÉS (CON SRI): -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
+
+    <!-- ... resto de la cabecera (Font Awesome, estilos, etc.) sin cambios ... -->
+</head>

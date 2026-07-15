@@ -3,6 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.wompi.co https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com https://randomuser.me https://raw.githubusercontent.com https://unpkg.com https://tile.openstreetmap.org https://basemaps.cartocdn.com; connect-src 'self' http://127.0.0.1:8000 https://funcreescolombia.org https://www.funcreescolombia.org; frame-src https://checkout.wompi.co;">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Fundación Funcrees Colombia | Crece Una Esperanza</title>
@@ -1116,7 +1118,7 @@
   </div>
 
   <!-- Leaflet.js for Interactive Map -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
 
   <!-- NOTA: app.js se carga al FINAL del body (justo antes de </body>) para
        garantizar que TODOS los elementos del DOM existen cuando el JS se

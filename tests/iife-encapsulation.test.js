@@ -47,6 +47,16 @@ before(() => {
   win.speechSynthesis = { cancel(){}, speak(){} };
   win.SpeechSynthesisUtterance = function() {};
 
+  win.matchMedia = win.matchMedia || function() {
+    return {
+      matches: false,
+      addListener: function() {},
+      removeListener: function() {},
+      addEventListener: function() {},
+      removeEventListener: function() {}
+    };
+  };
+
   win.IntersectionObserver = class {
     constructor() { this.observe = () => {}; }
     observe() {}
@@ -70,6 +80,7 @@ before(() => {
   globalThis.MutationObserver = win.MutationObserver;
   globalThis.speechSynthesis = win.speechSynthesis;
   globalThis.SpeechSynthesisUtterance = win.SpeechSynthesisUtterance;
+  globalThis.matchMedia = win.matchMedia;
 
   // Cargar app.js y ejecutar en el contexto del DOM virtual
   const appJsPath = path.resolve(__dirname, '..', 'app.js');

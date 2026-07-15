@@ -1,6 +1,8 @@
 import re
-from django.core.exceptions import ValidationError
+
 from rest_framework import serializers
+from django.core.exceptions import ValidationError
+
 from .models import ContactMessage
 
 
@@ -27,18 +29,24 @@ def _validate_telefono_colombiano(value: str) -> str:
 
 
 class ContactMessageSerializer(serializers.ModelSerializer):
-    # Validaciones para mejorar la calidad de los datos de contacto
-    nombre = serializers.CharField(min_length=2, max_length=200)
-
-    # Limitar longitudes para evitar mensajes gigantes que saturarían la BD y
-    # el inbox del admin. El modelo usa TextField (sin max_length), así que
-    # acotamos aquí a nivel de API.
-    mensaje = serializers.CharField(max_length=2000)
+    nombre = serializers.CharField(
+        min_length=2,
+        max_length=200,
+        help_text="Nombre del remitente (mínimo 2 caracteres).",
+    )
+    mensaje = serializers.CharField(
+        max_length=2000,
+        help_text="Mensaje del contacto (máximo 2000 caracteres).",
+    )
     telefono = serializers.CharField(
         max_length=20,
         required=False,
         allow_blank=True,
         validators=[_validate_telefono_colombiano],
+        help_text=(
+            "Teléfono de contacto (opcional). "
+            "10 dígitos o 12 con prefijo +57."
+        ),
     )
 
     class Meta:

@@ -66,7 +66,7 @@ function showToast(message, type = 'success', duration = 4000) {
   `;
 
   const iconMap = { success: '✓', error: '✕', warning: '⚠' };
-  toast.innerHTML = `<span style="font-size:1.2rem;font-weight:800;flex-shrink:0;">${iconMap[type] || '✓'}</span><span>${message}</span>`;
+  toast.innerHTML = `<span style="font-size:1.2rem;font-weight:800;flex-shrink:0;">${iconMap[type] || '✓'}</span><span>${sanitizeHTML(message)}</span>`;
 
   container.appendChild(toast);
 
@@ -1225,9 +1225,9 @@ function renderCheckoutModal() {
         </div>
 
         <div class="checkout-tabs">
-          <button class="checkout-tab ${isApadrinamiento ? 'active' : ''}" onclick="openDonationModal('apadrinamiento', '${checkoutModalState.preselectedAbuelito}')">Apadrinamiento</button>
-          <button class="checkout-tab ${isDonacion ? 'active' : ''}" onclick="openDonationModal('donacion')">Donaciones Generales</button>
-          <button class="checkout-tab" onclick="openDonationModal('patrocinio')">Patrocinio Empresarial</button>
+          <button class="checkout-tab ${isApadrinamiento ? 'active' : ''}" data-tab-type="apadrinamiento">Apadrinamiento</button>
+          <button class="checkout-tab ${isDonacion ? 'active' : ''}" data-tab-type="donacion">Donaciones Generales</button>
+          <button class="checkout-tab" data-tab-type="patrocinio">Patrocinio Empresarial</button>
         </div>
 
         ${abuelitosSelect}
@@ -1307,9 +1307,9 @@ function renderCheckoutModal() {
         </div>
 
         <div class="checkout-tabs">
-          <button class="checkout-tab" onclick="openDonationModal('apadrinamiento')">Apadrinamiento</button>
-          <button class="checkout-tab" onclick="openDonationModal('donacion')">Donaciones</button>
-          <button class="checkout-tab active" onclick="openDonationModal('patrocinio')">Patrocinio Empresarial</button>
+          <button class="checkout-tab" data-tab-type="apadrinamiento">Apadrinamiento</button>
+          <button class="checkout-tab" data-tab-type="donacion">Donaciones</button>
+          <button class="checkout-tab active" data-tab-type="patrocinio">Patrocinio Empresarial</button>
         </div>
 
         <form id="patrocinio-form" onsubmit="submitFormSimulation(event, 'Patrocinio')" class="contact-form" style="background:none; padding:0;">
@@ -1409,6 +1409,21 @@ function renderCheckoutModal() {
       ${checkoutFormHTML}
     </div>
   `;
+
+  // Programmatic event delegation for checkout tabs to avoid inline onclick handlers
+  modalContainer.querySelectorAll('.checkout-tab').forEach(function(tab) {
+    tab.addEventListener('click', function(e) {
+      e.preventDefault();
+      const tabType = this.getAttribute('data-tab-type');
+      if (tabType === 'apadrinamiento') {
+        openDonationModal('apadrinamiento', checkoutModalState.preselectedAbuelito);
+      } else if (tabType === 'donacion') {
+        openDonationModal('donacion');
+      } else if (tabType === 'patrocinio') {
+        openDonationModal('patrocinio');
+      }
+    });
+  });
 
   modalBackdrop.classList.add('active');
   if (appAccessibilityState.ttsEnabled) {
@@ -1534,8 +1549,8 @@ async function processSimulationCheckout() {
 ========================================
 ID Transacción: PSE-${Math.floor(100000 + Math.random() * 900000)}
 Fecha:          ${dateStr}
-Donante:        ${nombre}
-Email:          ${email}
+Donante:        ${sanitizeHTML(nombre)}
+Email:          ${sanitizeHTML(email)}
 Monto:          $${formatMoneyNumber(amount)} COP
 Método Pago:    PSE
 Estado:         Completado
@@ -1561,7 +1576,7 @@ Tipo: Cuenta de Ahorros
 Número: 123-456789-01
 NIT: 902036173-3
 Monto: $${formatMoneyNumber(amount)} COP
-Referencia: ${data.referencia || 'Donación Funcrees'}
+Referencia: ${sanitizeHTML(data.referencia || 'Donación Funcrees')}
 ========================================
 Una vez realices la transferencia,
 envíanos el comprobante por WhatsApp
@@ -1673,8 +1688,8 @@ function renderTicketsCheckout() {
         <span style="background-color:var(--primary-trans); color:var(--primary-dark); font-weight:700; padding:0.4rem 1rem; border-radius:50px; font-size:0.75rem; display:inline-block; margin-bottom:0.75rem;">
           Bono Solidario: ${ev.fecha}
         </span>
-        <h2 class="modal-checkout-title" style="font-size:1.6rem; color:var(--secondary);">${ev.titulo}</h2>
-        <p class="modal-checkout-desc">${ev.desc}</p>
+        <h2 class="modal-checkout-title" style="font-size:1.6rem; color:var(--secondary);">${sanitizeHTML(ev.titulo)}</h2>
+        <p class="modal-checkout-desc">${sanitizeHTML(ev.desc)}</p>
       </div>
 
       <div class="form-group" style="margin-bottom:1.5rem;">
@@ -1776,7 +1791,7 @@ function processTicketsCheckout() {
     // Direct WhatsApp redirect simulation
     const numericCost = parseCOP(ev.costo);
     const totalPrice = numericCost * ticketsCheckoutState.quantity;
-    const message = encodeURIComponent(`Hola Fundación FUNCREESCOLOMBIA, me gustaría coordinar la compra de ${ticketsCheckoutState.quantity} bono(s) para el evento "${ev.titulo}" por un valor de $${totalPrice.toLocaleString('es-CO')} COP.`);
+    const message = encodeURIComponent(`Hola Fundación FUNCREESCOLOMBIA, me gustaría coordinar la compra de ${ticketsCheckoutState.quantity} bono(s) para el evento "${sanitizeHTML(ev.titulo)}" por un valor de $${totalPrice.toLocaleString('es-CO')} COP.`);
     
     closeActiveModal();
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
@@ -1811,7 +1826,7 @@ function processTicketsCheckout() {
 ========================================
 ID Transacción: EVT-${Math.floor(100000 + Math.random() * 900000)}
 Fecha:          ${dateStr}
-Evento:         ${ev.titulo}
+Evento:         ${sanitizeHTML(ev.titulo)}
 Cantidad:       ${ticketsCheckoutState.quantity} Bonos
 Total Cobrado:  $${formatMoneyNumber(totalPrice)} COP
 Método Pago:    ${ticketsCheckoutState.gateway.toUpperCase()}
