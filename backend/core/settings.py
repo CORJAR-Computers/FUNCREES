@@ -316,10 +316,10 @@ FRONTEND_URL = env('FRONTEND_URL')
 # WOMPI (Pasarela de Pagos)
 # ============================================
 
-WOMPI_ENV = env('WOMPI_ENV')
-WOMPI_PUBLIC_KEY = env('WOMPI_PUBLIC_KEY')
-WOMPI_PRIVATE_KEY = env('WOMPI_PRIVATE_KEY')
-WOMPI_INTEGRITY_SECRET = env('WOMPI_INTEGRITY_SECRET')
+WOMPI_ENV = env('WOMPI_ENV', default='sandbox')
+WOMPI_PUBLIC_KEY = env('WOMPI_PUBLIC_KEY', default='')
+WOMPI_PRIVATE_KEY = env('WOMPI_PRIVATE_KEY', default='')
+WOMPI_INTEGRITY_SECRET = env('WOMPI_INTEGRITY_SECRET', default='')
 
 # ============================================
 # ENCRYPTION KEY (Fernet — Ley 1581 Habeas Data)

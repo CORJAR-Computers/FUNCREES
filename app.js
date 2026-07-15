@@ -938,25 +938,34 @@ function renderEvents() {
     const dateDay = (ev.fecha || '').split(' ')[1] || 'Activa';
     const dateMonth = (ev.fecha || '').split(' ')[0] || 'Camp.';
 
+    // Seguridad: sanitizar todos los campos del evento antes de inyectar en innerHTML.
+    const safeHora    = sanitizeHTML(ev.hora);
+    const safeLugar   = sanitizeHTML(ev.lugar);
+    const safeCosto   = sanitizeHTML(String(ev.costo));
+    const safeEvId    = sanitizeHTML(String(ev.id));
+    const safeCat     = sanitizeHTML(ev.category);
+    const safeTitulo  = sanitizeHTML(ev.titulo);
+    const safeDesc    = sanitizeHTML(ev.desc);
+
     return `
-    <div class="evento-card" data-category="${ev.category}">
+    <div class="evento-card" data-category="${safeCat}">
       <div class="evento-badge-panel">
         <div class="evento-date-badge">
           <span class="evento-date-day">${dateDay}</span>
           <span class="evento-date-month">${dateMonth}</span>
         </div>
         <div style="margin-left: 1.5rem; flex:1;">
-          <div class="evento-meta-detail">🕒 ${ev.hora}</div>
-          <div class="evento-meta-detail">📍 ${ev.lugar}</div>
+          <div class="evento-meta-detail">🕒 ${safeHora}</div>
+          <div class="evento-meta-detail">📍 ${safeLugar}</div>
         </div>
       </div>
       ${countdownHTML}
       <div class="evento-info">
-        <h3 class="evento-titulo">${highlightText(ev.titulo, rawSearch)}</h3>
-        <p class="evento-text-desc">${highlightText(ev.desc, rawSearch)}</p>
+        <h3 class="evento-titulo">${highlightText(safeTitulo, rawSearch)}</h3>
+        <p class="evento-text-desc">${highlightText(safeDesc, rawSearch)}</p>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem;">
-          <span style="font-weight:700; color:var(--primary-dark); font-size:1.1rem;">Bono: ${ev.costo} COP</span>
-          <button class="btn btn-secondary" onclick="openTicketModal('${ev.id}')">
+          <span style="font-weight:700; color:var(--primary-dark); font-size:1.1rem;">Bono: ${safeCosto} COP</span>
+          <button class="btn btn-secondary" onclick="openTicketModal('${safeEvId}')">
             ${ev.id === 'rifa' ? 'Comprar Boleta +' : 'Adquirir Bono +'}
           </button>
         </div>
@@ -1588,7 +1597,11 @@ al +57 313 792 4439 para confirmar tu aporte.
       throw new Error('No se pudo inicializar el pago');
     }
   } catch (err) {
-    console.error(err);
+    // Seguridad: NO propagar el mensaje de error interno al usuario.
+    // Solo loguear en desarrollo (DEBUG) para no filtrar info sensible.
+    if (window.__FUNCREES_CONFIG && window.__FUNCREES_CONFIG.API_BASE && window.__FUNCREES_CONFIG.API_BASE.includes('127.0.0.1')) {
+      console.warn('[FUNCREES DEV] Error en pasarela de pagos:', err && err.message ? err.message : err);
+    }
     showToast('Ocurrió un error al iniciar la pasarela de pagos. Por favor intenta de nuevo.', 'error');
     closeActiveModal();
   }
