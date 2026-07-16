@@ -73,6 +73,9 @@
     right: -4px;
   }
   .testimonial-card {
+    min-width: 340px;
+    max-width: 380px;
+    flex: 0 0 340px;
     padding: 2.5rem 2rem;
   }
   .testimonial-quote {
@@ -146,11 +149,11 @@
     align-items: center;
   }
   .testimonial-section {
-    padding: 3.5rem 1rem;
+    padding: 2.5rem 0.5rem;
   }
   .testimonial-card {
     min-width: 260px;
-    max-width: 280px;
+    max-width: 290px;
     flex: 0 0 260px;
     padding: 2rem 1.5rem;
   }
