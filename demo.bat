@@ -79,16 +79,16 @@ echo  [OK] Dependencias Python instaladas
 echo.
 echo [3/6] Configurando base de datos para demo local...
 
-:: Para demo local SIEMPRE usar DEBUG=True y SQLite — no requiere PostgreSQL
+:: Para demo local SIEMPRE usar DEBUG=True y Base de datos Neon
 if not exist ".env" (
-    echo  Creando .env de DEMO LOCAL con SQLite...
+    echo  Creando .env de DEMO LOCAL con PostgreSQL Neon...
     (
         echo # FUNCREES Colombia - .env DEMO LOCAL
         echo # Generado por demo.bat — NO usar en produccion
         echo DEBUG=True
         echo SECRET_KEY=demo-local-key-funcrees-2025-change-in-production
         echo ALLOWED_HOSTS=localhost,127.0.0.1
-        echo DATABASE_URL=sqlite:///db.sqlite3
+        echo DATABASE_URL=postgresql://neondb_owner:npg_s1ez3vJjWOPV@ep-misty-credit-acz7h5ei-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require^&channel_binding=require
         echo CORS_ALLOWED_ORIGINS=http://localhost:5500,http://127.0.0.1:5500
         echo FRONTEND_URL=http://localhost:5500
         echo DEFAULT_FROM_EMAIL=demo@funcreescolombia.org
@@ -103,13 +103,13 @@ if not exist ".env" (
         echo WOMPI_INTEGRITY_SECRET=test_integrity_placeholder
         echo ENCRYPTION_KEY=
     ) > .env
-    echo  [OK] .env de demo creado (SQLite + DEBUG=True)
+    echo  [OK] .env de demo creado (PostgreSQL Neon + DEBUG=True)
 ) else (
     :: Detectar si el .env existente usa PostgreSQL o DEBUG=False
     findstr /i "DEBUG=False" .env >nul 2>&1
     if %errorlevel% equ 0 (
         echo  [AVISO] El .env existente tiene DEBUG=False (modo produccion).
-        echo  Para demo local se necesita DEBUG=True con SQLite.
+        echo  Para demo local se necesita DEBUG=True.
         echo  Desea usar configuracion temporal de demo? (S=Si / N=Mantener actual)
         set /p usardemo=Respuesta: 
         if /i "%usardemo%"=="S" (
@@ -121,7 +121,7 @@ if not exist ".env" (
                 echo DEBUG=True
                 echo SECRET_KEY=demo-local-key-funcrees-2025-change-in-production
                 echo ALLOWED_HOSTS=localhost,127.0.0.1
-                echo DATABASE_URL=sqlite:///db.sqlite3
+                echo DATABASE_URL=postgresql://neondb_owner:npg_s1ez3vJjWOPV@ep-misty-credit-acz7h5ei-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require^&channel_binding=require
                 echo CORS_ALLOWED_ORIGINS=http://localhost:5500,http://127.0.0.1:5500
                 echo FRONTEND_URL=http://localhost:5500
                 echo DEFAULT_FROM_EMAIL=demo@funcreescolombia.org
@@ -266,7 +266,7 @@ echo  ║  API:       http://localhost:8000/api/                       ║
 echo  ║  Admin:     http://localhost:8000/admin/                     ║
 echo  ║                                                              ║
 echo  ╠═══════════════════════════════════════════════════════════════╣
-echo  ║  DEMO: DEBUG=True + SQLite (sin necesidad de PostgreSQL)    ║
+echo  ║  DEMO: DEBUG=True + PostgreSQL (Neon Tech Serverless)       ║
 echo  ╠═══════════════════════════════════════════════════════════════╣
 echo  ║  Para crear usuario Admin de la demo:                       ║
 echo  ║  En la ventana "FUNCREES Backend" ejecuta:                  ║
