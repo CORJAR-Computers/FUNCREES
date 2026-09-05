@@ -38,20 +38,19 @@ python manage.py migrate --noinput
 :: Volver a la raiz
 cd ..
 
-:: Abrir el frontend en el navegador por defecto
-echo Abriendo el sitio web en tu navegador...
-start index.html
-
-:: Iniciar el servidor de Django
-echo.
 echo ===================================================
-echo   El servidor backend esta en linea.
-echo   Sitio web: file:///%CD%/index.html
-echo   Panel de Admin: http://127.0.0.1:8000/admin/
+echo   Iniciando Servidor Backend y Frontend SvelteKit...
+echo ===================================================
+echo.
+echo   Sitio Web:       http://localhost:5173
+echo   API REST:        http://127.0.0.1:8000/api/
+echo   Panel de Admin:  http://127.0.0.1:8000/admin/
 echo.
 echo   MANTEN ESTA VENTANA ABIERTA para que el sistema funcione.
-echo   Para salir, cierra esta ventana.
+echo   Para salir, presiona Ctrl+C o cierra esta ventana.
 echo ===================================================
 echo.
-cd backend
-python manage.py runserver
+
+start http://localhost:5173
+npm run dev
+

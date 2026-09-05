@@ -50,4 +50,6 @@ yarn-error.log*
 # ─── Archivos Markdown y entornos extra ───
 *.md
 !README.md
+!DEPLOY.md
+!MANUAL_ENTREGA_Y_ADMINISTRACION.md
 nombre_del_entorno/

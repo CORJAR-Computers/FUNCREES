@@ -10,7 +10,10 @@
 
 ## 📋 Descripción General
 
-Plataforma web institucional de alta fidelidad para la **Fundación Funcrees Colombia**, desarrollada por **CORJAR Computers Solutions**. El sistema integra un **frontend SPA (Single Page Application)** moderno y accesible con un **backend REST API** en Django para la gestión de beneficiarios, donaciones, eventos y contactos.
+Plataforma web institucional de alta fidelidad para la **Fundación Funcrees Colombia**, desarrollada por **CORJAR Computers Solutions**. El sistema integra una moderna arquitectura desacoplada:
+- **Frontend SvelteKit (Svelte 5):** Aplicación web reactiva, modular y accesible con renderizado del lado del servidor (SSR), enrutamiento basado en archivos y compilador Vite.
+- **Backend REST API (Django 5.x):** Gestión centralizada de beneficiarios (adultos mayores), donaciones cifradas, bonos/eventos solidarios y formularios de contacto.
+- **Frontend SPA Clásico (Legacy):** Versión monolítica en Vanilla JS (`index.html` + `app.js`) conservada para compatibilidad.
 
 ---
 
@@ -19,101 +22,71 @@ Plataforma web institucional de alta fidelidad para la **Fundación Funcrees Col
 ```
 FUNCREES/
 │
-├── 📄 index.html              # Frontend SPA principal (6 vistas integradas)
-├── 🎨 base.css                # Reset, variables CSS, keyframes
-├── 🎨 components.css          # Estilos de componentes
-├── 🎨 themes.css              # Modo oscuro, alto contraste, dislexia
-├── 🎨 responsive.css          # Todos los media queries
-├── ⚡ app.js                  # Motor JavaScript (IIFE, 21 exports en window)
-├── 📑 propuesta.html          # Generador de propuesta comercial CORJAR
-├── 📦 package.json            # Scripts npm (dev, test, test:coverage, etc.)
-├── 📦 requirements.txt        # Dependencias Python del backend
-├── 📖 README.md               # Este archivo
-├── 📖 DEPLOY.md               # Guía de deployment para el cliente
-│
-├── 📁 assets/                 # Recursos visuales del sitio
-│   ├── Logo.png               # Logotipo oficial
-│   └── Foto Fundación.png     # Fotografía institucional principal
+├── 📁 frontend/               # ⭐ NUEVO: Frontend moderno en SvelteKit (Svelte 5)
+│   ├── 📁 src/
+│   │   ├── app.html           # HTML base con tipografías y FontAwesome
+│   │   ├── 📁 lib/
+│   │   │   ├── 📁 api/        # Cliente API asíncrono para Django REST
+│   │   │   ├── 📁 components/ # Componentes (Navbar, Footer, LeafletMap, Toast, etc.)
+│   │   │   ├── 📁 data/       # Catálogo de proyectos y modelos locales
+│   │   │   ├── 📁 stores/     # Estado reactivo global con Svelte 5 Runes ($state)
+│   │   │   ├── 📁 styles/     # Hojas de estilo CSS institucionales
+│   │   │   └── 📁 utils/      # Utilidades (parseCOP, formatMoneyNumber, sanitizeHTML)
+│   │   └── 📁 routes/         # Enrutamiento basado en archivos
+│   │       ├── +layout.svelte # Layout global, widgets flotantes y banner de cookies
+│   │       ├── +page.svelte   # Inicio (Hero Banner y Métricas de impacto)
+│   │       ├── quienes-somos/ # Identidad, Misión, Visión 2030 y Valores
+│   │       ├── proyectos/     # Catálogo con búsqueda reactiva y filtros
+│   │       ├── historias/     # Beneficiarios con API Django y modal
+│   │       ├── eventos/       # Eventos, cuentas regresivas y bonos
+│   │       ├── donaciones/    # Tiers de apadrinamiento, Wompi y formularios
+│   │       └── contacto/      # Contacto con Django, Mapa Leaflet y Aliados
+│   ├── 📁 static/             # Assets estáticos (Logo oficial, fotos)
+│   ├── 📁 tests/              # Suite de pruebas unitarias con node:test
+│   ├── svelte.config.js       # Configuración del framework
+│   ├── vite.config.js         # Configuración Vite + Proxy a Django (/api)
+│   └── package.json           # Dependencias frontend (Svelte 5, Vite 8)
 │
 ├── 📁 backend/                # API REST con Django 5.x
 │   ├── manage.py              # Punto de entrada de Django
 │   ├── populate_db.py         # Script de datos semilla (seed data)
-│   ├── .env                   # Variables de entorno (NO subir a Git)
 │   ├── .env.example           # Plantilla de variables de entorno
-│   ├── gunicorn.conf.py       # Configuración Gunicorn para producción
-│   │
-│   ├── 📁 core/               # Configuración central del proyecto Django
-│   │   ├── settings.py        # Configuración global (DB, CORS, Unfold, DRF)
-│   │   ├── urls.py            # Enrutador principal + registro de API endpoints
-│   │   ├── asgi.py            # Servidor ASGI (despliegue async)
-│   │   └── wsgi.py            # Servidor WSGI (despliegue tradicional)
-│   │
+│   ├── 📁 core/               # Configuración global (DB, CORS, Unfold, DRF)
 │   ├── 📁 beneficiaries/      # App: Gestión de adultos mayores beneficiarios
-│   │   ├── models.py          # Modelo Beneficiary (UUID, nombre, historia, foto)
-│   │   ├── views.py           # ViewSet REST para CRUD de beneficiarios
-│   │   ├── serializers.py     # Serializadores DRF
-│   │   └── migrations/        # Migraciones de base de datos
-│   │
-│   ├── 📁 donations/          # App: Donaciones, apadrinamiento y patrocinios
-│   │   ├── models.py          # Modelos: Donation, Sponsorship (cifrado Fernet)
-│   │   ├── views.py           # ViewSet REST para donaciones
-│   │   ├── serializers.py     # Serializadores DRF
-│   │   ├── services/          # Servicios externos
-│   │   │   ├── wompi.py       # Integración con pasarela de pagos Wompi
-│   │   │   ├── email_service.py # Servicio de envío de emails
-│   │   │   └── pdf_generator.py # Generación de certificados PDF
-│   │   └── migrations/        # Migraciones de base de datos
-│   │
+│   ├── 📁 donations/          # App: Donaciones, apadrinamiento y Wompi
 │   ├── 📁 events/             # App: Eventos solidarios y venta de boletas
-│   │   ├── models.py          # Modelos: Event, Ticket (código único generado)
-│   │   ├── views.py           # ViewSet REST para eventos y tickets
-│   │   ├── serializers.py     # Serializadores DRF
-│   │   └── migrations/        # Migraciones de base de datos
-│   │
-│   ├── 📁 contact/            # App: Formulario de contacto y alianzas
-│   │   ├── models.py          # Modelo ContactMessage
-│   │   ├── views.py           # ViewSet REST para mensajes de contacto
-│   │   ├── serializers.py     # Serializadores DRF
-│   │   └── migrations/        # Migraciones de base de datos
-│   │
-│   ├── 📁 templates/          # Templates de email y páginas de error
-│   │   ├── emails/
-│   │   │   └── donation_confirmation.html
-│   │   ├── 404.html
-│   │   └── 500.html
-│   │
-│   └── 📁 scripts/            # Scripts utilitarios
-│       └── migrate_to_postgresql.py
+│   ├── 📁 contact/            # App: Mensajes de contacto y alianzas
+│   └── requirements.txt       # Dependencias Python del backend
 │
-├── 📁 tests/                  # Tests unitarios (135 tests)
-│   ├── unit.test.js           # 45 tests (sanitizeHTML, parseCOP, showToast)
-│   ├── iife-encapsulation.test.js # 44 tests (encapsulación IIFE)
-│   └── interactions.test.js   # 46 tests (modales, checkout, filtros)
+├── 📁 legacy/                 # 📦 Versión anterior (SPA Vanilla JS, estilos y 135 tests)
+│   ├── index.html             # Frontend SPA clásico
+│   ├── app.js                 # Motor JS clásico
+│   ├── 📁 assets/             # Recursos estáticos clásicos
+│   ├── 📁 tests/              # Suite de 135 tests unitarios clásicos
+│   └── 🎨 base.css, components.css, themes.css, responsive.css
 │
-├── 📁 .github/workflows/      # CI: GitHub Action (push/PR a main)
-│   └── test.yml               # Tests con Node 20/22 matrix
-│
-└── 📁 mejoras_FUNCREES/       # Documentación de mejoras de seguridad
-    ├── apply_frontend_patches.py
-    ├── RESUMEN_CAMBIOS_FRONTEND.md
-    └── backend/
-        └── (configuraciones de referencia)
+├── 📦 package.json            # Scripts npm unificados (desarrollo, build, tests)
+├── 🚀 start.bat               # Script Windows para iniciar backend y frontend juntos
+├── 📖 README.md               # Este archivo
+└── 📖 DEPLOY.md               # Guía de deployment
 ```
 
 ---
 
 ## 🛠️ Stack Tecnológico
 
-### Frontend
+### Frontend (SvelteKit 5 + Vanilla Legacy)
 
 | Tecnología | Versión | Uso |
 |------------|---------|-----|
-| **HTML5** | Semántico | Estructura SPA de 6 vistas integradas |
-| **CSS3 / Vanilla CSS** | Variables HSL | Sistema de diseño premium con glassmorphism |
-| **JavaScript (ES6+)** | Nativo | Motor SPA, TTS, pasarelas simuladas |
-| **Google Fonts** | Inter + Outfit | Tipografía moderna y accesible |
-| **Leaflet.js** | 1.9.4 | Mapa interactivo de ubicación |
-| **FontAwesome** | 6.4.0 | Iconografía del sitio |
+| **SvelteKit** | 2.63.x | Framework de aplicaciones fullstack con enrutamiento basado en archivos y SSR |
+| **Svelte 5** | 5.56.x | Sistema de reactividad moderno con Runes (`$state`, `$derived`, `$props`) |
+| **Vite** | 8.0.x | Entorno de desarrollo rápido, bundler optimizado y proxy inverso a Django REST |
+| **Leaflet.js** | 1.9.4 | Mapa interactivo de ubicación institucional (Sincelejo, Sucre) |
+| **CSS3 / Variables HSL** | Nativo | Glassmorphism, diseño responsivo y accesibilidad (Alto contraste, Dislexia, TTS) |
+| **Google Fonts** | Inter + Outfit | Tipografía institucional moderna y legible |
+| **FontAwesome** | 6.4.0 | Iconografía vectorial del sitio |
+| **Vanilla JS (Legacy)** | ES6+ | SPA clásica conservada en raíz (`index.html` + `app.js`) para compatibilidad |
 
 ### Backend
 
@@ -179,23 +152,42 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-### Frontend (desarrollo)
+### Frontend Moderno (SvelteKit 5 - Recomendado)
+
+```bash
+# Opción A: Desde la raíz del proyecto
+npm run frontend:dev      # Inicia Vite en http://localhost:5173 con proxy inverso a Django (/api)
+npm run frontend:build    # Compila para producción SSR
+npm run frontend:check    # Verificación de tipos y componentes Svelte con svelte-check
+npm run frontend:test     # Ejecuta pruebas unitarias de utilidades frontend
+
+# Opción B: Directamente en la carpeta frontend
+cd frontend
+npm install
+npm run dev
+```
+
+### Frontend Clásico (Legacy Vanilla JS)
 
 ```bash
 # Desde la raíz del proyecto
 npm install
-npm start  # Abre http://localhost:5500
+npm start                 # Abre servidor local en http://localhost:5500
 ```
 
 ### Scripts Disponibles
 
 | Script | Comando | Descripción |
 |--------|---------|-------------|
-| **Desarrollo completo** | `npm run dev` | Inicia backend y frontend juntos |
-| **Solo frontend** | `npm start` | Sirve archivos estáticos en puerto 5500 |
-| **Tests** | `npm test` | Ejecuta los 135 tests unitarios |
-| **Tests (watch)** | `npm run test:watch` | Re-ejecuta tests al detectar cambios |
-| **Cobertura** | `npm run test:coverage` | Genera reporte de cobertura |
+| **Frontend SvelteKit (Dev)** | `npm run frontend:dev` | Inicia servidor Vite en `http://localhost:5173` con proxy a `/api` |
+| **Frontend SvelteKit (Build)** | `npm run frontend:build` | Genera bundle optimizado SSR/producción con SvelteKit |
+| **Frontend SvelteKit (Check)** | `npm run frontend:check` | Diagnóstico de tipos y sintaxis Svelte con `svelte-check` |
+| **Frontend SvelteKit (Tests)** | `npm run frontend:test` | Ejecuta suite de tests de utilidades frontend (`node:test`) |
+| **Desarrollo completo (Legacy)**| `npm run dev` | Inicia backend Django y frontend SPA clásico juntos |
+| **Solo frontend clásico** | `npm start` | Sirve SPA clásica en puerto 5500 (`serve`) |
+| **Tests SPA clásica** | `npm test` | Ejecuta los 135 tests unitarios de la versión clásica |
+| **Tests SPA (watch)** | `npm run test:watch` | Re-ejecuta tests clásicos al detectar cambios |
+| **Cobertura SPA clásica** | `npm run test:coverage` | Genera reporte de cobertura de la versión clásica |
 
 ---
 
@@ -233,7 +225,26 @@ npm start  # Abre http://localhost:5500
 
 ## 🧪 Tests
 
-El proyecto cuenta con **135 tests unitarios** organizados en 3 archivos:
+El proyecto cuenta con dos suites automatizadas de pruebas:
+
+### 1. Tests Frontend SvelteKit (`frontend/tests/`)
+Pruebas unitarias sobre utilidades de formato monetario y saneamiento contra vulnerabilidades XSS:
+
+| Archivo | Tests | Cubre |
+|---------|-------|-------|
+| `currency.test.js` | 4 | `parseCOP()`, `formatMoneyNumber()`, sanitización de valores vacíos e inválidos |
+| `sanitize.test.js` | 4 | `sanitizeHTML()`, prevención XSS y neutralización de atributos maliciosos |
+
+```bash
+# Ejecutar tests de frontend moderno
+npm run frontend:test
+
+# Verificación estática y de tipos
+npm run frontend:check
+```
+
+### 2. Tests SPA Clásica Legacy (`tests/`)
+Suite integral de **135 tests unitarios** para la versión clásica:
 
 | Archivo | Tests | Cubre |
 |---------|-------|-------|
@@ -242,7 +253,7 @@ El proyecto cuenta con **135 tests unitarios** organizados en 3 archivos:
 | `interactions.test.js` | 46 | Modales, checkout, filtros, navegación |
 
 ```bash
-# Ejecutar todos los tests
+# Ejecutar tests clásicos
 npm test
 
 # Ejecutar con cobertura
@@ -257,12 +268,12 @@ Para instrucciones detalladas de deployment en producción, consultar [DEPLOY.md
 
 ### Resumen Rápido
 
-1. Configurar servidor Ubuntu 22.04 con Nginx, PostgreSQL, Python
+1. Configurar servidor Ubuntu 22.04 con Nginx, PostgreSQL, Python, Node.js
 2. Clonar proyecto en `/var/www/funcrees`
-3. Configurar variables de entorno en `.env`
-4. Ejecutar migraciones y collectstatic
-5. Configurar Gunicorn como servicio systemd
-6. Configurar Nginx como reverse proxy
+3. Configurar variables de entorno en `.env` y frontend
+4. Ejecutar migraciones Django y build de SvelteKit (`npm run frontend:build`)
+5. Configurar Gunicorn / Node adapter como servicios systemd
+6. Configurar Nginx como reverse proxy para API y Frontend
 7. Instalar certificado SSL con Certbot
 
 ---
@@ -271,7 +282,8 @@ Para instrucciones detalladas de deployment en producción, consultar [DEPLOY.md
 
 | Versión | Fecha | Descripción |
 |---------|-------|-------------|
-| v1.0.0 | Julio 2026 | Producción: Backend Django + Frontend SPA (En preparación) |
+| **v1.1.0** | Septiembre 2026 | **Migración Frontend SvelteKit**: Arquitectura modular con **Svelte 5 Runes** (`$state`), Vite 8, proxy inverso integrado a Django REST API, mapas interactivos con Leaflet.js, catálogo reactivo de proyectos, apadrinamiento con cálculo dinámico y widgets de accesibilidad universal (TTS, dislexia, alto contraste). |
+| v1.0.0 | Julio 2026 | Producción: Backend Django + Frontend SPA clásico |
 | v0.4.1 | Junio 2026 | Tests de interacción, CI/CD, .gitattributes |
 | v0.4.0 | Junio 2026 | IIFE encapsulation, CSS dividido, 89 tests |
 | v0.3.0 | Junio 2026 | Propuesta comercial interactiva |

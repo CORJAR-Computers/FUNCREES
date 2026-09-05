@@ -1,0 +1,437 @@
+/* ─── Accessibility Theme Overrides ─────────────────────────── */
+
+/* 1. High Contrast Theme */
+body.high-contrast {
+  --primary: #ffff00;
+  --primary-dark: #ffff00;
+  --primary-soft: #121212;
+  --primary-trans: rgba(255, 255, 0, 0.2);
+  --secondary: #ffffff;
+  --secondary-light: #ffffff;
+  --accent: #ffff00;
+  --bg-primary: #000000;
+  --bg-secondary: #121212;
+  --bg-card: #000000;
+  --bg-footer: #000000;
+  --text-main: #ffffff;
+  --text-muted: #ffff00;
+  --text-white: #ffffff;
+  --border-color: #ffffff;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-floating: 0 0 10px #ffffff;
+}
+
+body.high-contrast input,
+body.high-contrast textarea,
+body.high-contrast select,
+body.high-contrast button,
+body.high-contrast .card {
+  border: 2px solid #ffffff !important;
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+body.high-contrast button:hover,
+body.high-contrast .btn:hover {
+  background-color: #ffff00 !important;
+  color: #000000 !important;
+}
+
+body.high-contrast a {
+  color: #ffff00 !important;
+  text-decoration: underline !important;
+}
+
+body.high-contrast .header {
+  background-color: #000000;
+}
+
+body.high-contrast .aliados-section {
+  background-color: #000000;
+}
+
+body.high-contrast .contact-section-grid {
+  border: 2px solid #ffffff;
+}
+
+body.high-contrast .whatsapp-float {
+  background-color: #000000 !important;
+  border: 3px solid #ffff00 !important;
+  color: #ffff00 !important;
+}
+
+body.high-contrast .theme-toggle {
+  border: 2px solid #ffffff !important;
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+body.high-contrast .evento-filter-btn {
+  border: 2px solid #ffffff !important;
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+body.high-contrast .evento-filter-btn.active {
+  background: #ffff00 !important;
+  color: #000000 !important;
+  border-color: #ffff00 !important;
+}
+
+body.high-contrast .evento-countdown {
+  background: #000000 !important;
+  border: 2px solid #ffff00 !important;
+}
+
+body.high-contrast .evento-permanent-badge {
+  background: #000000 !important;
+  border: 2px solid #ffffff !important;
+}
+
+body.high-contrast .evento-empty-state {
+  background: #000000 !important;
+  border: 2px dashed #ffff00 !important;
+}
+
+body.high-contrast .evento-search-input {
+  border: 2px solid #ffffff !important;
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+body.high-contrast .evento-search-input:focus {
+  border-color: #ffff00 !important;
+  box-shadow: 0 0 0 3px #ffff00 !important;
+}
+
+body.high-contrast .evento-results-count {
+  color: #ffff00 !important;
+}
+
+body.high-contrast .section-search-input {
+  border: 2px solid #ffffff !important;
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+body.high-contrast .section-search-input:focus {
+  border-color: #ffff00 !important;
+  box-shadow: 0 0 0 3px #ffff00 !important;
+}
+
+body.high-contrast .section-empty-state {
+  background: #000000 !important;
+  border: 2px dashed #ffff00 !important;
+}
+
+body.high-contrast .section-results-count {
+  color: #ffff00 !important;
+}
+
+body.high-contrast .testimonial-card {
+  border: 2px solid #ffffff !important;
+  background: #000000 !important;
+}
+
+body.high-contrast .testimonial-btn {
+  border: 2px solid #ffff00 !important;
+  color: #ffff00 !important;
+  background: #000000 !important;
+}
+
+body.high-contrast .testimonial-btn:hover {
+  background: #ffff00 !important;
+  color: #000000 !important;
+}
+
+body.high-contrast .testimonial-dot {
+  background: #ffffff !important;
+}
+
+body.high-contrast .testimonial-dot.active {
+  background: #ffff00 !important;
+}
+
+body.high-contrast .leaflet-map-container {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+body.high-contrast .logo-item {
+  filter: invert(1) brightness(2);
+  opacity: 0.9;
+}
+
+body.high-contrast .search-highlight {
+  background-color: #ffff00 !important;
+  color: #000000 !important;
+  text-decoration: underline;
+}
+
+/* 2. Dyslexia Font Theme */
+body.dyslexia-font {
+  --font-body: var(--font-family-dyslexia);
+  --font-title: var(--font-family-dyslexia);
+  letter-spacing: 0.05em;
+  word-spacing: 0.12em;
+  line-height: 1.7;
+}
+
+/* 3. Screen Reader Highlight (TTS) */
+.tts-highlight {
+  background-color: hsla(45, 100%, 50%, 0.3) !important;
+  border-radius: 4px;
+}
+
+body.high-contrast .tts-highlight {
+  background-color: #ffff00 !important;
+  color: #000000 !important;
+}
+
+/* ─── Dark Mode Theme ──────────────────────────────────────── */
+
+body.dark-mode {
+  --primary-hue: 125;
+  --primary-sat: 30%;
+  --primary-light: 48%;
+
+  --primary: hsl(var(--primary-hue), var(--primary-sat), var(--primary-light));
+  --primary-dark: hsl(var(--primary-hue), 35%, 35%);
+  --primary-soft: hsl(var(--primary-hue), 25%, 15%);
+  --primary-trans: hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
+
+  --secondary: hsl(200, 30%, 88%);
+  --secondary-light: hsl(200, 20%, 75%);
+  --accent: hsl(150, 45%, 52%);
+
+  --bg-primary: hsl(200, 40%, 8%);
+  --bg-secondary: hsl(200, 35%, 12%);
+  --bg-card: hsl(200, 35%, 15%);
+  --bg-footer: hsl(200, 40%, 6%);
+
+  --text-main: hsl(200, 20%, 92%);
+  --text-muted: hsl(200, 15%, 72%);
+  --text-white: hsl(0, 0%, 100%);
+
+  --border-color: hsl(200, 25%, 22%);
+
+  --hero-overlay: linear-gradient(135deg, rgba(20,50,20,0.88) 0%, rgba(10,30,40,0.92) 100%);
+
+  /* Gold & brand overrides */
+  --gold:            hsl(43, 80%, 60%);
+  --gold-light:      hsl(43, 90%, 72%);
+  --green-light-brand: hsl(120, 45%, 65%);
+  --green-dark-brand:  hsl(120, 30%, 20%);
+}
+
+body.dark-mode .header {
+  background-color: rgba(14, 27, 36, 0.95);
+}
+
+body.dark-mode .quick-card,
+body.dark-mode .mv-card,
+body.dark-mode .valor-card,
+body.dark-mode .proyecto-card,
+body.dark-mode .abuelito-card,
+body.dark-mode .evento-card,
+body.dark-mode .contact-form,
+body.dark-mode .modal-card,
+body.dark-mode .receipt-box {
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .receipt-box {
+  color: #ffd54f;
+}
+
+body.dark-mode .aliado-badge rect {
+  fill: #1a2c38;
+}
+
+body.dark-mode .aliado-badge text {
+  fill: #e0e0e0;
+}
+
+body.dark-mode .map-land {
+  fill: url(#map-bg-dark);
+}
+
+body.dark-mode .map-street {
+  stroke: rgba(255, 255, 255, 0.15);
+}
+
+body.dark-mode .map-svg-canvas rect[fill="#d7dfd1"] {
+  fill: #1e2c38;
+  stroke: #2a3a48;
+}
+
+body.dark-mode .map-svg-canvas rect[fill="#b0d6b0"] {
+  fill: #152f20;
+}
+
+body.dark-mode .map-svg-canvas text {
+  fill: #859580;
+}
+
+body.dark-mode .evento-filter-btn {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-muted);
+}
+
+body.dark-mode .evento-filter-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+body.dark-mode .evento-filter-btn.active {
+  background: var(--primary);
+  color: var(--text-white);
+  border-color: var(--primary);
+}
+
+body.dark-mode .evento-countdown {
+  background: linear-gradient(135deg, var(--secondary) 0%, #1a2c38 100%);
+}
+
+body.dark-mode .evento-permanent-badge {
+  background: linear-gradient(135deg, #1a4a3a 0%, #1a2c38 100%);
+}
+
+body.dark-mode .evento-empty-state {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .evento-search-input {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-main);
+}
+
+body.dark-mode .evento-search-input:focus {
+  border-color: var(--primary);
+}
+
+body.dark-mode .evento-results-count {
+  color: var(--text-muted);
+}
+
+body.dark-mode .section-search-input {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-main);
+}
+
+body.dark-mode .section-search-input:focus {
+  border-color: var(--primary);
+}
+
+body.dark-mode .section-empty-state {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .search-highlight {
+  background-color: #854d0e;
+  color: #fef9c3;
+}
+
+body.dark-mode .testimonial-section {
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+}
+
+body.dark-mode .testimonial-card {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .testimonial-btn {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-main);
+}
+
+body.dark-mode .testimonial-btn:hover {
+  background: var(--primary);
+  color: var(--text-white);
+  border-color: var(--primary);
+}
+
+body.dark-mode .testimonial-dot {
+  background: var(--border-color);
+}
+
+body.dark-mode .testimonial-dot.active {
+  background: var(--primary);
+}
+
+body.dark-mode .leaflet-map-container .leaflet-popup-content-wrapper {
+  background: var(--bg-card);
+  color: var(--text-main);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .leaflet-map-container .leaflet-popup-tip {
+  background: var(--bg-card);
+}
+
+body.dark-mode .leaflet-map-container .leaflet-control-zoom a {
+  background: var(--bg-card);
+  color: var(--text-main);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .theme-toggle {
+  color: #ffd54f;
+}
+
+/* Tag color classes — dark mode overrides */
+body.dark-mode .ptag-adulto-mayor   { background: hsla(120, 33%, 27%, 0.3); color: var(--green-light-brand); }
+body.dark-mode .ptag-juventud       { background: hsla(210, 60%, 40%, 0.25); color: hsl(210, 70%, 70%); }
+body.dark-mode .ptag-mujer-rural    { background: hsla(280, 40%, 55%, 0.22); color: hsl(280, 60%, 75%); }
+body.dark-mode .ptag-educacion      { background: hsla(200, 70%, 50%, 0.22); color: hsl(200, 70%, 72%); }
+body.dark-mode .ptag-soberania      { background: hsla(80, 50%, 40%, 0.22);  color: hsl(80, 60%, 68%); }
+body.dark-mode .ptag-cultura        { background: hsla(28, 80%, 55%, 0.22);  color: hsl(28, 80%, 72%); }
+body.dark-mode .ptag-ecologia       { background: hsla(134, 36%, 45%, 0.22); color: var(--green-light-brand); }
+body.dark-mode .ptag-consultoria    { background: hsla(220, 60%, 50%, 0.22); color: hsl(220, 70%, 74%); }
+body.dark-mode .ptag-ninez          { background: hsla(350, 70%, 55%, 0.22); color: hsl(350, 70%, 74%); }
+body.dark-mode .ptag-emprendimiento { background: hsla(43, 65%, 47%, 0.22);  color: var(--gold-light); }
+body.dark-mode .ptag-bienestar-animal { background: hsla(160, 50%, 45%, 0.22); color: hsl(160, 60%, 65%); }
+
+/* ─── Theme Toggle Button ──────────────────────────────────── */
+
+.theme-toggle-li {
+  display: flex;
+  align-items: center;
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  color: var(--secondary);
+  width: 38px;
+  height: 38px;
+  cursor: pointer;
+  border-radius: var(--radius-round);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+  padding: 0;
+}
+
+.theme-toggle:hover {
+  background-color: var(--primary-trans);
+  color: var(--primary);
+  transform: scale(1.1);
+}
+
+.theme-toggle svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+}
