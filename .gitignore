@@ -58,6 +58,8 @@ yarn-error.log*
 !CHECKLIST_ENTREGA.md
 !RUNBOOK_VPS.md
 !PLAN_ROLLBACK.md
+!GUIA_PERSONAL_PANEL.md
+!AGENDA_CAPACITACION.md
 nombre_del_entorno/
 
 # ─── QA local / herramientas ──────────────

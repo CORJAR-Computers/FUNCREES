@@ -254,7 +254,7 @@ en `deploy_nginx.conf`).
 | Dominio DNS | Registrador | Verificar que apunta al VPS y renovación al día |
 
 - [ ] Todo lo anterior en un **gestor de contraseñas** (Bitwarden/1Password), nunca en correo, WhatsApp ni documentos sueltos.
-- [ ] Sesión de capacitación con el personal: subir fotos, crear eventos, revisar donaciones y el panel de resumen, marcar mensajes leídos, exportar CSV de donaciones.
+- [ ] Sesión de capacitación con el personal: subir fotos, crear eventos, revisar donaciones y el panel de resumen, marcar mensajes leídos, exportar CSV de donaciones. **Usar `AGENDA_CAPACITACION.md`** (sesión de 90 min con prácticas) y **entregar `GUIA_PERSONAL_PANEL.md` impresa** a cada participante.
 - [ ] Entregar impresa/PDF: `DEPLOY.md` (operación), este checklist firmado, y las URLs clave.
 
 ---
