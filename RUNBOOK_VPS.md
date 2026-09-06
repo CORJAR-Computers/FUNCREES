@@ -76,6 +76,8 @@ FRONTEND_URL=https://funcreescolombia.org
 DIGEST_TO=directiva@funcrees.org,contabilidad@funcrees.org
 UPTIME_ALERT_TO=<mismo u otro correo de alertas>     # vacío = usa DIGEST_TO
 UPTIME_HEARTBEAT_URL=                                # opcional (healthchecks.io), Fase 8
+# Los ajustes finos del monitor (umbrales, timeout, URLs a verificar) son
+# opcionales y tienen valores por defecto sensatos: ver backend/.env.example.
 DEFAULT_FROM_EMAIL=contacto@funcreescolombia.org
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
