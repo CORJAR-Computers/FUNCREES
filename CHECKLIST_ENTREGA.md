@@ -178,7 +178,7 @@ sudo crontab -e
 - [ ] Si el servidor no está en UTC, ajustar la hora del cron (NO tocar Django).
 - [ ] Confirmar que `DIGEST_TO` tiene los correos reales de la directiva (sección 1).
 - [ ] Añadir el cron del **monitor de disponibilidad** de `DEPLOY.md` §📊 (check_uptime cada 5 min: alerta por correo si el sitio o la API se caen) y el pg_dump diario.
-- [ ] **Monitor de disponibilidad (check_uptime):** probar `--dry-run` (verificación en consola) y `--force-email` con `--to` (llega el correo "✅ todo funciona" = SMTP y cron listos). Confirmar `UPTIME_ALERT_TO` en `.env` (vacío usa `DIGEST_TO`). Recomendado: heartbeat gratuito en healthchecks.io (`UPTIME_HEARTBEAT_URL`) para cubrir caída total del VPS. El estado vive en `backend/logs/uptime_state.json`.
+- [ ] **Monitor de disponibilidad (check_uptime):** probar `--dry-run` (verificación en consola) y `--force-email` con `--to` (llega el correo "✅ todo funciona" = SMTP y cron listos). Confirmar `UPTIME_ALERT_TO` en `.env` (vacío usa `DIGEST_TO`). Recomendado: heartbeat gratuito en healthchecks.io (`UPTIME_HEARTBEAT_URL`) para cubrir caída total del VPS. El estado vive en `backend/logs/uptime_state.json`. **El día 2, ejecutar el simulacro completo con `DIA2_MONITOREO.md`.**
 
 ---
 
@@ -255,7 +255,7 @@ en `deploy_nginx.conf`).
 
 - [ ] Todo lo anterior en un **gestor de contraseñas** (Bitwarden/1Password), nunca en correo, WhatsApp ni documentos sueltos.
 - [ ] Sesión de capacitación con el personal: subir fotos, crear eventos, revisar donaciones y el panel de resumen, marcar mensajes leídos, exportar CSV de donaciones. **Usar `AGENDA_CAPACITACION.md`** (sesión de 90 min con prácticas) y **entregar `GUIA_PERSONAL_PANEL.md` impresa** a cada participante.
-- [ ] Entregar impresa/PDF: `DEPLOY.md` (operación), este checklist firmado, y las URLs clave.
+- [ ] Entregar impresa/PDF: el **`PAQUETE_ENTREGA.md`** (documento combinado: runbook + rollback + guía del personal + agenda + acta de firmas), `DEPLOY.md` (operación), este checklist firmado, y las URLs clave.
 
 ---
 

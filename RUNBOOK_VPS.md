@@ -336,9 +336,10 @@ git status --short    # sin .env ni secretos en el árbol
 ```
 
 ☐ Snapshots automáticos del VPS activados (panel Hostinger).
-☐ **Simulacro del monitor (day-2):** `sudo systemctl restart funcrees-web` →
-  sin correo en el 1.er fallo → 🔴 alerta al 2.º (~10 min) → reinicia de nuevo →
-  correo ✅ de recuperación. Si no llega nada: `UPTIME_ALERT_TO` y
+☐ **Simulacro del monitor (day-2):** usar la hoja imprimible `DIA2_MONITOREO.md` —
+  heartbeat de healthchecks.io (Parte A) + `sudo systemctl stop funcrees-web` →
+  sin correo en el 1.er fallo → 🔴 alerta al 2.º (~10 min) → levantar de nuevo →
+  correo ✅ de recuperación (Parte B). Si no llega nada: `UPTIME_ALERT_TO` y
   `/var/log/funcrees/uptime.log`.
 ☐ Al día siguiente: `journalctl -u funcrees -n 100` sin errores recurrentes.
 
