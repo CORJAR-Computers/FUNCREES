@@ -371,6 +371,10 @@ Logs maestros: `journalctl -u funcrees -f` (backend) · `journalctl -u funcrees-
 
 ## 🔙 Rollback — revertir código y recuperar el sitio
 
+> 📄 **Plan completo en `PLAN_ROLLBACK.md`**: diagnóstico por tipo de fallo,
+> restauración de base de datos (local y Neon) y cierre del incidente. Aquí va
+> el resumen operativo:
+
 **Código (volver al deploy anterior que funcionaba):**
 
 ```bash

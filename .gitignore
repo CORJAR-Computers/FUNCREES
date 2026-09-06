@@ -57,6 +57,7 @@ yarn-error.log*
 !DEPLOY.md
 !CHECKLIST_ENTREGA.md
 !RUNBOOK_VPS.md
+!PLAN_ROLLBACK.md
 nombre_del_entorno/
 
 # ─── QA local / herramientas ──────────────
