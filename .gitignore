@@ -75,3 +75,9 @@ grafico-mensual.png
 # Vista previa regenerable del correo del monitor de disponibilidad:
 # cd backend && venv/Scripts/python manage.py check_uptime --dry-run (o render manual)
 uptime_preview*.html
+# HTML imprimible del paquete de entrega — regenerable:
+# backend/venv/Scripts/python scripts/build_print_pack.py
+PAQUETE_ENTREGA.html
+# PDF directo del paquete — regenerable:
+# backend/venv/Scripts/python scripts/build_print_pack.py --pdf
+PAQUETE_ENTREGA.pdf
