@@ -96,14 +96,22 @@
 		{#if filteredAbuelitos.length > 0}
 			<div class="abuelitos-grid" id="abuelitos-grid-container">
 				{#each filteredAbuelitos as ab (ab.id)}
-					<div class="abuelito-card">
-						<div class="abuelito-img-box">
-							<img
-								class="abuelito-img"
-								src={ab.img}
-								alt={ab.nombre}
-								loading="lazy"
-							/>
+					<div class="abuelito-card">							<div class="abuelito-img-box">
+								<picture>
+									{#if ab.img_webp_srcset}
+										<source
+											srcset={ab.img_webp_srcset}
+											sizes="(max-width: 576px) 100vw, (max-width: 1200px) 45vw, 23vw"
+											type="image/webp"
+										/>
+									{/if}
+									<img
+										class="abuelito-img"
+										src={ab.img}
+										alt={ab.nombre}
+										loading="lazy"
+									/>
+								</picture>
 							<div class="abuelito-overlay-info">
 								<h3 class="abuelito-nombre">{ab.nombre}</h3>
 								<div class="abuelito-meta">
@@ -140,13 +148,21 @@
 <!-- Modal de Historia Completa -->
 {#if selectedAbuelito}
 	<Modal open={!!selectedAbuelito} onclose={closeStoryModal} labelledby="story-modal-title">
-		<div class="modal-body-story">
-			<div class="modal-story-banner">
-				<img
-					class="modal-story-img"
-					src={selectedAbuelito.img}
-					alt={selectedAbuelito.nombre}
-				/>
+		<div class="modal-body-story">				<div class="modal-story-banner">
+					<picture>
+						{#if selectedAbuelito.img_webp_srcset}
+							<source
+								srcset={selectedAbuelito.img_webp_srcset}
+								sizes="(max-width: 768px) 100vw, 560px"
+								type="image/webp"
+							/>
+						{/if}
+						<img
+							class="modal-story-img"
+							src={selectedAbuelito.img}
+							alt={selectedAbuelito.nombre}
+						/>
+					</picture>
 				<div class="modal-story-meta">
 					<h2 class="abuelito-nombre" id="story-modal-title" style="font-size: 2rem; margin-bottom: 0.4rem; color: #fff;">
 						{selectedAbuelito.nombre}

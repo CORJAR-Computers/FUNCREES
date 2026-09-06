@@ -30,7 +30,7 @@ class Event(models.Model):
         blank=True,
         null=True,
         verbose_name='Imagen (subir archivo)',
-        help_text='Imagen promocional del evento. Se redimensiona automáticamente.',
+        help_text='Imagen promocional del evento. Se optimiza y genera variantes WebP automáticamente.',
     )
     # Compatibilidad: imagen por URL externa (opción avanzada)
     imagen_url = models.URLField(max_length=500, blank=True, null=True, verbose_name='Imagen (URL externa)')
@@ -43,10 +43,12 @@ class Event(models.Model):
         return self.titulo
 
     def save(self, *args, **kwargs):
-        """Redimensiona la imagen subida a máx 1200x1200 px para la web."""
+        """Redimensiona la imagen subida a máx 1200x1200 px y genera variantes
+        WebP (200/400/800/1200w) para que el navegador descargue la más ligera."""
         super().save(*args, **kwargs)
         if self.imagen:
             self._resize_image()
+            self._generar_webp()
 
     def _resize_image(self):
         from PIL import Image
@@ -62,6 +64,10 @@ class Event(models.Model):
         except Exception:
             # No bloquear el guardado si Pillow no puede procesar el archivo
             pass
+
+    def _generar_webp(self):
+        from core.services.images import generar_variantes_webp
+        generar_variantes_webp(self.imagen)
 
 def generate_verification_code():
     """

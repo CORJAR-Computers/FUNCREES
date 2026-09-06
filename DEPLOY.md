@@ -155,6 +155,15 @@ mkdir -p media   # fotos de beneficiarios e imágenes de eventos subidas desde e
 python manage.py createsuperuser
 ```
 
+> **🖼️ Optimización de imágenes:** cada foto subida desde el panel genera
+> automáticamente variantes **WebP** (200/400/800w en beneficiarios,
+> hasta 1200w en eventos) para que `/historias` y `/eventos` carguen rápido:
+> el navegador elige la variante que necesita vía `srcset` (~70% menos peso).
+> Las imágenes subidas **antes** de instalar este sistema necesitan un
+> backfill único: `python manage.py generate_image_variants` (idempotente;
+> ver `--dry-run` para contar primero). Es obligatorio ejecutarlo en el VPS
+> si el directorio `media/` se restauró desde un backup anterior.
+
 ---
 
 ## 5️⃣ Construir el Frontend (SvelteKit)
@@ -419,13 +428,56 @@ sudo nano /etc/logrotate.d/funcrees
 }
 ```
 
+### 🟢 Monitor de disponibilidad con alertas por correo
+
+El comando `check_uptime` verifica cada 5 minutos que el backend (gunicorn +
+Django + base de datos, vía `/api/health/`) y el frontend (SvelteKit :3000)
+respondan, y avisa por correo al personal cuando algo se cae:
+
+| Situación | Acción del monitor |
+|---|---|
+| Todo OK | Silencio (nunca hay correos "todo bien" en producción) |
+| Servicio caído (2 fallos seguidos ≈ 10 min) | **Un correo** con todos los servicios afectados |
+| Sigue caído | Recordatorio cada 2 horas |
+| Se recupera | Correo de confirmación con la duración de la caída |
+
 ```bash
-# Monitoreo cada 5 minutos
+# Instalar el cron (junto al del resumen semanal):
 sudo crontab -e
 # Agregar:
-*/5 * * * * curl -sf https://funcreescolombia.org/api/health/ | grep -q '"status":"ok"' || echo "$(date): health check failed" >> /var/log/funcrees/monitor.log
-*/5 * * * * curl -sf -o /dev/null https://funcreescolombia.org/ || echo "$(date): frontend down" >> /var/log/funcrees/monitor.log
+*/5 * * * * cd /var/www/funcrees/backend && venv/bin/python manage.py check_uptime >> /var/log/funcrees/uptime.log 2>&1
 ```
+
+Configuración en `backend/.env` (todas opcionales, ver `.env.example`):
+
+```
+UPTIME_ALERT_TO=directiva@funcrees.org,tecnico@funcrees.org   # vacío => usa DIGEST_TO
+UPTIME_BACKEND_URL=http://127.0.0.1:8000/api/health/          # interno (rápido, sin DNS/SSL externos)
+UPTIME_FRONTEND_URL=http://127.0.0.1:3000/                    # o https://funcreescolombia.org/ para probar también Nginx/SSL
+UPTIME_FALLOS_PARA_ALERTA=2        # anti-ruido: ~10 min de caída real antes de avisar
+UPTIME_REMINDER_HOURS=2            # recordatorio mientras siga caído
+UPTIME_TIMEOUT=10                  # segundos de espera por respuesta
+UPTIME_HEARTBEAT_URL=              # opcional, ver abajo
+```
+
+**Prueba después de instalar el cron:**
+
+```bash
+python manage.py check_uptime --dry-run        # verificación en consola, sin efectos
+python manage.py check_uptime --force-email    # llega el correo "✅ todo funciona" (prueba de SMTP)
+```
+
+Si algo está caído, el correo incluye el error concreto y el comando de
+reinicio (`systemctl status/restart funcrees funcrees-web`). El estado del
+monitor vive en `backend/logs/uptime_state.json` (gitignored); bórralo para
+reiniciar el histórico de alertas.
+
+**Recomendado — heartbeat externo (cubre caída total del VPS):** si el
+servidor entero se cae, ni el monitor ni el correo pueden ejecutarse. Crea un
+check gratuito en [healthchecks.io](https://healthchecks.io), pega su URL de
+ping en `UPTIME_HEARTBEAT_URL` y listo: el monitor solo hace ping cuando TODO
+está bien, así que si el ping deja de llegar, el servicio externo alerta por
+su cuenta (correo/Slack) aunque FUNCREES esté completamente fuera de línea.
 
 ---
 

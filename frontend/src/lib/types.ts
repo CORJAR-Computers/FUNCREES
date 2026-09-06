@@ -12,6 +12,8 @@ export interface Beneficiary {
 	edad: number;
 	ciudad: string | null;
 	foto_url: string | null;
+	/** srcset de variantes WebP (200w/400w/800w); null si aún no hay variantes. */
+	foto_webp_srcset: string | null;
 	video_url: string | null;
 	apadrinado: boolean;
 	apadrinadores_count: number;
@@ -34,6 +36,8 @@ export interface ApiEvent {
 	categoria: 'evento' | 'campania';
 	/** URL absoluta de la imagen subida desde el admin (o null). */
 	imagen: string | null;
+	/** srcset de variantes WebP (200w/400w/800w/1200w); null si aún no hay variantes. */
+	imagen_webp_srcset: string | null;
 	imagen_url: string | null;
 }
 
@@ -98,6 +102,8 @@ export interface ContactPayload {
 export interface UiEvent {
 	/** URL de la imagen promocional (subida desde el admin o URL externa). */
 	imagen?: string | null;
+	/** srcset WebP para <source> (null si la imagen es externa o no tiene variantes). */
+	imagen_webp_srcset?: string | null;
 	id: string;
 	titulo: string;
 	fecha: string; // texto legible: "26 Octubre"
@@ -118,6 +124,8 @@ export interface UiBeneficiary {
 	testimonio: string;
 	historia: string;
 	img: string;
+	/** srcset WebP para <source> (null si la foto es externa o no tiene variantes). */
+	img_webp_srcset?: string | null;
 }
 
 /** GET /api/stats/ — cifras públicas agregadas (core.services.cifras_publicas) */

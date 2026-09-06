@@ -278,7 +278,16 @@
 					<div class="evento-card">
 						{#if ev.imagen}
 							<div class="evento-img-box">
-								<img class="evento-img" src={ev.imagen} alt="{ev.titulo} — Fundación FUNCREES" loading="lazy" />
+								<picture>
+									{#if ev.imagen_webp_srcset}
+										<source
+											srcset={ev.imagen_webp_srcset}
+											sizes="(max-width: 576px) 100vw, 46vw"
+											type="image/webp"
+										/>
+									{/if}
+									<img class="evento-img" src={ev.imagen} alt="{ev.titulo} — Fundación FUNCREES" loading="lazy" />
+								</picture>
 							</div>
 						{/if}
 						<div class="evento-badge-panel">

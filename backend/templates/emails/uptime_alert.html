@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alerta de disponibilidad — Funcrees Colombia</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f7f4;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f7f4;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.08);">
+
+          <!-- Header: rojo si algo está caído, verde si todo está bien -->
+          <tr>
+            <td style="background: {% if hay_caida %}linear-gradient(135deg, #7f1d1d 0%, #dc2626 100%){% else %}linear-gradient(135deg, #2d502d 0%, #578c57 100%){% endif %};padding:36px 40px 28px;text-align:center;">
+              <h1 style="color:#ffffff;margin:0;font-size:26px;font-weight:700;letter-spacing:1px;">FUNCREES</h1>
+              <p style="color:rgba(255,255,255,0.9);margin:6px 0 0;font-size:15px;font-weight:600;">
+                {% if hay_caida %}🔴 Alerta: servicio caído{% elif forzado %}🟢 Verificación de monitor — todo funciona{% else %}✅ Servicio recuperado{% endif %}
+              </p>
+              <p style="color:rgba(255,255,255,0.75);margin:4px 0 0;font-size:12px;">Verificado el {{ generado_fmt }} (hora Colombia)</p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:36px 40px;">
+
+              {% if forzado %}
+                <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0fdf4;border-left:4px solid #16a34a;border-radius:0 8px 8px 0;padding:20px;margin-bottom:28px;">
+                  <tr>
+                    <td>
+                      <p style="margin:0 0 6px;color:#166534;font-size:13px;text-transform:uppercase;letter-spacing:1px;font-weight:700;">✅ Todo funciona</p>
+                      <p style="margin:0;color:#444;font-size:13px;line-height:1.6;">
+                        Este correo confirma que el monitor está configurado correctamente:
+                        backend y frontend responden y el envío de alertas llega a tu buzón.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              {% endif %}
+
+              <!-- Tarjetas por cada novedad (caída / sigue caído / recuperación) -->
+              {% for ev in eventos %}
+                {% if ev.tipo == "caida" %}
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fef2f2;border-left:4px solid #dc2626;border-radius:0 8px 8px 0;padding:20px;margin-bottom:18px;">
+                    <tr>
+                      <td>
+                        <p style="margin:0 0 4px;color:#991b1b;font-size:13px;text-transform:uppercase;letter-spacing:1px;font-weight:700;">🔴 CAÍDA · {{ ev.nombre }}</p>
+                        <p style="margin:0;color:#7f1d1d;font-size:14px;line-height:1.6;">
+                          No responde desde las <strong>{{ ev.desde_fmt }}</strong>.
+                          {% if ev.error %}<br><span style="font-family:monospace;font-size:12px;">{{ ev.error }}</span>{% endif %}
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                {% elif ev.tipo == "recordatorio" %}
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fef3c7;border-left:4px solid #f59e0b;border-radius:0 8px 8px 0;padding:20px;margin-bottom:18px;">
+                    <tr>
+                      <td>
+                        <p style="margin:0 0 4px;color:#92400e;font-size:13px;text-transform:uppercase;letter-spacing:1px;font-weight:700;">⏳ SIGUE CAÍDO · {{ ev.nombre }}</p>
+                        <p style="margin:0;color:#78350f;font-size:14px;line-height:1.6;">
+                          Lleva <strong>{{ ev.duracion_fmt }}</strong> sin responder (desde las {{ ev.desde_fmt }}).
+                          {% if ev.error %}<br><span style="font-family:monospace;font-size:12px;">{{ ev.error }}</span>{% endif %}
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                {% else %}
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0fdf4;border-left:4px solid #16a34a;border-radius:0 8px 8px 0;padding:20px;margin-bottom:18px;">
+                    <tr>
+                      <td>
+                        <p style="margin:0 0 4px;color:#166534;font-size:13px;text-transform:uppercase;letter-spacing:1px;font-weight:700;">✅ RECUPERADO · {{ ev.nombre }}</p>
+                        <p style="margin:0;color:#14532d;font-size:14px;line-height:1.6;">
+                          Volvió a responder. Estuvo caído <strong>{{ ev.duracion_fmt }}</strong>
+                          (desde las {{ ev.desde_fmt }}).
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                {% endif %}
+              {% endfor %}
+
+              <!-- Resultado de esta verificación -->
+              <p style="margin:0 0 10px;color:#2d502d;font-size:14px;font-weight:700;">Resultado de la verificación</p>
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+                {% for r in resultados %}
+                  <tr>
+                    <td style="padding:9px 4px;border-bottom:1px solid #eef4ee;font-size:13px;color:#444;">
+                      {% if r.ok %}<span style="color:#16a34a;font-weight:700;">✅ Operativo</span>{% else %}<span style="color:#dc2626;font-weight:700;">🔴 Caído</span>{% endif %}
+                      &nbsp;{{ r.nombre }}
+                      <span style="color:#999;">· {{ r.host }}</span>
+                    </td>
+                    <td align="right" style="padding:9px 4px;border-bottom:1px solid #eef4ee;font-size:12px;color:#666;white-space:nowrap;">
+                      {{ r.detalle }}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </table>
+
+              <!-- Qué hacer -->
+              {% if hay_caida %}
+                <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8faf8;border:1px solid #e5efe5;border-radius:8px;padding:18px;margin-bottom:8px;">
+                  <tr>
+                    <td>
+                      <p style="margin:0 0 8px;color:#2d502d;font-size:12px;text-transform:uppercase;letter-spacing:1px;font-weight:700;">¿Qué hacer desde el VPS?</p>
+                      <p style="margin:0;color:#555;font-size:12px;line-height:1.8;font-family:monospace;">
+                        sudo systemctl status funcrees funcrees-web<br>
+                        sudo systemctl restart funcrees funcrees-web
+                      </p>
+                      <p style="margin:8px 0 0;color:#888;font-size:11px;line-height:1.6;">
+                        Si el problema persiste, revisa los logs del servicio antes de reiniciar de nuevo.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              {% endif %}
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#f8faf8;padding:18px 40px;border-top:1px solid #e5efe5;">
+              <p style="margin:0;color:#999;font-size:11px;line-height:1.6;text-align:center;">
+                Correo automático del monitor de disponibilidad — verificación cada 5 minutos.<br>
+                Se avisa al detectar la caída, cada 2 horas mientras persista y al recuperarse. No responder a este correo.<br>
+                Fundación Crece Una Esperanza Social — FUNCREES Colombia · Sincelejo, Sucre
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

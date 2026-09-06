@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from core.services.images import construir_srcset
 from .models import Event, Ticket
 
 
@@ -10,10 +12,12 @@ class EventSerializer(serializers.ModelSerializer):
     (URL externa). La respuesta expone la URL final lista para el frontend.
     """
     imagen = serializers.ImageField(use_url=True, required=False, allow_null=True, read_only=True)
+    # srcset de variantes WebP (200w/400w/800w/1200w) — None si aún no hay variantes
+    imagen_webp_srcset = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
-        fields = ['id', 'titulo', 'descripcion', 'fecha', 'hora', 'lugar', 'costo_bono', 'cupo_maximo', 'cupo_disponible', 'numeracion_min', 'numeracion_max', 'permite_seleccion_numero', 'categoria', 'imagen', 'imagen_url']
+        fields = ['id', 'titulo', 'descripcion', 'fecha', 'hora', 'lugar', 'costo_bono', 'cupo_maximo', 'cupo_disponible', 'numeracion_min', 'numeracion_max', 'permite_seleccion_numero', 'categoria', 'imagen', 'imagen_webp_srcset', 'imagen_url']
         read_only_fields = ['imagen']
 
     def to_representation(self, instance):
@@ -27,6 +31,10 @@ class EventSerializer(serializers.ModelSerializer):
             data['imagen'] = uploaded
             data['imagen_url'] = uploaded
         return data
+
+    def get_imagen_webp_srcset(self, obj):
+        request = self.context.get('request')
+        return construir_srcset(obj.imagen, request)
 
 
 class TicketSerializer(serializers.ModelSerializer):

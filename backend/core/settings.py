@@ -343,6 +343,47 @@ WOMPI_PRIVATE_KEY = env('WOMPI_PRIVATE_KEY', default='')
 WOMPI_INTEGRITY_SECRET = env('WOMPI_INTEGRITY_SECRET', default='')
 
 # ============================================
+# MONITOR DE DISPONIBILIDAD (comando check_uptime)
+# ============================================
+# Verifica cada 5 minutos (cron) que el backend y el frontend respondan y
+# avisa por correo al personal cuando algo se cae. Ver DEPLOY.md,
+# sección "🟢 Monitor de disponibilidad".
+
+# URLs verificadas. Por defecto son internas (el comando corre en el propio
+# VPS): el health check del backend prueba gunicorn+Django+BD y el puerto del
+# frontend prueba el servidor SvelteKit. Apuntarlas al dominio público
+# (UPTIME_BACKEND_URL=https://funcreescolombia.org/api/health/) también prueba
+# DNS/SSL/Nginx, pero añade dependencias de red externas al chequeo.
+UPTIME_BACKEND_URL = env('UPTIME_BACKEND_URL', default='http://127.0.0.1:8000/api/health/')
+UPTIME_FRONTEND_URL = env('UPTIME_FRONTEND_URL', default='http://127.0.0.1:3000/')
+
+# Segundos de espera por respuesta antes de dar el servicio por caído.
+UPTIME_TIMEOUT = env.int('UPTIME_TIMEOUT', default=10)
+
+# Anti-ruido: se declara la caída tras N verificaciones fallidas consecutivas
+# (con cron de 5 min => N=2 significa ~10 minutos de caída real antes de
+# avisar; evita alertas falsas por micro-cortes durante un despliegue).
+UPTIME_FALLOS_PARA_ALERTA = env.int('UPTIME_FALLOS_PARA_ALERTA', default=2)
+
+# Mientras un servicio siga caído, se re-avisa cada N horas (recordatorio).
+UPTIME_REMINDER_HOURS = env.float('UPTIME_REMINDER_HOURS', default=2.0)
+
+# Destinatarios de las alertas, separados por coma. Si queda vacío se usa
+# DIGEST_TO. Si ambos están vacíos, el comando verifica pero no envía correo.
+UPTIME_ALERT_TO = env('UPTIME_ALERT_TO', default='')
+
+# Estado del monitor (histórico de caídas para saber si algo ya estaba caído).
+# Vive en backend/logs/ (gitignored) y sobrevive reinicios del servidor.
+UPTIME_STATE_FILE = BASE_DIR / 'logs' / 'uptime_state.json'
+
+# Opcional: URL de heartbeat externo (p.ej. https://hc-ping.com/<uuid> de
+# healthchecks.io). Si TODOS los servicios responden, se hace un GET a esta
+# URL; si el propio VPS se cae completo, el servicio externo detecta que el
+# ping deja de llegar y avisa por su cuenta (cubre el caso en que ni el
+# monitor interno puede ejecutarse ni enviar correo).
+UPTIME_HEARTBEAT_URL = env('UPTIME_HEARTBEAT_URL', default='')
+
+# ============================================
 # ENCRYPTION KEY (Fernet — Ley 1581 Habeas Data)
 # ============================================
 

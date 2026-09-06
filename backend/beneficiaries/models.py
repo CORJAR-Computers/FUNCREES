@@ -16,7 +16,7 @@ class Beneficiary(models.Model):
         blank=True,
         null=True,
         verbose_name='Foto (subir archivo)',
-        help_text='Foto del beneficiario. Formatos: JPG, PNG. Se redimensiona automáticamente.',
+        help_text='Foto del beneficiario. Formatos: JPG, PNG. Se optimiza y genera variantes WebP automáticamente.',
     )
     # Compatibilidad: foto por URL externa (opción avanzada)
     foto_url = models.URLField(max_length=500, blank=True, null=True, verbose_name='Foto (URL externa)')
@@ -37,10 +37,12 @@ class Beneficiary(models.Model):
         return self.nombre
 
     def save(self, *args, **kwargs):
-        """Redimensiona la foto subida a máx 800x800 px para optimizar la web."""
+        """Redimensiona la foto subida a máx 800x800 px y genera variantes
+        WebP (200/400/800w) para que el navegador descargue la más ligera."""
         super().save(*args, **kwargs)
         if self.foto:
             self._resize_image()
+            self._generar_webp()
 
     def _resize_image(self):
         from PIL import Image
@@ -57,3 +59,7 @@ class Beneficiary(models.Model):
         except Exception:
             # No bloquear el guardado si Pillow no puede procesar el archivo
             pass
+
+    def _generar_webp(self):
+        from core.services.images import generar_variantes_webp
+        generar_variantes_webp(self.foto)

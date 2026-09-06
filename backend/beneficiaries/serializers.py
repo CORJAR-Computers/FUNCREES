@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from core.services.images import construir_srcset
 from .models import Beneficiary
 
 
@@ -12,10 +14,12 @@ class BeneficiarySerializer(serializers.ModelSerializer):
     """
     # URL absoluta de la foto (archivo subido) o None si no hay
     foto = serializers.ImageField(use_url=True, required=False, allow_null=True, read_only=True)
+    # srcset de variantes WebP (200w/400w/800w) — None si aún no hay variantes
+    foto_webp_srcset = serializers.SerializerMethodField()
 
     class Meta:
         model = Beneficiary
-        fields = ['id', 'nombre', 'historia', 'testimonio', 'edad', 'ciudad', 'foto', 'foto_url', 'video_url', 'apadrinado', 'apadrinadores_count']
+        fields = ['id', 'nombre', 'historia', 'testimonio', 'edad', 'ciudad', 'foto', 'foto_webp_srcset', 'foto_url', 'video_url', 'apadrinado', 'apadrinadores_count']
         read_only_fields = ['foto']
 
     def to_representation(self, instance):
@@ -30,3 +34,7 @@ class BeneficiarySerializer(serializers.ModelSerializer):
         if uploaded:
             data['foto_url'] = uploaded
         return data
+
+    def get_foto_webp_srcset(self, obj):
+        request = self.context.get('request')
+        return construir_srcset(obj.foto, request)

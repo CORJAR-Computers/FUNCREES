@@ -196,7 +196,8 @@ export async function getBeneficiaries(fetchFn: typeof fetch = fetch): Promise<U
 		ciudad: ab.ciudad || 'Sincelejo, Sucre',
 		testimonio: ab.testimonio,
 		historia: ab.historia,
-		img: ab.foto_url || FALLBACK_BENEFICIARIES[0].img
+		img: ab.foto_url || FALLBACK_BENEFICIARIES[0].img,
+		img_webp_srcset: ab.foto_webp_srcset || null
 	}));
 }
 
@@ -226,6 +227,7 @@ export async function getEvents(fetchFn: typeof fetch = fetch): Promise<UiEvent[
 			desc: ev.descripcion || '',
 			category: ev.categoria || 'evento',
 			imagen: ev.imagen || ev.imagen_url || null,
+			imagen_webp_srcset: ev.imagen_webp_srcset || null,
 			dateObj
 		};
 	});

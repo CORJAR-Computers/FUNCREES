@@ -177,7 +177,8 @@ sudo crontab -e
       no aparece. Espejo exacto de la alerta del panel de administración.
 - [ ] Si el servidor no está en UTC, ajustar la hora del cron (NO tocar Django).
 - [ ] Confirmar que `DIGEST_TO` tiene los correos reales de la directiva (sección 1).
-- [ ] Añadir los crons de monitoreo y backup de `DEPLOY.md` §📊 (health check cada 5 min + pg_dump diario).
+- [ ] Añadir el cron del **monitor de disponibilidad** de `DEPLOY.md` §📊 (check_uptime cada 5 min: alerta por correo si el sitio o la API se caen) y el pg_dump diario.
+- [ ] **Monitor de disponibilidad (check_uptime):** probar `--dry-run` (verificación en consola) y `--force-email` con `--to` (llega el correo "✅ todo funciona" = SMTP y cron listos). Confirmar `UPTIME_ALERT_TO` en `.env` (vacío usa `DIGEST_TO`). Recomendado: heartbeat gratuito en healthchecks.io (`UPTIME_HEARTBEAT_URL`) para cubrir caída total del VPS. El estado vive en `backend/logs/uptime_state.json`.
 
 ---
 
@@ -193,6 +194,7 @@ en `deploy_nginx.conf`).
 - [ ] Verifica: la miniatura se ve en el listado del admin Y la foto aparece en `https://funcreescolombia.org/historias` (cargada desde `/media/beneficiarios/...`, no desde una URL externa).
 - [ ] Repite con la imagen de un **evento** y confirma que se ve en `/eventos`.
 - [ ] Sube una foto grande (>800px) y confirma que el sitio la redimensiona automáticamente (no debe pesar megas).
+- [ ] **Variantes WebP:** la misma subida debe crear junto al original los archivos `-200w.webp` y `-400w.webp` (y `-800w.webp` si la foto es grande) en `backend/media/...`; el API expone `foto_webp_srcset` y `/historias` renderiza `<picture><source type="image/webp">`. Si el `media/` del VPS se restauró de un backup anterior, ejecutar `python manage.py generate_image_variants` (backfill único).
 - [ ] `backend/media/` fuera de git (ya en `.gitignore`) y **incluido** en el plan de backup (rsync del directorio o volumen del VPS).
 
 ---
@@ -233,6 +235,7 @@ en `deploy_nginx.conf`).
 - [ ] `chmod 600 backend/.env`; confirmar que no hay `.env` en ningún commit (`git status` limpio).
 - [ ] Activar snapshots automáticos del VPS (Hostinger los ofrece en el panel).
 - [ ] Logrotate instalado (`DEPLOY.md` §📊) y crons de monitoreo activos.
+- [ ] **Monitor con alertas activo:** un reinicio manual de un servicio (`sudo systemctl restart funcrees-web`) debe producir: sin correo en el primer fallo → alerta 🔴 al 2.º chequeo fallido (~10 min) → correo ✅ al recuperarse. Si no llega nada, revisar `UPTIME_ALERT_TO` y el log `/var/log/funcrees/uptime.log`.
 - [ ] Revisar al día siguiente: `journalctl -u funcrees -n 100` sin errores recurrentes; digest.log sin fallos si ya pasó el lunes.
 
 ---
