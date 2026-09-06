@@ -57,3 +57,15 @@ yarn-error.log*
 !DEPLOY.md
 !CHECKLIST_ENTREGA.md
 nombre_del_entorno/
+
+# ─── QA local / herramientas ──────────────
+# Estado interno del cliente Freebuff (no es código del proyecto)
+.freebuff/
+# Artefactos regenerables de QA del correo semanal:
+# cd backend && venv/Scripts/python manage.py send_weekly_digest --dry-run
+# + render de vista previa (ver CHECKLIST_ENTREGA.md §6)
+digest_preview*.html
+grafico-mensual.png
+# Vista previa regenerable del correo del monitor de disponibilidad:
+# cd backend && venv/Scripts/python manage.py check_uptime --dry-run (o render manual)
+uptime_preview*.html
