@@ -1,0 +1,302 @@
+{% load funcrees_dashboard_tags %}
+<div class="funcrees-dashboard">
+	<!-- Encabezado -->
+	<div class="fd-head">
+		<h2 class="fd-title">Resumen de la Fundación</h2>
+		<span class="fd-month">{{ mes_nombre }}</span>
+	</div>
+
+	<!-- Fila 1: Donaciones del mes -->
+	<div class="fd-cards fd-cards-4">
+		<div class="fd-card">
+			<div class="fd-card-label">💰 Recaudado en el mes</div>
+			<div class="fd-card-value fd-primary">{{ total_mes|cop }}</div>
+			<div class="fd-card-foot">
+				{% if variacion_direccion == "up" %}
+					<span class="fd-delta fd-up">▲ {{ variacion_abs }}% vs mes anterior</span>
+				{% elif variacion_direccion == "down" %}
+					<span class="fd-delta fd-down">▼ {{ variacion_abs }}% vs mes anterior</span>
+				{% else %}
+					<span class="fd-delta">— sin variación</span>
+				{% endif %}
+			</div>
+		</div>
+		<div class="fd-card">
+			<div class="fd-card-label">✅ Donaciones completadas</div>
+			<div class="fd-card-value">{{ cantidad_mes }}</div>
+			<div class="fd-card-foot">
+				{% if donaciones_pendientes > 0 %}
+					<span class="fd-delta fd-warn">⏳ {{ donaciones_pendientes }} pendiente{{ donaciones_pendientes|pluralize }}</span>
+				{% else %}
+					<span class="fd-delta">nada pendiente</span>
+				{% endif %}
+			</div>
+		</div>
+		<div class="fd-card">
+			<div class="fd-card-label">🤝 Apadrinamientos activos</div>
+			<div class="fd-card-value">{{ apadrinamientos_activos }}</div>
+			<div class="fd-card-foot">
+				<span class="fd-delta">{{ monto_mensual_apadrinamientos|cop }}/mes comprometido</span>
+			</div>
+		</div>
+		<div class="fd-card">
+			<div class="fd-card-label">📮 Mensajes nuevos</div>
+			<div class="fd-card-value {% if no_leidos > 0 %}fd-warn-text{% endif %}">{{ no_leidos }}</div>
+			<div class="fd-card-foot">
+				<span class="fd-delta">sin leer de {{ mensajes|length }} recientes</span>
+			</div>
+		</div>
+	</div>
+
+	<!-- Fila 2: Cifras generales -->
+	<div class="fd-cards fd-cards-4">
+		<div class="fd-mini">
+			<div class="fd-mini-value">{{ recaudado_total|cop }}</div>
+			<div class="fd-mini-label">Recaudado histórico</div>
+		</div>
+		<div class="fd-mini">
+			<div class="fd-mini-value">{{ beneficiarios_activos }}</div>
+			<div class="fd-mini-label">Beneficiarios activos</div>
+		</div>
+		<div class="fd-mini">
+			<div class="fd-mini-value">{{ beneficiarios_apadrinados }}</div>
+			<div class="fd-mini-label">Con padrino/madrina</div>
+		</div>
+		<div class="fd-mini">
+			<div class="fd-mini-value">{{ eventos_activos }}</div>
+			<div class="fd-mini-label">Eventos activos</div>
+		</div>
+		<div class="fd-mini">
+			<div class="fd-mini-value">{{ boletas_pagadas }}</div>
+			<div class="fd-mini-label">Boletas pagadas</div>
+		</div>
+		<div class="fd-mini">
+			<div class="fd-mini-value">{{ apadrinamientos_total }}</div>
+			<div class="fd-mini-label">Apadrinamientos (histórico)</div>
+		</div>
+	</div>
+
+	<!-- Gráfico: recaudado por mes (CSS puro, sin librerías) -->
+	<div class="fd-panel fd-chart-panel">
+		<div class="fd-panel-head">
+			<h3>📈 Recaudado por mes — últimos 6 meses</h3>
+			<span class="fd-sub">donaciones completadas (Wompi)</span>
+		</div>
+		<div class="fd-chart" role="img" aria-label="Gráfico de barras del total recaudado por mes en los últimos 6 meses. {{ serie_mensual|join_por_mes }}">
+			{% for m in serie_mensual %}
+				<div class="fd-chart-col {% if m.es_actual %}fd-chart-actual{% endif %}">
+					<div class="fd-chart-value">{{ m.total_fmt_corto }}</div>
+					<div class="fd-chart-barzone">
+						<div class="fd-chart-bar" style="height: {{ m.pct }}%;"></div>
+					</div>
+					<div class="fd-chart-label">{{ m.mes }}</div>
+				</div>
+			{% endfor %}
+		</div>
+	</div>
+
+	<!-- Fila 3: sección condicional (solo si hay pagos sin confirmar) -->
+	{% if por_confirmar %}
+		<div class="fd-panel fd-panel-alert">
+			<div class="fd-panel-head">
+				<h3>⏳ Pagos por confirmar con Wompi</h3>
+				<a href="/admin/donations/donation/?pendientes=si" class="fd-link">Ver todos ({{ por_confirmar_total }}) →</a>
+			</div>
+			<p class="fd-panel-note">Pagos iniciados hace más de 1 hora que Wompi no ha confirmado. Usa la acción <b>“🔄 Verificar con Wompi”</b> para consultar el estado real, o escríbele al donante por WhatsApp si dejó teléfono.</p>
+			<table class="fd-table">
+				<thead>
+					<tr><th>Referencia</th><th>Donante</th><th>Monto</th><th>Esperando</th><th></th></tr>
+				</thead>
+				<tbody>
+					{% for d in por_confirmar %}
+						<tr>
+							<td><a class="fd-link" href="/admin/donations/donation/{{ d.id }}/change/">{{ d.referencia }}</a></td>
+							<td>{{ d.donante_nombre }}</td>
+							<td>{{ d.monto_fmt }}</td>
+							<td class="fd-sub">{{ d.horas }}h</td>
+							<td>
+								<a class="fd-verify-btn" href="/admin/donations/donation/?pendientes=si">Verificar</a>
+								{% if d.wa_url %}<a class="fd-wa-btn" href="{{ d.wa_url }}" target="_blank" rel="noopener" aria-label="Escribir a {{ d.donante_nombre }} por WhatsApp" title="Escribir al donante por WhatsApp">WhatsApp</a>{% endif %}
+							</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	{% endif %}
+
+	<!-- Fila 4: Últimos mensajes -->
+	<div class="fd-panel">
+		<div class="fd-panel-head">
+			<h3>Últimos mensajes de contacto</h3>
+			<a href="/admin/contact/contactmessage/" class="fd-link">Ver todos →</a>
+		</div>
+		{% if mensajes %}
+			<table class="fd-table">
+				<thead>
+					<tr>
+						<th>Remitente</th>
+						<th>Tipo</th>
+						<th>Recibido</th>
+						<th>Estado</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for m in mensajes %}
+						<tr>
+							<td>
+								<a class="fd-link" href="/admin/contact/contactmessage/{{ m.id }}/change/">{{ m.nombre }}</a>
+								<div class="fd-sub">{{ m.email }}</div>
+							</td>
+							<td>{{ m.tipo|tipo_display }}</td>
+							<td class="fd-sub">{{ m.creado_en|fecha_corta }}</td>
+							<td>
+								{% if not m.leido %}
+									<span class="fd-badge fd-badge-new">nuevo</span>
+								{% elif m.respondido %}
+									<span class="fd-badge fd-badge-ok">respondido</span>
+								{% else %}
+									<span class="fd-badge fd-badge-read">leído</span>
+								{% endif %}
+								{% if m.leido and not m.respondido %}<span class="fd-sub">· falta responder</span>{% endif %}
+							</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		{% else %}
+			<p class="fd-empty">No hay mensajes de contacto todavía.</p>
+		{% endif %}
+	</div>
+
+	<!-- Accesos rápidos -->
+	<div class="fd-quick">
+		<a class="fd-quick-btn" href="/admin/donations/donation/">Ver donaciones</a>
+		<a class="fd-quick-btn" href="/admin/events/event/">Gestionar eventos</a>
+		<a class="fd-quick-btn" href="/admin/beneficiaries/beneficiary/">Editar beneficiarios</a>
+		<a class="fd-quick-btn" href="/admin/donations/donation/">Exportar donaciones (CSV)</a>
+	</div>
+</div>
+
+<style>
+	/* Usa solo variables CSS de Unfold para heredar tema claro/oscuro. */
+	.funcrees-dashboard { margin-bottom: calc(var(--spacing, 0.25rem) * 6); }
+	.fd-head { display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+	.fd-title { font-size: 1.15rem; font-weight: 700; color: var(--color-font-important-light); margin: 0; }
+	.fd-month {
+		font-size: 0.8rem; font-weight: 600; padding: 0.15rem 0.6rem; border-radius: 999px;
+		color: var(--color-primary-700); background: var(--color-primary-100);
+	}
+	.fd-cards { display: grid; gap: 0.75rem; margin-bottom: 0.75rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	@media (min-width: 768px) { .fd-cards-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+	.fd-card {
+		border: 1px solid var(--color-base-200); border-radius: 0.75rem; padding: 0.9rem 1rem;
+		background: var(--color-base-50);
+	}
+	.fd-card-label { font-size: 0.75rem; font-weight: 600; color: var(--color-font-subtle-light); margin-bottom: 0.35rem; }
+	.fd-card-value { font-size: 1.5rem; font-weight: 700; line-height: 1.2; color: var(--color-font-important-light); }
+	.fd-card-value.fd-primary { color: var(--color-primary-600); }
+	.fd-card-value.fd-warn-text { color: #d97706; }
+	.fd-card-foot { margin-top: 0.3rem; font-size: 0.72rem; }
+	.fd-delta { color: var(--color-font-subtle-light); }
+	.fd-up { color: #16a34a; font-weight: 600; }
+	.fd-down { color: #dc2626; font-weight: 600; }
+	.fd-warn { color: #d97706; font-weight: 600; }
+	.fd-mini {
+		border: 1px solid var(--color-base-200); border-radius: 0.6rem; padding: 0.65rem 0.75rem;
+		background: transparent;
+	}
+	.fd-mini-value { font-size: 1.05rem; font-weight: 700; color: var(--color-font-important-light); }
+	.fd-mini-label { font-size: 0.68rem; color: var(--color-font-subtle-light); margin-top: 0.15rem; }
+	.fd-panel {
+		border: 1px solid var(--color-base-200); border-radius: 0.75rem; padding: 1rem;
+		background: var(--color-base-50); margin-top: 0.75rem;
+	}
+	.fd-panel-alert { border-color: #f59e0b; }
+	.fd-panel-note { margin: 0 0 0.6rem; font-size: 0.75rem; color: var(--color-font-subtle-light); }
+	.fd-verify-btn {
+		display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 0.25rem 0.6rem;
+		border-radius: 0.4rem; background: var(--color-primary-600); color: #fff; text-decoration: none;
+	}
+	.fd-verify-btn:hover { background: var(--color-primary-700); }
+	.fd-wa-btn {
+		display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 0.25rem 0.6rem;
+		border-radius: 0.4rem; margin-left: 0.3rem;
+		background: #25d366; color: #fff; text-decoration: none;
+	}
+	.fd-wa-btn:hover { background: #1ebe5a; color: #fff; }
+
+	/* ── Gráfico de barras (CSS puro) ─────────────────────────────── */
+	.fd-chart-panel { margin-top: 0.75rem; }
+	.fd-chart {
+		display: flex; align-items: stretch; gap: 0.5rem;
+		padding-top: 1.6rem;
+	}
+	.fd-chart-col { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; min-width: 0; }
+	.fd-chart-value {
+		font-size: 0.68rem; font-weight: 600; color: var(--color-font-subtle-light);
+		margin-bottom: 0.3rem; white-space: nowrap;
+	}
+	.fd-chart-barzone {
+		height: 130px; width: 100%; max-width: 64px;
+		display: flex; align-items: flex-end; justify-content: center;
+	}
+	.fd-chart-bar {
+		width: 100%; height: 0%;
+		background: linear-gradient(180deg, var(--color-primary-400) 0%, var(--color-primary-600) 100%);
+		border-radius: 6px 6px 0 0;
+		transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+	.fd-chart-col:hover .fd-chart-bar { background: linear-gradient(180deg, var(--color-primary-300) 0%, var(--color-primary-500) 100%); }
+	.fd-chart-actual .fd-chart-bar { box-shadow: 0 0 0 2px var(--color-primary-200); }
+	.fd-chart-actual .fd-chart-label { color: var(--color-primary-700); font-weight: 700; }
+	.fd-chart-label { font-size: 0.72rem; margin-top: 0.4rem; color: var(--color-font-subtle-light); }
+
+	.fd-panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; }
+	.fd-panel-head h3 { font-size: 0.95rem; font-weight: 700; margin: 0; color: var(--color-font-important-light); }
+	.fd-link { color: var(--color-primary-600); text-decoration: none; font-size: 0.8rem; font-weight: 600; }
+	.fd-link:hover { text-decoration: underline; }
+	.fd-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+	.fd-table th {
+		text-align: left; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em;
+		color: var(--color-font-subtle-light); padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--color-base-200);
+	}
+	.fd-table td { padding: 0.5rem; border-bottom: 1px solid var(--color-base-100); vertical-align: top; }
+	.fd-sub { font-size: 0.72rem; color: var(--color-font-subtle-light); }
+	.fd-badge {
+		display: inline-block; font-size: 0.68rem; font-weight: 600; padding: 0.1rem 0.5rem; border-radius: 999px;
+	}
+	.fd-badge-new { background: #fef3c7; color: #92400e; }
+	.fd-badge-ok { background: #dcfce7; color: #166534; }
+	.fd-badge-read { background: var(--color-base-100); color: var(--color-font-subtle-light); }
+	.fd-empty { color: var(--color-font-subtle-light); font-size: 0.85rem; margin: 0.5rem 0; }
+	.fd-quick { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.75rem; }
+	.fd-quick-btn {
+		font-size: 0.78rem; font-weight: 600; padding: 0.4rem 0.8rem; border-radius: 0.5rem;
+		border: 1px solid var(--color-base-200); color: var(--color-font-important-light);
+		background: var(--color-white, #fff); text-decoration: none;
+	}
+	.fd-quick-btn:hover { border-color: var(--color-primary-600); color: var(--color-primary-600); }
+
+	/* ── Modo oscuro (Unfold alterna la clase .dark en un ancestro) ── */
+	.dark .fd-title, .dark .fd-card-value, .dark .fd-mini-value, .dark .fd-panel-head h3 { color: var(--color-font-important-dark); }
+	.dark .fd-card, .dark .fd-mini, .dark .fd-panel { background: var(--color-base-900); border-color: var(--color-base-700); }
+	.dark .fd-panel-alert { border-color: #b45309; }
+	.dark .fd-verify-btn { background: var(--color-primary-500); }
+	.dark .fd-verify-btn:hover { background: var(--color-primary-400); }
+	.dark .fd-wa-btn { background: #128c7e; }
+	.dark .fd-wa-btn:hover { background: #0f7a6d; }
+	.dark .fd-card-label, .dark .fd-mini-label, .dark .fd-delta, .dark .fd-sub,
+	.dark .fd-table th, .dark .fd-empty, .dark .fd-chart-value, .dark .fd-chart-label { color: var(--color-font-subtle-dark); }
+	.dark .fd-table td { border-bottom-color: var(--color-base-800); }
+	.dark .fd-month { background: rgba(16, 185, 129, 0.15); color: var(--color-primary-300); }
+	.dark .fd-card-value.fd-primary, .dark .fd-link { color: var(--color-primary-400); }
+	.dark .fd-card-value.fd-warn-text { color: #fbbf24; }
+	.dark .fd-chart-actual .fd-chart-bar { box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.35); }
+	.dark .fd-chart-actual .fd-chart-label { color: var(--color-primary-300); }
+	.dark .fd-badge-new { background: rgba(217, 119, 6, 0.2); color: #fcd34d; }
+	.dark .fd-badge-ok { background: rgba(22, 163, 74, 0.2); color: #86efac; }
+	.dark .fd-badge-read { background: var(--color-base-800); color: var(--color-font-subtle-dark); }
+	.dark .fd-quick-btn { background: var(--color-base-900); border-color: var(--color-base-700); color: var(--color-font-important-dark); }
+	.dark .fd-quick-btn:hover { border-color: var(--color-primary-400); color: var(--color-primary-400); }
+</style>

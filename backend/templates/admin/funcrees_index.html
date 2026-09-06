@@ -1,0 +1,7 @@
+{% extends "admin/index.html" %}
+{% load funcrees_dashboard_tags %}
+
+{% block content %}
+{% funcrees_dashboard %}
+{{ block.super }}
+{% endblock %}

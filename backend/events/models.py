@@ -23,7 +23,17 @@ class Event(models.Model):
     permite_seleccion_numero = models.BooleanField(default=True, help_text="Si el usuario puede elegir su número de boleta")
     categoria = models.CharField(max_length=20, choices=CATEGORIA_CHOICES, default='evento')
     activo = models.BooleanField(default=True)
-    imagen_url = models.URLField(max_length=500, blank=True, null=True)
+
+    # Imagen subida desde el panel (opción amigable)
+    imagen = models.ImageField(
+        upload_to='eventos/%Y/%m/',
+        blank=True,
+        null=True,
+        verbose_name='Imagen (subir archivo)',
+        help_text='Imagen promocional del evento. Se redimensiona automáticamente.',
+    )
+    # Compatibilidad: imagen por URL externa (opción avanzada)
+    imagen_url = models.URLField(max_length=500, blank=True, null=True, verbose_name='Imagen (URL externa)')
 
     class Meta:
         verbose_name = 'Evento'
@@ -31,6 +41,27 @@ class Event(models.Model):
 
     def __str__(self):
         return self.titulo
+
+    def save(self, *args, **kwargs):
+        """Redimensiona la imagen subida a máx 1200x1200 px para la web."""
+        super().save(*args, **kwargs)
+        if self.imagen:
+            self._resize_image()
+
+    def _resize_image(self):
+        from PIL import Image
+
+        MAX = 1200
+        try:
+            img = Image.open(self.imagen.path)
+            if img.width > MAX or img.height > MAX:
+                img.thumbnail((MAX, MAX), Image.LANCZOS)
+                if img.mode not in ('RGB', 'RGBA'):
+                    img = img.convert('RGB')
+                img.save(self.imagen.path, quality=85, optimize=True)
+        except Exception:
+            # No bloquear el guardado si Pillow no puede procesar el archivo
+            pass
 
 def generate_verification_code():
     """

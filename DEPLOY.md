@@ -1,6 +1,10 @@
-# 🚀 Guía de Deploy — FUNCREES Colombia
+# 🚀 Guía de Deploy — FUNCREES Colombia (v2.0)
 
-Guía paso a paso para desplegar el sitio web de la Fundación Funcrees Colombia en un servidor VPS (ej: Hostinger, DigitalOcean, AWS).
+Guía paso a paso para desplegar el sitio web de la Fundación Funcrees Colombia.
+
+> **Arquitectura v2.0:** Frontend **SvelteKit SSR** (adapter-node en Node.js :3000)
+> + Backend **Django REST Framework** (Gunicorn :8000), ambos detrás de **Nginx**
+> en el mismo dominio (sin CORS, un solo certificado TLS).
 
 ---
 
@@ -9,10 +13,17 @@ Guía paso a paso para desplegar el sitio web de la Fundación Funcrees Colombia
 | Componente | Versión mínima |
 |------------|---------------|
 | Sistema operativo | Ubuntu 22.04 LTS / Debian 12 |
-| Python | 3.10+ |
+| Python | 3.12+ |
+| Node.js | 22 LTS |
 | PostgreSQL | 14+ |
 | Nginx | 1.18+ |
-| Node.js (solo para tests) | 18+ |
+
+### 💡 Recomendación de hosting
+
+**Hostinger VPS Corporativo (KVM 2 o superior)** es la opción sugerida para la
+fundación: buen precio, soporte en español, snapshots y panel sencillo. También
+funciona en DigitalOcean, Hetzner o AWS Lightsail. El despliegue es idéntico en
+cualquier VPS Ubuntu.
 
 ---
 
@@ -23,11 +34,15 @@ Guía paso a paso para desplegar el sitio web de la Fundación Funcrees Colombia
 sudo apt update && sudo apt upgrade -y
 
 # Instalar dependencias del sistema
-sudo apt install -y python3 python3-pip python3-venv postgresql postgresql-contrib nginx certbot python3-certbot-nginx git curl mailutils
+sudo apt install -y python3 python3-pip python3-venv postgresql postgresql-contrib \
+  nginx certbot python3-certbot-nginx git curl
+
+# Node.js 22 LTS (NodeSource)
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt install -y nodejs
 
 # Crear directorios necesarios
-sudo mkdir -p /var/log/funcrees
-sudo mkdir -p /var/run/funcrees
+sudo mkdir -p /var/log/funcrees /var/run/funcrees
 sudo chown www-data:www-data /var/log/funcrees /var/run/funcrees
 ```
 
@@ -36,26 +51,20 @@ sudo chown www-data:www-data /var/log/funcrees /var/run/funcrees
 ## 2️⃣ Clonar el Proyecto
 
 ```bash
-# Crear directorio del proyecto
-sudo mkdir -p /var/www/funcrees/frontend
+sudo mkdir -p /var/www/funcrees
 sudo chown $USER:$USER /var/www/funcrees
-
-# Clonar el repositorio
 cd /var/www/funcrees
+
 git clone https://github.com/TU_USUARIO/funcrees-colombia.git .
 
-# Organizar archivos del frontend
-sudo cp -r *.html *.css *.js assets/ /var/www/funcrees/frontend/
-sudo chown -R www-data:www-data /var/www/funcrees/frontend
-
-# Estructura del proyecto
+# Estructura del proyecto (v2.0)
 # /var/www/funcrees/
-# ├── frontend/           ← Archivos estáticos del sitio web
-# │   ├── index.html
-# │   ├── app.js
-# │   ├── styles.css
-# │   └── assets/
-# └── backend/            ← Backend Django
+# ├── frontend/            ← SvelteKit (SSR, adapter-node)
+# │   ├── src/
+# │   ├── build/           ← generado por npm run build
+# │   └── node_modules/
+# ├── backend/             ← Django REST Framework
+# └── deploy_nginx.conf    ← configuración de Nginx lista para usar
 ```
 
 ---
@@ -63,10 +72,10 @@ sudo chown -R www-data:www-data /var/www/funcrees/frontend
 ## 3️⃣ Configurar Base de Datos PostgreSQL
 
 ```bash
-# Entrar al usuario de PostgreSQL
 sudo -u postgres psql
+```
 
-# Crear base de datos y usuario
+```sql
 CREATE USER funcrees_user WITH PASSWORD 'TU_PASSWORD_SEGURO';
 CREATE DATABASE funcrees_db OWNER funcrees_user;
 GRANT ALL PRIVILEGES ON DATABASE funcrees_db TO funcrees_user;
@@ -78,40 +87,38 @@ GRANT ALL PRIVILEGES ON DATABASE funcrees_db TO funcrees_user;
 ## 4️⃣ Configurar Backend (Django)
 
 ```bash
-# Navegar al directorio backend
 cd /var/www/funcrees/backend
 
-# Crear entorno virtual
 python3 -m venv venv
 source venv/bin/activate
 
-# Instalar dependencias
 pip install -r requirements.txt
 
 # Configurar variables de entorno
 cp .env.example .env
-nano .env  # Editar con tus valores reales
+nano .env  # Editar con tus valores reales (ver abajo)
 ```
 
-### Variables de Entorno Requeridas (.env)
+### Variables de Entorno Requeridas (backend/.env)
 
 ```bash
 # Django
 DEBUG=False
 SECRET_KEY=tu-clave-secreta-generada
-ALLOWED_HOSTS=tudominio.com,www.tudominio.com
+ALLOWED_HOSTS=funcreescolombia.org,www.funcreescolombia.org
 
 # Base de datos
 DATABASE_URL=postgresql://funcrees_user:tu_password@localhost:5432/funcrees_db
 
-# CORS
-CORS_ALLOWED_ORIGINS=https://tudominio.com,https://www.tudominio.com
+# CORS — en esta arquitectura el frontend y la API comparten dominio,
+# pero se conservan los orígenes para el admin y herramientas locales.
+CORS_ALLOWED_ORIGINS=https://funcreescolombia.org,https://www.funcreescolombia.org
 
-# Frontend
-FRONTEND_URL=https://tudominio.com
+# Frontend (URL a la que Wompi redirige tras el pago)
+FRONTEND_URL=https://funcreescolombia.org
 
 # Email
-DEFAULT_FROM_EMAIL=contacto@tudominio.com
+DEFAULT_FROM_EMAIL=contacto@funcreescolombia.org
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_HOST_USER=tu-correo@gmail.com
@@ -134,37 +141,51 @@ ENCRYPTION_KEY=tu-clave-fernet-generada
 # SECRET_KEY de Django
 python3 -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 
-# ENCRYPTION_KEY para datos sensibles
+# ENCRYPTION_KEY para datos sensibles (Ley 1581)
 python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
 ```
 
-### Ejecutar Migraciones y Crear Superusuario
+### Migraciones, estáticos y superusuario
 
 ```bash
-cd /var/www/funcrees/backend
 source venv/bin/activate
-
-# Aplicar migraciones
 python manage.py migrate --noinput
-
-# Recolectar archivos estáticos
 python manage.py collectstatic --noinput
-
-# Crear superusuario para el admin
+mkdir -p media   # fotos de beneficiarios e imágenes de eventos subidas desde el admin
 python manage.py createsuperuser
 ```
 
 ---
 
-## 5️⃣ Configurar Gunicorn (Servidor de Producción)
+## 5️⃣ Construir el Frontend (SvelteKit)
 
-Crear servicio systemd:
+```bash
+cd /var/www/funcrees/frontend
+
+# Instalar dependencias y compilar (genera build/index.js)
+npm ci
+npm run build
+
+# Prueba rápida local (opcional):
+PORT=3000 node build   # Ctrl+C para salir
+```
+
+Variables opcionales de build (archivo `frontend/.env`):
+
+```bash
+# Dominio canónico para SEO/sitemap (solo cambia si es distinto)
+VITE_SITE_URL=https://funcreescolombia.org
+```
+
+---
+
+## 6️⃣ Servicios systemd
+
+### Backend (Gunicorn)
 
 ```bash
 sudo nano /etc/systemd/system/funcrees.service
 ```
-
-Contenido del servicio:
 
 ```ini
 [Unit]
@@ -175,9 +196,7 @@ After=network.target postgresql.service
 User=www-data
 Group=www-data
 WorkingDirectory=/var/www/funcrees/backend
-ExecStart=/var/www/funcrees/backend/venv/bin/gunicorn \
-          --config gunicorn.conf.py \
-          core.wsgi:application
+ExecStart=/var/www/funcrees/backend/venv/bin/gunicorn --config gunicorn.conf.py core.wsgi:application
 Restart=on-failure
 RestartSec=5
 
@@ -185,92 +204,68 @@ RestartSec=5
 WantedBy=multi-user.target
 ```
 
-Iniciar y habilitar el servicio:
+### Frontend (SvelteKit adapter-node)
+
+El archivo `funcrees-web.service` viene incluido en la raíz del repositorio:
 
 ```bash
+sudo cp /var/www/funcrees/funcrees-web.service /etc/systemd/system/
+```
+
+### Activar ambos servicios
+
+```bash
+sudo chown -R www-data:www-data /var/www/funcrees
 sudo systemctl daemon-reload
-sudo systemctl start funcrees
-sudo systemctl enable funcrees
-
-# Verificar estado
-sudo systemctl status funcrees
+sudo systemctl enable --now funcrees
+sudo systemctl enable --now funcrees-web
+sudo systemctl status funcrees funcrees-web
 ```
 
 ---
 
-## 6️⃣ Configurar Nginx (Frontend + Proxy)
+## 7️⃣ Configurar Nginx
 
 ```bash
-sudo nano /etc/nginx/sites-available/funcrees
+sudo cp /var/www/funcrees/deploy_nginx.conf /etc/nginx/sites-available/funcrees
+sudo ln -sf /etc/nginx/sites-available/funcrees /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
-Usar el archivo `deploy_nginx.conf` incluido en el proyecto, o crear manualmente:
-
-```nginx
-# Frontend (SPA)
-location / {
-    root /var/www/funcrees/frontend;
-    index index.html;
-    try_files $uri $uri/ /index.html;
-}
-
-# Backend API
-location /api/ {
-    proxy_pass http://127.0.0.1:8000;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-}
-
-# Admin Django
-location /admin/ {
-    proxy_pass http://127.0.0.1:8000;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-}
-
-# Archivos estáticos
-location /static/ {
-    alias /var/www/funcrees/backend/staticfiles/;
-    expires 30d;
-}
-```
-
-Activar sitio:
-
-```bash
-sudo ln -s /etc/nginx/sites-available/funcrees /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl reload nginx
-```
+> 💡 El archivo incluye el proxy a Node (:3000) para `/` y a Gunicorn (:8000)
+> para `/api/`, `/admin/` y `/static/`, con CSP ajustada a Google Fonts,
+> Font Awesome, Unsplash, OpenStreetMap y Wompi.
 
 ---
 
-## 7️⃣ Configurar SSL con Certbot
+## 8️⃣ Configurar SSL con Certbot
 
 ```bash
-# Instalar certificado SSL gratuito
-sudo certbot --nginx -d tudominio.com -d www.tudominio.com
+sudo certbot --nginx -d funcreescolombia.org -d www.funcreescolombia.org
 
 # Verificar renovación automática
 sudo certbot renew --dry-run
 ```
 
+Después de que Certbot escriba los certificados, descomentar en
+`/etc/nginx/sites-available/funcrees` las líneas:
+
+```nginx
+# ssl_certificate     /etc/letsencrypt/live/funcreescolombia.org/fullchain.pem;
+# ssl_certificate_key /etc/letsencrypt/live/funcreescolombia.org/privkey.pem;
+```
+
+y ejecutar `sudo nginx -t && sudo systemctl reload nginx`.
+
 ---
 
-## 8️⃣ Permisos y Seguridad
+## 9️⃣ Permisos y Seguridad
 
 ```bash
 # Permisos de archivos
 sudo chown -R www-data:www-data /var/www/funcrees
-sudo chmod -R 755 /var/www/funcrees
-
-# Proteger archivos sensibles
 sudo chmod 600 /var/www/funcrees/backend/.env
-sudo chmod 600 /var/www/funcrees/backend/core/settings.py
 
 # Firewall
 sudo ufw allow 'Nginx Full'
@@ -280,126 +275,133 @@ sudo ufw enable
 
 ---
 
-## 9️⃣ Verificar el Deploy
-
-### Health Check
+## 🔟 Verificar el Deploy
 
 ```bash
-curl https://tudominio.com/api/health/
-# Debe retornar: {"status": "ok"}
+# Health check del backend
+curl https://funcreescolombia.org/api/health/
+# Debe retornar: {"status":"ok"}
+
+# SSR del frontend (debe devolver HTML con contenido, no un shell vacío)
+curl -s https://funcreescolombia.org/ | grep -o "<title>[^<]*</title>"
+# Debe retornar: <title>Fundación Funcrees Colombia | Crece Una Esperanza</title>
+
+# Sitemap
+curl -s https://funcreescolombia.org/sitemap.xml | head -5
 ```
 
-### Verificar Frontend
+Abrir en navegador:
+- Sitio: `https://funcreescolombia.org`
+- Admin: `https://funcreescolombia.org/admin/`
 
-Abrir en navegador: `https://tudominio.com`
+### Verificar el flujo de pagos (sandbox)
 
-### Verificar Admin
-
-Abrir en navegador: `https://tudominio.com/admin/`
+1. En `backend/.env`: `WOMPI_ENV=sandbox` + llaves sandbox de Wompi.
+2. Donar desde `/donaciones` con una tarjeta de prueba de Wompi.
+3. Verificar: la donación aparece en el admin (`/admin/donations/donation/`),
+   llega el certificado PDF por correo y el webhook quedó registrado.
 
 ---
 
 ## 🔧 Comandos Útiles
 
 ```bash
-# Reiniciar backend
-sudo systemctl restart funcrees
+# Reiniciar servicios
+sudo systemctl restart funcrees funcrees-web
 
-# Ver logs de Gunicorn
-sudo journalctl -u funcrees -f
-
-# Ver logs de Nginx
-sudo tail -f /var/log/nginx/funcrees_access.log
+# Logs
+sudo journalctl -u funcrees -f        # backend
+sudo journalctl -u funcrees-web -f    # frontend
+sudo tail -f /var/log/nginx/funcrees_error.log
 
 # Actualizar código (después de git pull)
-cd /var/www/funcrees/backend
-source venv/bin/activate
+cd /var/www/funcrees/backend && source venv/bin/activate
 pip install -r requirements.txt
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput
-sudo systemctl restart funcrees
+
+cd /var/www/funcrees/frontend
+npm ci && npm run build
+
+sudo systemctl restart funcrees funcrees-web
 ```
 
 ---
 
-## 🔐 Validación de Variables de Entorno
-
-Antes de iniciar el servidor, ejecutar este script para verificar que todas las variables críticas estén configuradas:
+## 💾 Backup Automático (Base de Datos)
 
 ```bash
-cd /var/www/funcrees/backend
-source venv/bin/activate
-
-# Script de validación (usa django-environ que ya está en requirements.txt)
-python3 -c "
-import os, sys
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
-
-# Cargar variables del .env usando django-environ
-import environ
-env = environ.Env()
-environ.Env.read_env(os.path.join(os.getcwd(), '.env'))
-
-required = ['SECRET_KEY', 'DATABASE_URL', 'ALLOWED_HOSTS', 'WOMPI_PUBLIC_KEY', 'ENCRYPTION_KEY']
-missing = [v for v in required if not env.str(v, default=None)]
-
-if missing:
-    print('❌ Faltan variables: ' + ', '.join(missing))
-    sys.exit(1)
-else:
-    print('✅ Todas las variables de entorno están configuradas')
-"
-```
-
----
-
-## 💾 Configurar Backup Automático
-
-### Backup de Base de Datos (diario)
-
-```bash
-# Crear script de backup
 sudo nano /usr/local/bin/funcrees-backup.sh
 ```
-
-Contenido:
 
 ```bash
 #!/bin/bash
 BACKUP_DIR="/var/backups/funcrees"
 DATE=$(date +%Y%m%d_%H%M%S)
 mkdir -p $BACKUP_DIR
-
-# Backup de PostgreSQL
-sudo -u postgres pg_dump funcrees_db > $BACKUP_DIR/db_$DATE.sql
-
-# Comprimir
-gzip $BACKUP_DIR/db_$DATE.sql
-
-# Eliminar backups mayores a 30 días
+sudo -u postgres pg_dump funcrees_db | gzip > $BACKUP_DIR/db_$DATE.sql.gz
 find $BACKUP_DIR -name "*.gz" -mtime +30 -delete
-
 echo "[$(date)] Backup completado: db_$DATE.sql.gz" >> /var/log/funcrees/backup.log
 ```
 
 ```bash
-# Hacer ejecutable
 sudo chmod +x /usr/local/bin/funcrees-backup.sh
-
-# Agregar a cron (ejecutar diario a las 2 AM)
 sudo crontab -e
 # Agregar: 0 2 * * * /usr/local/bin/funcrees-backup.sh
 ```
 
 ---
 
-## 📊 Configurar Log Rotation
+## 📧 Resumen Semanal por Correo
+
+Todos los lunes a las 7:00 a.m. (hora Colombia) el sistema envía a la
+directiva un correo con: total recaudado del mes (y variación vs. mes
+anterior), apadrinamientos activos con su monto mensual comprometido,
+mensajes sin leer, el gráfico mensual como imagen embebida y accesos al panel.
+
+**⏳ Pagos por confirmar con Wompi (sección condicional):** si existen
+donaciones `pendiente`/`procesando` con más de 1 hora de creadas, el correo
+incluye una sección ámbar con cada caso (referencia, donante, monto, horas
+esperando) y un enlace directo al listado filtrado del panel
+(`/admin/donations/donation/?pendientes=si`), donde la acción "Verificar con
+Wompi" confirma el pago. Usa exactamente los mismos datos que la alerta del
+panel de administración; si no hay nada estancado, la sección no aparece.
+
+**Configuración (una sola vez) en `backend/.env`:**
 
 ```bash
-sudo nano /etc/logrotate.d/funcrees
+# Destinatarios del resumen (separados por coma). Vacío = desactivado.
+DIGEST_TO=directiva@funcrees.org,contabilidad@funcrees.org
 ```
 
-Contenido:
+**Probar manualmente antes de programar el cron:**
+
+```bash
+cd /var/www/funcrees/backend && source venv/bin/activate
+python manage.py send_weekly_digest --dry-run   # ver cifras en consola
+python manage.py send_weekly_digest --to tu-correo@funcrees.org  # envío real de prueba
+```
+
+**Programar el envío (cron del sistema, usa la zona horaria del servidor):**
+
+```bash
+sudo crontab -e
+# Lunes 12:00 UTC = 7:00 a.m. en Colombia (UTC-5, sin horario de verano)
+0 12 * * 1 cd /var/www/funcrees/backend && venv/bin/python manage.py send_weekly_digest >> /var/log/funcrees/digest.log 2>&1
+```
+
+> 💡 Si el servidor usa otra zona horaria, ajusta la hora: el comando usa la
+> configuración `TIME_ZONE` de Django (America/Bogota) para calcular las
+> cifras del mes, así que solo importa la hora *del servidor* en el cron.
+
+---
+
+## 📊 Monitoreo y Log Rotation
+
+```bash
+# Log rotation
+sudo nano /etc/logrotate.d/funcrees
+```
 
 ```
 /var/log/funcrees/*.log {
@@ -417,41 +419,12 @@ Contenido:
 }
 ```
 
----
-
-## 📡 Configurar Monitoreo de Health Check
-
 ```bash
-# Agregar cron job para monitoreo
+# Monitoreo cada 5 minutos
 sudo crontab -e
-```
-
-Agregar línea:
-
-```
-# Verificar salud de FUNCREES cada 5 minutos
-*/5 * * * * curl -sf https://tudominio.com/api/health/ | grep -q '"status":"ok"' || echo "$(date): FUNCREES health check failed" >> /var/log/funcrees/monitor.log
-```
-
----
-
-## 🔄 Renovación Automática de SSL
-
-Certbot instala un cron job automáticamente, pero verificar:
-
-```bash
-# Verificar cron de certbot
-sudo systemctl list-timers | grep certbot
-
-# Probar renovación manual
-sudo certbot renew --dry-run
-```
-
-Si no existe, agregar manualmente:
-
-```bash
-sudo crontab -e
-# Agregar: 0 12 * * * /usr/bin/certbot renew --quiet --post-hook "systemctl reload nginx"
+# Agregar:
+*/5 * * * * curl -sf https://funcreescolombia.org/api/health/ | grep -q '"status":"ok"' || echo "$(date): health check failed" >> /var/log/funcrees/monitor.log
+*/5 * * * * curl -sf -o /dev/null https://funcreescolombia.org/ || echo "$(date): frontend down" >> /var/log/funcrees/monitor.log
 ```
 
 ---
@@ -460,60 +433,27 @@ sudo crontab -e
 
 | Problema | Solución |
 |----------|----------|
-| Error 502 Bad Gateway | Verificar que Gunicorn esté corriendo: `sudo systemctl status funcrees` |
-| Error de BD | Verificar que PostgreSQL esté activo: `sudo systemctl status postgresql` |
+| Error 502 Bad Gateway (sitio) | Verificar Node: `sudo systemctl status funcrees-web` |
+| Error 502 Bad Gateway (API) | Verificar Gunicorn: `sudo systemctl status funcrees` |
+| "Cannot find module build/index.js" | Ejecutar `npm run build` en `frontend/` |
+| Donaciones fallan con 503 | Llaves de Wompi mal configuradas en `.env` (verificar `WOMPI_ENV`) |
+| Certificados no llegan por email | Revisar `EMAIL_HOST_PASSWORD` (contraseña de aplicación Gmail) |
 | CSRF Error | Verificar `CSRF_TRUSTED_ORIGINS` en `.env` |
-| CORS Error | Verificar `CORS_ALLOWED_ORIGINS` en `.env` |
-| Páginas no cargan | Verificar configuración de Nginx: `sudo nginx -t` |
-
----
-
-## 📁 Estructura Final del Servidor
-
-```
-/var/www/funcrees/
-├── frontend/                    ← Archivos estáticos (Nginx sirve desde aquí)
-│   ├── index.html
-│   ├── app.js
-│   ├── styles.css
-│   ├── themes.css
-│   ├── responsive.css
-│   ├── base.css
-│   ├── components.css
-│   └── assets/
-│       ├── Logo.png
-│       └── Foto Fundación.png
-└── backend/                     ← Aplicación Django
-    ├── manage.py
-    ├── requirements.txt
-    ├── .env                     ← Variables de entorno (NO subir a git)
-    ├── gunicorn.conf.py
-    ├── core/
-    │   ├── settings.py
-    │   ├── urls.py
-    │   └── wsgi.py
-    ├── beneficiaries/
-    ├── donations/
-    ├── events/
-    ├── contact/
-    ├── staticfiles/             ← Archivos estáticos de Django
-    └── templates/
-```
+| Páginas no cargan | `sudo nginx -t` y `sudo journalctl -u funcrees-web -n 50` |
 
 ---
 
 ## 📝 Notas Importantes para el Cliente
 
-1. **NUNCA** subir el archivo `.env` a repositorios públicos
-2. **NUNCA** compartir la `SECRET_KEY` o `ENCRYPTION_KEY`
-3. **SIEMPRE** usar HTTPS en producción
-4. **SIEMPRE** hacer backup antes de actualizar el código
-5. El admin de Django está en: `https://tudominio.com/admin/`
-6. El health check está en: `https://tudominio.com/api/health/`
+1. **NUNCA** subir el archivo `.env` a repositorios (contiene llaves de Wompi y encriptación)
+2. **NUNCA** compartir la `SECRET_KEY` o `ENCRYPTION_KEY` — perder la Fernet key = perder los datos cifrados
+3. **SIEMPRE** hacer backup antes de actualizar el código
+4. Probar siempre primero en `WOMPI_ENV=sandbox` antes de producción
+5. El admin de Django está en: `https://funcreescolombia.org/admin/`
+6. El health check está en: `https://funcreescolombia.org/api/health/`
+7. Los comprobantes de bonos/donaciones son reales: cada transacción queda registrada en Wompi y en el admin
 
 ---
 
----
-
-**Versión del proyecto:** 1.0.0  
-**Última actualización:** Julio 2026
+**Versión del proyecto:** 2.0.0
+**Última actualización:** Septiembre 2026

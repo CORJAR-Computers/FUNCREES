@@ -2,8 +2,10 @@ from django.contrib import admin
 from django.urls import path, include
 from django.http import JsonResponse
 from django.conf import settings
+from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 from beneficiaries.views import BeneficiaryViewSet
+from core.views import public_stats
 from events.views import EventViewSet, TicketViewSet
 from contact.views import ContactMessageViewSet
 from donations.views import DonationViewSet
@@ -52,7 +54,15 @@ def health_check(request):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    # Cifras públicas agregadas (página "Nuestros números"). Fuera del router:
+    # es un endpoint de solo lectura sin serializer ni CRUD.
+    path('api/stats/', public_stats, name='public-stats'),
     # Health check: una sola ruta (api/health/) para evitar duplicados que
     # confunden a los servicios de monitoreo y complican la rotación de logs.
     path('api/health/', health_check, name='health-check'),
 ]
+
+# Servir imágenes subidas (media) en desarrollo. En producción las sirve
+# Nginx (ver deploy_nginx.conf, location /media/).
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -776,6 +776,24 @@
   border-color: var(--primary-trans);
 }
 
+/* Imagen promocional del evento (subida desde el panel admin) */
+.evento-img-box {
+  height: 180px;
+  overflow: hidden;
+}
+
+.evento-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.evento-card:hover .evento-img {
+  transform: scale(1.04);
+}
+
 .evento-badge-panel {
   position: relative;
   height: 100px;
@@ -3826,5 +3844,202 @@ body.dark-mode :focus-visible {
      el navegador ignora 'auto' — por eso existe el guard en 3c-a11y.js. */
   * {
     scroll-behavior: auto !important;
+  }
+}
+
+/* =============================================================================
+   NUESTROS NÚMEROS (/numeros) — página pública de transparencia
+   ============================================================================= */
+
+.numeros-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto 3rem;
+}
+
+.numeros-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.numeros-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+.numeros-card-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  background: var(--primary-trans);
+  color: var(--primary-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.numeros-card-value {
+  margin: 0 0 0.4rem;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--primary-dark);
+  font-variant-numeric: tabular-nums;
+}
+
+.numeros-card-label {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.numeros-chart-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 1100px;
+  margin: 0 auto 3rem;
+}
+
+.numeros-chart-title {
+  margin: 0 0 1.5rem;
+  font-size: 1.25rem;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.numeros-chart-title i {
+  color: var(--primary-dark);
+}
+
+.numeros-chart {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 0.75rem;
+  align-items: end;
+  height: 260px;
+}
+
+.numeros-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  min-width: 0;
+}
+
+.numeros-col-value {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+  margin-bottom: 0.35rem;
+}
+
+.numeros-bar-area {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.numeros-bar {
+  width: 70%;
+  max-width: 46px;
+  background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+  border-radius: 6px 6px 0 0;
+  transition: filter 0.2s ease;
+}
+
+.numeros-bar:hover {
+  filter: brightness(1.12);
+}
+
+.numeros-col.actual .numeros-bar {
+  box-shadow: 0 0 0 2px var(--primary-trans), 0 0 0 3px var(--primary);
+}
+
+.numeros-col.actual .numeros-col-label,
+.numeros-col.actual .numeros-col-anio,
+.numeros-col.actual .numeros-col-value {
+  color: var(--primary-dark);
+  font-weight: 800;
+}
+
+.numeros-col-label {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.numeros-col-anio {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.numeros-chart-hint {
+  margin: 1rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.numeros-nota {
+  background: var(--primary-soft);
+  border-left: 4px solid var(--primary);
+  border-radius: 0 12px 12px 0;
+  padding: 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.numeros-nota p {
+  margin: 0;
+  color: var(--text-main);
+  line-height: 1.7;
+  font-size: 0.95rem;
+  flex: 1;
+  min-width: 280px;
+}
+
+.numeros-nota i {
+  color: var(--primary-dark);
+  margin-right: 0.35rem;
+}
+
+@media (max-width: 640px) {
+  .numeros-chart {
+    height: 200px;
+    gap: 0.4rem;
+  }
+
+  .numeros-col-value {
+    font-size: 0.6rem;
+  }
+
+  .numeros-col-label {
+    font-size: 0.68rem;
+  }
+
+  .numeros-col-anio {
+    display: none;
   }
 }

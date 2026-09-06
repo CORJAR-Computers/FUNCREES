@@ -1,7 +1,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseCOP, formatMoneyNumber } from '../src/lib/utils/currency.js';
-import { sanitizeHTML } from '../src/lib/utils/sanitize.js';
+import { parseCOP, formatMoneyNumber } from '../src/lib/utils/currency.ts';
+import { sanitizeHTML } from '../src/lib/utils/sanitize.ts';
 
 describe('SvelteKit Utils — parseCOP()', () => {
   test('parsea formato colombiano con punto de miles: "10.000"', () => {

@@ -1,0 +1,40 @@
+# =============================================================================
+# FUNCREES — Servicio systemd para el frontend SvelteKit (adapter-node)
+# =============================================================================
+# Instalación:
+#   sudo cp funcrees-web.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now funcrees-web
+#
+# Requisito: haber ejecutado `npm ci && npm run build` dentro de
+# /var/www/funcrees/frontend (genera frontend/build/index.js).
+#
+# Node.js se instala del paquete oficial (NodeSource) y queda en /usr/bin/node.
+# Si usas nvm, reemplaza ExecStart por la ruta absoluta del binario de Node.
+# =============================================================================
+
+[Unit]
+Description=FUNCREES Frontend (SvelteKit adapter-node)
+After=network.target funcrees.service
+Wants=funcrees.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/funcrees/frontend
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=HOST=127.0.0.1
+ExecStart=/usr/bin/node build
+Restart=on-failure
+RestartSec=5
+
+# Endurecimiento básico
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

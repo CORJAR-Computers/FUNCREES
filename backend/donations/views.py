@@ -12,11 +12,73 @@ from rest_framework.throttling import ScopedRateThrottle
 
 from .models import Donation
 from .serializers import DonationSerializer, InitiateDonationSerializer
-from .services.wompi import create_payment_session, verify_webhook_signature
+from .services.wompi import create_payment_session, verify_webhook_signature, get_transaction_by_reference
 from .services.pdf_generator import generate_donation_certificate
 from .services.email_service import send_donation_email
 
 logger = logging.getLogger(__name__)
+
+
+def procesar_transaccion_wompi(referencia: str, transaction_data: dict) -> Donation:
+    """
+    Aplica a una donación el resultado reportado por Wompi.
+
+    Fuente única para el webhook y para la verificación manual del panel
+    ("Verificar con Wompi"), garantizando idéntico comportamiento:
+    - Idempotencia: si ya está completada, no reprocesa ni reenvía certificado.
+    - Mapeo de estados APPROVED/DECLINED/VOIDED/ERROR.
+    - Al pasar a completado, genera y envía el certificado; los errores de
+      PDF/email se registran pero no propagan.
+
+    Lanza Donation.DoesNotExist si la referencia no existe.
+    """
+    estado_map = {
+        'APPROVED': 'completado',
+        'DECLINED': 'fallido',
+        'VOIDED': 'reembolsado',
+        'ERROR': 'fallido',
+    }
+
+    # Seguridad: bloqueo pesimista + idempotencia (Wompi reenvía webhooks).
+    with transaction.atomic():
+        donation = Donation.objects.select_for_update().get(referencia=referencia)
+
+        if donation.estado == 'completado':
+            logger.info(
+                f"Transacción idempotente: donación {referencia} ya completada, se omite reproceso."
+            )
+            return donation
+
+        nuevo_estado = estado_map.get(transaction_data.get('status'), 'procesando')
+        donation.estado = nuevo_estado
+        donation.referencia_pasarela = transaction_data.get('id')
+        donation.wompi_response = transaction_data
+        donation.save()
+
+        logger.info(f"Donación {referencia} actualizada a {nuevo_estado}")
+
+    # Certificado FUERA de la transacción: no se mantiene el bloqueo de fila
+    # durante SMTP/PDF y sus errores no rompen el registro del pago.
+    if nuevo_estado == 'completado' and not donation.certificado_enviado:
+        try:
+            pdf_bytes = generate_donation_certificate(
+                nombre=donation.donante_nombre,
+                documento=donation.donante_documento_cifrado,
+                monto=donation.monto,
+                referencia=donation.referencia,
+                tipo=donation.tipo,
+                fecha=donation.creado_en,
+            )
+            send_donation_email(donation, pdf_bytes)
+            donation.certificado_enviado = True
+            donation.save(update_fields=['certificado_enviado'])
+        except Exception as ex:
+            logger.error(
+                f"Error enviando certificado para donación {referencia}: {ex}",
+                exc_info=True,
+            )
+
+    return donation
 
 
 class DonationViewSet(viewsets.GenericViewSet):
@@ -170,66 +232,12 @@ class DonationViewSet(viewsets.GenericViewSet):
         if event == 'transaction.updated':
             transaction_data = data.get('transaction', {})
             referencia = transaction_data.get('reference')
-            estado_wompi = transaction_data.get('status')
 
             if referencia:
                 try:
-                    # Seguridad: bloqueo pesimista + idempotencia.
-                    # select_for_update() dentro de transaction.atomic() evita
-                    # condiciones de carrera si Wompi reenvía el mismo webhook
-                    # (comportamiento habitual en pasarelas de pago).
-                    with transaction.atomic():
-                        donation = Donation.objects.select_for_update().get(referencia=referencia)
-
-                        # Idempotencia: si la donación ya está completada, no
-                        # reprocesar (Wompi puede reenviar el webhook).
-                        if donation.estado == 'completado':
-                            logger.info(
-                                f"Webhook idempotente: donación {referencia} ya "
-                                f"completada, se omite reproceso."
-                            )
-                            return Response({"received": True}, status=status.HTTP_200_OK)
-
-                        estado_map = {
-                            'APPROVED': 'completado',
-                            'DECLINED': 'fallido',
-                            'VOIDED': 'reembolsado',
-                            'ERROR': 'fallido'
-                        }
-                        nuevo_estado = estado_map.get(estado_wompi, 'procesando')
-
-                        donation.estado = nuevo_estado
-                        donation.referencia_pasarela = transaction_data.get('id')
-                        donation.wompi_response = transaction_data
-                        donation.save()
-
-                        logger.info(f"Webhook: Donación {referencia} actualizada a {nuevo_estado}")
-
-                        # Si completó y no se ha enviado el certificado, generar
-                        # PDF y enviar email. Las fallas aquí NO deben romper el
-                        # webhook (Wompi espera 200 y reintentaría innecesariamente).
-                        if nuevo_estado == 'completado' and not donation.certificado_enviado:
-                            try:
-                                pdf_bytes = generate_donation_certificate(
-                                    nombre=donation.donante_nombre,
-                                    documento=donation.donante_documento_cifrado,
-                                    monto=donation.monto,
-                                    referencia=donation.referencia,
-                                    tipo=donation.tipo,
-                                    fecha=donation.creado_en,
-                                )
-                                send_donation_email(donation, pdf_bytes)
-                                donation.certificado_enviado = True
-                                donation.save(update_fields=['certificado_enviado'])
-                            except Exception as ex:
-                                # Log del error pero NO propagar: el webhook ya
-                                # registró el pago como completado correctamente.
-                                logger.error(
-                                    f"Error enviando certificado para donación "
-                                    f"{referencia}: {ex}",
-                                    exc_info=True
-                                )
-
+                    # procesar_transaccion_wompi() aplica el estado con bloqueo
+                    # pesimista, idempotencia y envío de certificado.
+                    procesar_transaccion_wompi(referencia, transaction_data)
                 except Donation.DoesNotExist:
                     logger.warning(f"Webhook: Donación no encontrada para referencia {referencia}")
 

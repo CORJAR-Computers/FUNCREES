@@ -7,7 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  frontend:
+    name: Frontend (SvelteKit)
     runs-on: ubuntu-latest
 
     strategy:
@@ -16,28 +17,76 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        run: npm ci
+        run: npm --prefix frontend ci
 
-      - name: Run tests + coverage
-        run: |
-          npm test
-          npm run test:coverage
+      - name: Type check (svelte-check)
+        run: npm --prefix frontend run check
 
-      - name: Show test summary (on failure)
-        if: failure()
+      - name: Build production (adapter-node)
+        run: npm --prefix frontend run build
+
+      - name: Run frontend tests
+        run: node --test frontend/tests/*.test.js
+
+  backend:
+    name: Backend (Django)
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ['3.12', '3.13']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
         run: |
-          echo "=== Node version ==="
-          node --version
-          echo "=== npm version ==="
-          npm --version
-          echo "=== Test output ==="
-          node --test --test-reporter spec ./tests/*.test.js 2>&1 | tail -50
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Django system checks (deployment strict)
+        env:
+          SECRET_KEY: ci-only-secret-key-not-for-production
+          DEBUG: 'False'
+          DATABASE_URL: sqlite:///ci.sqlite3
+          ENCRYPTION_KEY: Y2ktb25seS1mZXJuZXQta2V5LTMyLWJ5dGVzLWJhc2U2NC0xMg==
+          ALLOWED_HOSTS: localhost,127.0.0.1
+          CORS_ALLOWED_ORIGINS: https://funcreescolombia.org
+          WOMPI_ENV: sandbox
+          WOMPI_PUBLIC_KEY: pub_test_ci
+          WOMPI_PRIVATE_KEY: prv_test_ci
+          WOMPI_INTEGRITY_SECRET: test_integrity_ci
+          FRONTEND_URL: https://funcreescolombia.org
+        run: python backend/manage.py check --deploy --settings=core.settings
+
+      - name: Run backend tests
+        env:
+          SECRET_KEY: ci-only-secret-key-not-for-production
+          DEBUG: 'True'
+          DATABASE_URL: sqlite:///:memory:
+          ENCRYPTION_KEY: Y2ktb25seS1mZXJuZXQta2V5LTMyLWJ5dGVzLWJhc2U2NC0xMg==
+          WOMPI_ENV: sandbox
+          WOMPI_PUBLIC_KEY: pub_test_ci
+          WOMPI_PRIVATE_KEY: prv_test_ci
+          WOMPI_INTEGRITY_SECRET: test_integrity_ci
+          FRONTEND_URL: https://funcreescolombia.org
+        working-directory: backend
+        run: python manage.py test -v 2

@@ -63,6 +63,7 @@ else:
 
 INSTALLED_APPS = [
     'unfold',
+    'unfold.contrib.filters',  # filtros desplegables usados en el panel
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -76,6 +77,7 @@ INSTALLED_APPS = [
     'corsheaders',
 
     # Local apps
+    'core',  # template tags del panel (dashboard_stats)
     'beneficiaries',
     'donations',
     'events',
@@ -228,6 +230,14 @@ STATICFILES_DIRS = [
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # ============================================
+# MEDIA (imágenes subidas desde el admin:
+# fotos de beneficiarios, imágenes de eventos)
+# ============================================
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# ============================================
 # ADMIN THEME (django-unfold)
 # ============================================
 
@@ -235,6 +245,10 @@ UNFOLD = {
     "SITE_TITLE": "Funcrees Admin",
     "SITE_HEADER": "Funcrees Colombia",
     "SITE_URL": "/",
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": True,
+    },
     "SITE_LOGO": {
         "light": lambda request: "/static/Logo.png",
         "dark": lambda request: "/static/Logo.png",
@@ -287,6 +301,9 @@ REST_FRAMEWORK = {
         'user': '200/hour',
         'donate': '10/hour',
         'contact': '5/hour',
+        # Cifras públicas (/api/stats/): suficientes para visitantes normales,
+        # restrictivas para scraping masivo.
+        'stats': '30/hour',
     }
 }
 
@@ -295,6 +312,10 @@ REST_FRAMEWORK = {
 # ============================================
 
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
+
+# Destinatarios del resumen semanal (comando send_weekly_digest).
+# Separados por coma. Si queda vacío, el comando no envía nada.
+DIGEST_TO = env('DIGEST_TO', default='')
 
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

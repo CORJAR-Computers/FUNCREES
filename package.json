@@ -1,23 +1,26 @@
 {
   "name": "funcrees",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "private": true,
   "description": "Fundación Crece Una Esperanza Social — Soluciones Sociales Innovadoras para un Impacto Positivo y Duradero. NIT: 902036173-3 | Sincelejo, Sucre, Colombia",
   "type": "module",
   "scripts": {
     "dev": "npm run dev:kill && concurrently --kill-others --names \"BACKEND,FRONTEND\" --prefix-colors \"blue,green\" \"cd backend && venv\\Scripts\\python manage.py runserver 0.0.0.0:8000\" \"npm run frontend:dev\"",
     "dev:backend": "cd backend && venv\\Scripts\\python manage.py runserver 0.0.0.0:8000",
-    "dev:kill": "npx kill-port 5173 5500 8000 --yes",
+    "dev:kill": "npx kill-port 5173 8000 --yes",
     "start": "npm run frontend:dev",
     "build": "npm run frontend:build",
+    "build:all": "npm run frontend:build",
+    "start:prod": "npm --prefix frontend run start",
     "check": "npm run frontend:check",
-    "test": "npm run frontend:test",
+    "test": "npm run frontend:test && npm run backend:test",
     "frontend:dev": "npm --prefix frontend run dev",
     "frontend:build": "npm --prefix frontend run build",
     "frontend:check": "npm --prefix frontend run check",
+    "frontend:start": "npm --prefix frontend run start",
     "frontend:test": "node --test frontend/tests/*.test.js",
-    "legacy:start": "npx serve legacy -p 5500 --no-clipboard",
-    "legacy:test": "node --test ./legacy/tests/*.test.js"
+    "backend:test": "cd backend && venv\\Scripts\\python manage.py test --settings=core.test_settings",
+    "postinstall": "npm --prefix frontend install"
   },
   "license": "ISC",
   "devDependencies": {

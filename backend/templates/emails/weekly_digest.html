@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resumen Semanal — Funcrees Colombia</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f7f4;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f7f4;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.08);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #2d502d 0%, #578c57 100%);padding:40px 40px 30px;text-align:center;">
+              <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:700;letter-spacing:1px;">FUNCREES</h1>
+              <p style="color:rgba(255,255,255,0.85);margin:6px 0 0;font-size:14px;">Resumen Semanal · {{ mes_nombre }}</p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:40px;">
+
+              <h2 style="color:#2d502d;font-size:20px;margin:0 0 8px;">Buenos días, equipo FUNCREES 👋</h2>
+              <p style="color:#555;line-height:1.6;margin:0 0 28px;font-size:14px;">
+                Este es el panorama de la Fundación para <strong>{{ mes_nombre }}</strong>.
+              </p>
+
+              <!-- Recaudado del mes (destacado) -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0f7f0;border-left:4px solid #578c57;border-radius:0 8px 8px 0;padding:22px;margin-bottom:28px;">
+                <tr>
+                  <td>
+                    <p style="margin:0 0 6px;color:#555;font-size:13px;text-transform:uppercase;letter-spacing:1px;">💰 Recaudado en el mes</p>
+                    <p style="margin:0;color:#2d502d;font-size:34px;font-weight:700;">{{ total_mes_fmt }} COP</p>
+                    <p style="margin:8px 0 0;color:#555;font-size:13px;">
+                      {{ cantidad_mes }} donaci{{ cantidad_mes|pluralize:"ón,ones" }} completada{{ cantidad_mes|pluralize }}
+                      {% if donaciones_pendientes > 0 %}
+                        · <span style="color:#b45309;font-weight:600;">{{ donaciones_pendientes }} pendiente{{ donaciones_pendientes|pluralize }} de confirmar</span>
+                      {% endif %}
+                      {% if variacion_direccion == "up" %}
+                        · <span style="color:#16a34a;font-weight:700;">▲ {{ variacion_abs }}% vs mes anterior</span>
+                      {% elif variacion_direccion == "down" %}
+                        · <span style="color:#dc2626;font-weight:700;">▼ {{ variacion_abs }}% vs mes anterior</span>
+                      {% endif %}
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Pagos por confirmar (pendientes >1h, espejo del panel del admin) -->
+              {% if por_confirmar %}
+                <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fef3c7;border-left:4px solid #f59e0b;border-radius:0 8px 8px 0;padding:18px;margin-bottom:28px;">
+                  <tr>
+                    <td>
+                      <p style="margin:0 0 4px;color:#92400e;font-size:13px;text-transform:uppercase;letter-spacing:1px;font-weight:700;">
+                        ⏳ Pagos por confirmar con Wompi
+                      </p>
+                      <p style="margin:0 0 12px;color:#92400e;font-size:12px;">
+                        Wompi normalmente confirma en segundos; estos llevan más de 1 hora sin confirmarse y requieren atención.
+                      </p>
+                      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
+                        {% for p in por_confirmar %}
+                          <tr>
+                            <td style="padding:6px 0;border-bottom:1px solid #fde68a;font-size:13px;color:#78350f;">
+                              <strong style="font-family:monospace;">{{ p.referencia }}</strong> · {{ p.donante_nombre }}
+                            </td>
+                            <td align="right" style="padding:6px 0;border-bottom:1px solid #fde68a;font-size:13px;color:#78350f;white-space:nowrap;">
+                              <strong>{{ p.monto_fmt }} COP</strong> · {{ p.horas }}h esperando
+                            </td>
+                          </tr>
+                        {% endfor %}
+                      </table>
+                      <p style="margin:0;font-size:12px;color:#92400e;line-height:1.6;">
+                        <a href="{{ admin_url }}donations/donation/?pendientes=si" style="color:#92400e;font-weight:700;">Revisar y verificar en el panel →</a>
+                        {% if por_confirmar_total > por_confirmar|length %}({{ por_confirmar_total }} en total){% endif %}
+                        — usa la acción "Verificar con Wompi" para confirmarlos sin esperar el webhook.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              {% endif %}
+
+              <!-- Gráfico mensual (imagen embebida en el correo) -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+                <tr>
+                  <td style="background-color:#ffffff;border:1px solid #e5efe5;border-radius:8px;padding:16px;text-align:center;">
+                    <img src="cid:grafico-mensual" alt="Gráfico de barras: total recaudado por mes en los últimos 6 meses, en pesos colombianos. Los detalles se repiten en el texto de este correo." width="560" style="display:block;max-width:100%;height:auto;border:0;outline:none;text-decoration:none;" />
+                    <p style="margin:12px 0 0;font-size:13px;">
+                      <a href="{{ admin_url }}" style="color:#2d502d;font-weight:700;text-decoration:underline;">Ver cifras en vivo en el panel de administración →</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Indicadores principales -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+                <tr>
+                  <td width="50%" style="padding:14px;background-color:#f8faf8;border:1px solid #e5efe5;border-radius:8px 0 0 8px;">
+                    <p style="margin:0;color:#2d502d;font-size:22px;font-weight:700;">{{ apadrinamientos_activos }}</p>
+                    <p style="margin:2px 0 0;color:#666;font-size:12px;">🤝 Apadrinamientos activos</p>
+                    <p style="margin:2px 0 0;color:#888;font-size:11px;">{{ monto_mensual_fmt }} COP/mes comprometidos</p>
+                  </td>
+                  <td width="50%" style="padding:14px;background-color:#f8faf8;border:1px solid #e5efe5;border-left:none;border-radius:0 8px 8px 0;">
+                    <p style="margin:0;color:{% if no_leidos > 0 %}#b45309{% else %}#2d502d{% endif %};font-size:22px;font-weight:700;">{{ no_leidos }}</p>
+                    <p style="margin:2px 0 0;color:#666;font-size:12px;">📮 Mensajes sin leer</p>
+                    <p style="margin:2px 0 0;color:#888;font-size:11px;">de {{ mensajes|length }} recibidos recientemente</p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Acumulados -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #e5efe5;padding-top:18px;margin-bottom:28px;">
+                <tr>
+                  <td style="padding:3px 0;color:#555;font-size:13px;">
+                    <strong style="color:#2d502d;">Recaudado histórico:</strong> {{ recaudado_total_fmt }} COP
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:3px 0;color:#555;font-size:13px;">
+                    <strong style="color:#2d502d;">Beneficiarios:</strong> {{ beneficiarios_activos }} activos · {{ beneficiarios_apadrinados }} con padrino/madrina
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:3px 0;color:#555;font-size:13px;">
+                    <strong style="color:#2d502d;">Eventos activos:</strong> {{ eventos_activos }} · <strong style="color:#2d502d;">Boletas pagadas:</strong> {{ boletas_pagadas }}
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Últimos mensajes -->
+              {% if mensajes %}
+                <p style="margin:0 0 10px;color:#2d502d;font-size:14px;font-weight:700;">Últimos mensajes recibidos</p>
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+                  {% for m in mensajes %}
+                    <tr>
+                      <td style="padding:8px 0;border-bottom:1px solid #eef4ee;font-size:13px;color:#444;">
+                        <strong>{{ m.nombre }}</strong>
+                        <span style="color:#999;">· {{ m.creado_en|date:"d/m H:i" }}</span>
+                        {% if not m.leido %}
+                          <span style="background:#fef3c7;color:#92400e;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:4px;">NUEVO</span>
+                        {% elif m.respondido %}
+                          <span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:4px;">RESPONDIDO</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </table>
+              {% endif %}
+
+              <!-- CTA -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="text-align:center;">
+                <tr>
+                  <td>
+                    <a href="{{ admin_url }}" style="display:inline-block;background-color:#2d502d;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:14px 36px;border-radius:8px;">Abrir panel de administración</a>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#f8faf8;padding:20px 40px;border-top:1px solid #e5efe5;">
+              <p style="margin:0;color:#999;font-size:11px;line-height:1.6;text-align:center;">
+                Este correo se genera automáticamente todos los lunes a las 7:00 a.m. (hora Colombia).<br>
+                Fundación Crece Una Esperanza Social — FUNCREES Colombia · Sincelejo, Sucre
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

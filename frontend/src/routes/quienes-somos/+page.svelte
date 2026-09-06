@@ -1,11 +1,12 @@
-<script>
-  import { toast } from '$lib/stores/toast.svelte.js';
+<script lang="ts">
+  import Seo from '$lib/components/Seo.svelte';
 </script>
 
-<svelte:head>
-  <title>Quiénes Somos | Fundación Funcrees Colombia</title>
-  <meta name="description" content="Conoce la misión, visión, valores y pilares de acción de la Fundación Funcrees en Sincelejo, Sucre. Comprometidos con el desarrollo integral y digno." />
-</svelte:head>
+<Seo
+  title="Quiénes Somos | Fundación Funcrees Colombia"
+  description="Conoce la misión, visión, valores y pilares de acción de la Fundación Funcrees en Sincelejo, Sucre. Comprometidos con el desarrollo integral y digno."
+  path="/quienes-somos"
+/>
 
 <section id="quienes-somos" class="view-section active">
   <div class="section">
