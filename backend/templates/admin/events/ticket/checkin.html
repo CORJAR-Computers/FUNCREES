@@ -1,0 +1,184 @@
+{% extends "admin/base_site.html" %}
+{% load funcrees_dashboard_tags %}
+{% comment %}
+Pantalla de check-in en puerta para el personal de la fundación.
+
+Diseñada para tablet/teléfono: input grande con autofocus (el escáner de QR
+actúa como teclado y envía Enter → busca solo), resultado en tarjeta grande
+y botón de registro evidente. Usa variables CSS de Unfold para heredar el
+tema claro/oscuro del panel.
+{% endcomment %}
+
+{% block title %}Check-in en puerta | {{ site_title }}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+        .chk-wrap { max-width: 640px; margin: 1.5rem auto 3rem; padding: 0 1rem; }
+        .chk-head { display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .chk-title { font-size: 1.25rem; font-weight: 700; margin: 0; color: var(--color-font-important-light, var(--body-fg)); }
+        .chk-hint { font-size: 0.8rem; color: var(--color-font-subtle-light, #6b7280); }
+
+        .chk-form {
+                display: flex; gap: 0.6rem; margin-bottom: 1rem;
+        }
+        .chk-input {
+                flex: 1 1 auto; min-width: 0;
+                font-size: 1.3rem; font-weight: 700; letter-spacing: 0.14em;
+                text-transform: uppercase; text-align: center;
+                padding: 0.75rem 1rem; border-radius: 0.6rem;
+                border: 2px solid var(--color-primary-500, #10b981);
+                background: var(--color-base-50, #fff); color: var(--color-font-important-light, var(--body-fg));
+        }
+        .chk-input:focus { outline: 3px solid var(--color-primary-300, #6ee7b7); outline-offset: 1px; }
+        .chk-btn {
+                flex: 0 0 auto; font-size: 1rem; font-weight: 600;
+                padding: 0.75rem 1.4rem; border-radius: 0.6rem; border: none; cursor: pointer;
+                background: var(--color-primary-600, #059669); color: #fff;
+        }
+        .chk-btn:hover { background: var(--color-primary-700, #047857); }
+
+        .chk-card {
+                border: 1px solid var(--color-base-200, #e5e7eb); border-radius: 0.9rem;
+                background: var(--color-base-50, #fff);
+                padding: 1.25rem 1.4rem; margin-bottom: 1rem;
+        }
+        .chk-evento { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-primary-600, #059669); }
+        .chk-numero { font-size: 1.7rem; font-weight: 800; margin: 0.2rem 0 0.1rem; color: var(--color-font-important-light, var(--body-fg)); }
+        .chk-nombre { font-size: 0.95rem; color: var(--color-font-subtle-light, #6b7280); }
+        .chk-facts { display: flex; gap: 1.25rem; flex-wrap: wrap; margin-top: 0.9rem; font-size: 0.85rem; }
+        .chk-fact b { display: block; font-size: 0.7rem; text-transform: uppercase; color: var(--color-font-subtle-light, #9ca3af); font-weight: 600; }
+
+        .chk-badge { display: inline-block; font-size: 0.8rem; font-weight: 700; padding: 0.3rem 0.8rem; border-radius: 999px; }
+        .chk-badge--ok { background: #dcfce7; color: #166534; }
+        .chk-badge--warn { background: #fef9c3; color: #854d0e; }
+        .chk-badge--bad { background: #fee2e2; color: #991b1b; }
+
+        .chk-banner { border-radius: 0.7rem; padding: 0.9rem 1.1rem; font-size: 0.9rem; margin-bottom: 1rem; }
+        .chk-banner--ok { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+        .chk-banner--warn { background: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
+        .chk-banner--bad { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+        .chk-register { text-align: center; }
+        .chk-register-btn {
+                width: 100%; font-size: 1.1rem; font-weight: 700; padding: 1rem 1.5rem;
+                border-radius: 0.7rem; border: none; cursor: pointer;
+                background: var(--color-primary-600, #059669); color: #fff;
+        }
+        .chk-register-btn:hover { background: var(--color-primary-700, #047857); }
+        .chk-autorizar { margin-top: 0.75rem; font-size: 0.85rem; display: flex; gap: 0.5rem; align-items: center; justify-content: center; }
+        .chk-autorizar input { width: 1.15rem; height: 1.15rem; }
+        .chk-codigo-eco { font-size: 0.75rem; color: var(--color-font-subtle-light, #9ca3af); text-align: center; margin-top: 0.6rem; }
+        .chk-volver { font-size: 0.8rem; color: var(--color-primary-600, #059669); text-decoration: none; font-weight: 600; }
+        .chk-volver:hover { text-decoration: underline; }
+
+        .dark .chk-card { background: var(--color-base-900, #1f2937); border-color: var(--color-base-700, #374151); }
+        .dark .chk-input { background: var(--color-base-900, #111827); border-color: var(--color-primary-400, #34d399); }
+        .dark .chk-banner--ok { background: rgba(22, 163, 74, 0.18); color: #86efac; border-color: rgba(22, 163, 74, 0.45); }
+        .dark .chk-banner--warn { background: rgba(217, 119, 6, 0.15); color: #fcd34d; border-color: rgba(217, 119, 6, 0.45); }
+        .dark .chk-banner--bad { background: rgba(220, 38, 38, 0.15); color: #fca5a5; border-color: rgba(220, 38, 38, 0.45); }
+        .dark .chk-badge--ok { background: rgba(22, 163, 74, 0.2); color: #86efac; }
+        .dark .chk-badge--warn { background: rgba(217, 119, 6, 0.2); color: #fcd34d; }
+        .dark .chk-badge--bad { background: rgba(220, 38, 38, 0.2); color: #fca5a5; }
+
+        @media (prefers-reduced-motion: no-preference) {
+                .chk-card { animation: chk-aparecer 0.2s ease; }
+                @keyframes chk-aparecer { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+        }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chk-wrap">
+        <div class="chk-head">
+                <h1 class="chk-title">🚪 Check-in en puerta</h1>
+                <a class="chk-volver" href="{% url 'admin:events_ticket_changelist' %}">← Volver a boletas</a>
+        </div>
+        <p class="chk-hint">
+                Escanee el QR de la boleta con la cámara del dispositivo (abre esta misma pantalla con el
+                código prellenado) o digite el código de verificación y presione <b>Buscar</b>.
+        </p>
+
+        <form class="chk-form" method="get" action="">
+                <input
+                        type="text" name="codigo" class="chk-input" value="{{ codigo }}"
+                        placeholder="CÓDIGO" maxlength="20" autocomplete="off" spellcheck="false"
+                        autofocus aria-label="Código de verificación de la boleta"
+                />
+                <button type="submit" class="chk-btn">Buscar</button>
+        </form>
+
+        {% if registrado_ok and ticket %}
+                <div class="chk-banner chk-banner--ok">
+                        ✅ <b>Entrada registrada</b> — buen trabajo. Puede escanear la siguiente boleta.
+                </div>
+        {% endif %}
+
+        {% if codigo and not ticket %}
+                <div class="chk-banner chk-banner--bad">
+                        ❌ No existe una boleta con el código <b>{{ codigo }}</b>. Verifique que esté completo.
+                </div>
+        {% endif %}
+
+        {% if ticket %}
+                <div class="chk-card">
+                        <span class="chk-evento">{{ ticket.evento.titulo }}</span>
+                        <div class="chk-numero">Boleta N.º {{ ticket.numero_ticket }}</div>
+                        <span class="chk-nombre">A nombre de: <b>{{ ticket.comprador_nombre }}</b></span>
+
+                        <div class="chk-facts">
+                                <div class="chk-fact"><b>Estado de pago</b>
+                                        {% if ticket.estado_pago == 'pagado' %}
+                                                <span class="chk-badge chk-badge--ok">Pagado</span>
+                                        {% elif ticket.estado_pago == 'pendiente' %}
+                                                <span class="chk-badge chk-badge--warn">Pendiente</span>
+                                        {% else %}
+                                                <span class="chk-badge chk-badge--bad">Cancelado</span>
+                                        {% endif %}
+                                </div>
+                                <div class="chk-fact"><b>Valor</b> {{ ticket.monto_pagado|cop_full }}</div>
+                                <div class="chk-fact"><b>Entrada</b>
+                                        {% if ticket.asistio %}
+                                                ✅ {{ ticket.checkin_en|date:"d/m/Y H:i" }}
+                                                {% if ticket.checkin_por %} — {{ ticket.checkin_por.get_username }}{% endif %}
+                                        {% else %}
+                                                — sin registrar
+                                        {% endif %}
+                                </div>
+                        </div>
+                </div>
+
+                {% if ticket.estado_pago == 'cancelado' %}
+                        <div class="chk-banner chk-banner--bad">
+                                🚫 <b>Boleta cancelada:</b> no se permite registrar entrada. Si el comprador
+                                insiste, contacte al coordinador del evento.
+                        </div>
+                {% elif ticket.asistio %}
+                        <div class="chk-banner chk-banner--warn">
+                                ⚠️ <b>Entrada ya registrada</b> el {{ ticket.checkin_en|date:"d/m/Y H:i" }}{% if ticket.checkin_por %} por {{ ticket.checkin_por.get_username }}{% endif %}.
+                                No es necesario volver a registrarla.
+                        </div>
+                {% else %}
+                        <form class="chk-register" method="post" action="">
+                                {% csrf_token %}
+                                <input type="hidden" name="codigo" value="{{ ticket.codigo_verificacion }}" />
+                                {% if ticket.estado_pago == 'pendiente' %}
+                                        <div class="chk-banner chk-banner--warn">
+                                                ⏳ Esta boleta está <b>pendiente de pago</b>. Solo regístre la entrada
+                                                si un responsable autoriza el ingreso sin pago confirmado.
+                                        </div>
+                                        <label class="chk-autorizar">
+                                                <input type="checkbox" name="autorizar" value="1"
+                                                       required id="chk-autoriza" />
+                                                Autorizo la entrada sin pago confirmado
+                                        </label>
+                                {% endif %}
+                                <p style="margin-top: 1rem;">
+                                        <button type="submit" class="chk-register-btn">✅ Registrar entrada ahora</button>
+                                </p>
+                                <p class="chk-codigo-eco">código: <code>{{ ticket.codigo_verificacion }}</code></p>
+                        </form>
+                {% endif %}
+        {% endif %}
+</div>
+{% endblock %}

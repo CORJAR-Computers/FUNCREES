@@ -105,6 +105,16 @@ class BoletasMetricsTests(TestCase):
         self.assertEqual(fila['pagadas'], 3)    # 2 del mes + 1 del mes previo
         self.assertEqual(fila['recaudo_fmt'], '$60.000')
 
+    def test_asistidas_cuenta_solo_checkin(self):
+        # Sin check-ins todavía: cero. Tras registrar uno en una boleta
+        # pendiente (autorizada en puerta), cuenta igual — la persona entró.
+        r = self._resumen()
+        self.assertEqual(r['boletas_asistidas'], 0)
+        self.pendiente_reciente.checkin_en = timezone.now()
+        self.pendiente_reciente.save(update_fields=['checkin_en'])
+        r = self._resumen()
+        self.assertEqual(r['boletas_asistidas'], 1)
+
     def test_sin_boletas_no_explota(self):
         Ticket.objects.all().delete()
         r = self._resumen()

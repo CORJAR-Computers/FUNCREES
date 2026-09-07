@@ -1,0 +1,13 @@
+{% extends "admin/change_list.html" %}
+{% comment %}
+Añade el acceso directo "Check-in en puerta" a la barra de herramientas del
+listado de boletas. La URL llega como `checkin_url` desde TicketAdmin
+.changelist_view().
+{% endcomment %}
+
+{% block object-tools-items %}
+<li>
+        <a href="{{ checkin_url }}" class="button">🚪 Check-in en puerta</a>
+</li>
+{{ block.super }}
+{% endblock %}

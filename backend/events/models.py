@@ -1,6 +1,7 @@
 import uuid
 import secrets
 import string
+from django.conf import settings
 from django.db import models
 
 # Ley 1581: el teléfono del comprador es dato personal y se cifra en reposo
@@ -121,10 +122,33 @@ class Ticket(models.Model):
     # antigüedad (remind_pending_tickets --dias N) y métricas de ventas.
     creado_en = models.DateTimeField(auto_now_add=True, verbose_name='Creado')
 
+    # Check-in en puerta: el personal escanea (o digita) el código del QR
+    # en /admin/events/ticket/checkin/ y aquí queda quién entró y cuándo.
+    checkin_en = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name='Entrada registrada',
+        help_text='Momento en que se registró la entrada al evento (check-in en puerta).',
+    )
+    checkin_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='checkins_registrados',
+        verbose_name='Entrada registrada por',
+        help_text='Miembro del personal que registró la entrada.',
+    )
+
     class Meta:
         verbose_name = 'Boleta/Ticket'
         verbose_name_plural = 'Boletas/Tickets'
         unique_together = ('evento', 'numero_ticket')
+
+    @property
+    def asistio(self) -> bool:
+        """True si la entrada ya fue registrada en puerta."""
+        return self.checkin_en is not None
 
     def __str__(self):
         return f"Ticket #{self.numero_ticket} - {self.evento.titulo}"

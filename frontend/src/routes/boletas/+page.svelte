@@ -198,6 +198,15 @@
 
                         {#if ticket}
                                 <article class="boletas-resultado" aria-live="polite">
+                                        <!-- Encabezado oficial: visible SOLO al imprimir (comprobante con cara formal) -->
+                                        <div class="boletas-print-head" aria-hidden="true">
+                                                <img src="/assets/logo-funcrees.webp" alt="" class="boletas-print-logo" />
+                                                <div>
+                                                        <strong>Fundación Crece una Esperanza (Funcrees) Colombia</strong>
+                                                        <span>Comprobante oficial de boleta · funcreescolombia.org</span>
+                                                </div>
+                                        </div>
+
                                         <header class="boletas-resultado-header">
                                                 <div>
                                                         <span class="boletas-evento-label"><i class="fa-solid fa-calendar-star"></i> {ticket.evento_titulo}</span>
@@ -219,7 +228,7 @@
                                                                 <strong><i class="fa-solid fa-qrcode" aria-hidden="true"></i> Verificación en la puerta</strong>
                                                                 <p>
                                                                         Presenta este QR (impreso o en tu teléfono) el día del evento:
-                                                                        el equipo lo escanea y confirma tu boleta al instante, sin tipear
+                                                                        el equipo lo escanea y registra tu entrada al instante, sin tipear
                                                                         el código.
                                                                 </p>
                                                         </div>
@@ -406,6 +415,12 @@
         .boletas-comprador {
                 font-size: 0.92rem;
                 color: var(--text-muted);
+        }
+
+        /* Encabezado oficial de impresión: oculto en pantalla, visible en papel.
+                Da cara de comprobante formal (logo + razón social + línea). */
+        .boletas-print-head {
+                display: none;
         }
 
         /* Bloque QR de verificación en puerta */
@@ -643,6 +658,33 @@
                         border-color: #2d502d;
                         box-shadow: none;
                         animation: none;
+                }
+
+                /* Encabezado oficial del comprobante impreso */
+                .boletas-print-head {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.9rem;
+                        padding: 0 1.4rem 0.9rem;
+                        border-bottom: 2px solid #2d502d;
+                        margin-bottom: 0.2rem;
+                }
+
+                .boletas-print-logo {
+                        width: 52px;
+                        height: 52px;
+                        object-fit: contain;
+                }
+
+                .boletas-print-head strong {
+                        display: block;
+                        font-size: 0.95rem;
+                        color: #1a1a1a;
+                }
+
+                .boletas-print-head span {
+                        font-size: 0.72rem;
+                        color: #444;
                 }
 
                 .boletas-acciones {

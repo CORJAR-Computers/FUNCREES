@@ -1,4 +1,8 @@
 from django.contrib import admin, messages
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.urls import path, reverse
+from django.utils import timezone
 from django.utils.html import format_html
 from unfold.admin import ModelAdmin
 from unfold.contrib.filters.admin import ChoicesDropdownFilter
@@ -90,17 +94,18 @@ class EventAdmin(ModelAdmin):
 
 @admin.register(Ticket)
 class TicketAdmin(ModelAdmin):
-    list_display = ('numero_ticket', 'evento', 'comprador_nombre', 'comprador_email', 'monto_pagado', 'estado_pago', 'ticket_enviado')
+    list_display = ('numero_ticket', 'evento', 'comprador_nombre', 'comprador_email', 'monto_pagado', 'estado_pago', 'ticket_enviado', 'asistio_badge')
     list_display_links = ('numero_ticket',)
     list_filter = (
         ('estado_pago', ChoicesDropdownFilter),
         ('seleccion_tipo', ChoicesDropdownFilter),
         ('ticket_enviado', ChoicesDropdownFilter),
+        ('checkin_en', admin.BooleanFieldListFilter),
         'evento',
     )
     search_fields = ('comprador_nombre', 'comprador_email', 'codigo_verificacion')
     search_help_text = 'Busque por nombre, email o código de verificación de la boleta.'
-    readonly_fields = ('codigo_verificacion', 'donacion_id')
+    readonly_fields = ('codigo_verificacion', 'donacion_id', 'checkin_en', 'checkin_por')
     actions = ('marcar_como_enviado', 'enviar_boleta_por_email', 'recordar_pago_pendiente')
 
     fieldsets = (
@@ -114,7 +119,99 @@ class TicketAdmin(ModelAdmin):
         ('Pago', {
             'fields': ('monto_pagado', 'estado_pago', 'referencia_wompi', 'donacion_id', 'ticket_enviado'),
         }),
+        ('🚪 Check-in (solo lectura)', {
+            'fields': ('checkin_en', 'checkin_por'),
+            'description': 'La entrada se registra desde la pantalla '
+                           '<a href="checkin/">Check-in en puerta</a> escaneando el QR de la boleta.',
+        }),
     )
+
+    def get_urls(self):
+        urls = super().get_urls()
+        propias = [
+            path(
+                'checkin/',
+                self.admin_site.admin_view(self.checkin_view),
+                name='events_ticket_checkin',
+            ),
+        ]
+        return propias + urls
+
+    @admin.display(description='Asistió', boolean=True)
+    def asistio_badge(self, obj):
+        """Marca ✔/✘ de asistencia (columna ordenable por checkin_en vía
+        ordering del campo; el booleano dibuja el check verde de Django)."""
+        return obj.asistio
+
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['checkin_url'] = reverse('admin:events_ticket_checkin')
+        return super().changelist_view(request, extra_context)
+
+    # ── Check-in en puerta ────────────────────────────────────────────
+    # Flujo Post/Redirect/Get: el POST registra y redirige con ?ok=1 para
+    # que F5 no registre la entrada dos veces. La búsqueda usa GET con
+    # ?codigo=, así el escáner de QR (que actúa como teclado) puede
+    # autofiltrar sin pasos extra.
+
+    def checkin_view(self, request):
+        """Pantalla para registrar la entrada de una boleta el día del evento."""
+        codigo = (request.GET.get('codigo') or request.POST.get('codigo') or '').strip().upper()
+        ticket = Ticket.objects.select_related('evento').filter(codigo_verificacion=codigo).first()
+
+        if request.method == 'POST':
+            return self._checkin_post(request, ticket, codigo)
+
+        contexto = {
+            'codigo': codigo,
+            'ticket': ticket,
+            'registrado_ok': request.GET.get('ok') == '1',
+            'title': 'Check-in en puerta',
+            'opts': Ticket._meta,
+        }
+        return render(request, 'admin/events/ticket/checkin.html', contexto)
+
+    def _checkin_post(self, request, ticket, codigo):
+        destino = reverse('admin:events_ticket_checkin')
+        query = f'?codigo={codigo}' if codigo else ''
+
+        if ticket is None:
+            messages.error(request, f'No existe una boleta con el código «{codigo or "(vacío)"}».')
+            return HttpResponseRedirect(destino)
+
+        if ticket.estado_pago == 'cancelado':
+            messages.error(
+                request,
+                f'La boleta N.º {ticket.numero_ticket} está CANCELADA: no se permite registrar entrada.',
+            )
+            return HttpResponseRedirect(f'{destino}{query}')
+
+        if ticket.asistio:
+            messages.warning(
+                request,
+                f'La entrada de la boleta N.º {ticket.numero_ticket} ya estaba registrada '
+                f'el {timezone.localtime(ticket.checkin_en):%d/%m/%Y %H:%M} '
+                f'por {ticket.checkin_por.get_username() if ticket.checkin_por else "—"}. '
+                'No se registró nada nuevo.',
+            )
+            return HttpResponseRedirect(f'{destino}{query}')
+
+        if ticket.estado_pago == 'pendiente' and request.POST.get('autorizar') != '1':
+            messages.warning(
+                request,
+                f'La boleta N.º {ticket.numero_ticket} está PENDIENTE de pago. Marque '
+                '"autorizar entrada" si decide dejarla pasar igualmente.',
+            )
+            return HttpResponseRedirect(f'{destino}{query}')
+
+        ticket.checkin_en = timezone.now()
+        ticket.checkin_por = request.user
+        ticket.save(update_fields=['checkin_en', 'checkin_por'])
+        messages.success(
+            request,
+            f'✅ Entrada registrada: boleta N.º {ticket.numero_ticket} — {ticket.comprador_nombre}.',
+        )
+        return HttpResponseRedirect(f'{destino}{query}&ok=1' if query else f'{destino}?ok=1')
 
     @admin.action(description='Marcar como boleta enviada')
     def marcar_como_enviado(self, request, queryset):

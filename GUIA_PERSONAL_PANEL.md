@@ -79,6 +79,32 @@ Y si hay boletas sin pagar con más de 48 horas, aparece además una sección
 
 ---
 
+## 🚪 Check-in en puerta (día del evento)
+
+El comprador ya recibe su boleta con un **QR**: solo tienes que escanearlo
+para registrar su entrada, sin listas en papel.
+
+1. Ve a **Boletas/Tickets** y pulsa el botón **"🚪 Check-in en puerta"**
+   (arriba de la lista), o entra directo a `/admin/events/ticket/checkin/`.
+2. En la pantalla grande, **escanea el QR de la boleta con la cámara** del
+   tablet/celular (la página se abre sola con el código ya escrito) o digita
+   el código de verificación y pulsa **Buscar**.
+3. Revisa la tarjeta: número de boleta, comprador y estado de pago.
+4. Pulsa **"✅ Registrar entrada ahora"**. Listo — aparece el confirm verde
+   y puedes escanear la siguiente.
+
+Reglas automáticas para protegerte:
+
+- **Pagada** → registra normal. **Ya registrada** → aviso con fecha y quién
+  registró; no se duplica.
+- **Pendiente de pago** → solo entra si marcas la casilla
+  *"Autorizo la entrada sin pago confirmado"* (queda a tu criterio).
+- **Cancelada** → el sistema lo rechaza siempre.
+- El listado de boletas muestra la columna **"Asistió"** y el inicio del
+  panel suma las **entradas registradas en puerta**.
+
+---
+
 ## 💸 Recordar un pago pendiente a un donante
 
 Si una donación quedó **pendiente** (la persona empezó el pago y no lo terminó):

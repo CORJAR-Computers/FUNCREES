@@ -239,6 +239,8 @@ def resumen_fundacion() -> dict:
     beneficiarios_apadrinados = Beneficiary.objects.filter(apadrinado=True).count()
     eventos_activos = Event.objects.filter(activo=True).count()
     boletas_pagadas = Ticket.objects.filter(estado_pago='pagado').count()
+    # Asistencia real registrada en puerta (check-in del panel, events/0007).
+    boletas_asistidas = Ticket.objects.filter(checkin_en__isnull=False).count()
 
     # ── Boletas del mes (usa creado_en, añadido en migración events/0006) ─
     boletas_actual_q = Ticket.objects.filter(
@@ -344,6 +346,7 @@ def resumen_fundacion() -> dict:
         'beneficiarios_apadrinados': beneficiarios_apadrinados,
         'eventos_activos': eventos_activos,
         'boletas_pagadas': boletas_pagadas,
+        'boletas_asistidas': boletas_asistidas,
         # Boletas del mes (métricas por fecha)
         'boletas_vendidas_mes': boletas_vendidas_mes,
         'boletas_pagadas_mes': boletas_pagadas_mes,
