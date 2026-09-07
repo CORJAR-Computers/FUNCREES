@@ -1,8 +1,10 @@
 <script lang="ts">
         import { page } from '$app/state';
+        import { browser } from '$app/environment';
         import Seo from '$lib/components/Seo.svelte';
         import { getTicket, ApiError } from '$lib/api/client';
         import type { ApiTicket } from '$lib/types';
+        import { buildBoletaDeepLink, generarQrSvg } from '$lib/utils/qr';
 
         /**
          * Consulta pública de boletas: el comprador ingresa el código de
@@ -23,6 +25,10 @@
         let ultimoCodigo = $state('');
         /** La página acepta el código por query string solo una vez (evita loops). */
         let deepLinkAplicado = $state(false);
+        /** SVG del QR con el deep-link de verificación (generado en cliente). */
+        let qrSvg = $state('');
+        /** URL absoluta codificada en el QR (tooltip/título del bloque). */
+        let qrUrl = $state('');
 
         const CODIGO_PATTERN = /^[A-Z0-9]{10}$/;
 
@@ -49,6 +55,7 @@
 
                 try {
                         ticket = await getTicket(normalizado);
+                        await generarQr(normalizado);
                 } catch (err) {
                         if (err instanceof ApiError && err.status === 404) {
                                 notFound = true;
@@ -60,6 +67,20 @@
                         }
                 } finally {
                         isConsultando = false;
+                }
+        }
+
+        /** Genera el QR del deep-link de consulta (solo navegador; fallo = sin QR, no rompe). */
+        async function generarQr(normalizado: string): Promise<void> {
+                qrSvg = '';
+                qrUrl = '';
+                if (!browser) return;
+                const url = buildBoletaDeepLink(window.location.origin, normalizado);
+                if (!url) return;
+                const svg = await generarQrSvg(url);
+                if (svg) {
+                        qrSvg = svg;
+                        qrUrl = url;
                 }
         }
 
@@ -188,6 +209,22 @@
                                                         {ESTADO_META[ticket.estado_pago]?.label ?? ticket.estado_pago}
                                                 </span>
                                         </header>
+
+                                        {#if qrSvg}
+                                                <div class="boletas-qr" title={qrUrl}>
+                                                        <div class="boletas-qr-codigo" aria-hidden="true">
+                                                                {@html qrSvg}
+                                                        </div>
+                                                        <div class="boletas-qr-info">
+                                                                <strong><i class="fa-solid fa-qrcode" aria-hidden="true"></i> Verificación en la puerta</strong>
+                                                                <p>
+                                                                        Presenta este QR (impreso o en tu teléfono) el día del evento:
+                                                                        el equipo lo escanea y confirma tu boleta al instante, sin tipear
+                                                                        el código.
+                                                                </p>
+                                                        </div>
+                                                </div>
+                                        {/if}
 
                                         <footer class="boletas-resultado-footer">
                                                 <span><i class="fa-solid fa-tags"></i> Valor: <strong>{fmtCOP(ticket.monto_pagado)} COP</strong></span>
@@ -368,6 +405,61 @@
 
         .boletas-comprador {
                 font-size: 0.92rem;
+                color: var(--text-muted);
+        }
+
+        /* Bloque QR de verificación en puerta */
+        .boletas-qr {
+                display: flex;
+                gap: 1.1rem;
+                align-items: center;
+                padding: 1.1rem 1.4rem;
+                border-top: 1px dashed var(--border-color);
+                border-bottom: 1px dashed var(--border-color);
+                background: color-mix(in srgb, var(--primary) 4%, var(--bg-card));
+                flex-wrap: wrap;
+        }
+
+        .boletas-qr-codigo {
+                flex: 0 0 auto;
+                width: 110px;
+                height: 110px;
+                background: #ffffff;
+                border: 1px solid var(--border-color);
+                border-radius: var(--radius-sm);
+                padding: 6px;
+                display: grid;
+                place-items: center;
+                box-shadow: var(--shadow-sm);
+        }
+
+        .boletas-qr-codigo :global(svg) {
+                width: 100%;
+                height: 100%;
+                display: block;
+        }
+
+        .boletas-qr-info {
+                flex: 1 1 240px;
+                min-width: 0;
+        }
+
+        .boletas-qr-info strong {
+                color: var(--text-main);
+                display: inline-flex;
+                align-items: center;
+                gap: 0.45rem;
+                font-size: 0.95rem;
+        }
+
+        .boletas-qr-info strong i {
+                color: var(--primary);
+        }
+
+        .boletas-qr-info p {
+                margin: 0.35rem 0 0;
+                font-size: 0.85rem;
+                line-height: 1.55;
                 color: var(--text-muted);
         }
 
@@ -562,6 +654,22 @@
                         -webkit-print-color-adjust: exact;
                         print-color-adjust: exact;
                 }
+
+                /* QR: blanco puro + tinta oscura para escaneo fiable en papel */
+                .boletas-qr {
+                        background: #ffffff !important;
+                        break-inside: avoid;
+                }
+
+                .boletas-qr-codigo {
+                        box-shadow: none;
+                        border-color: #2d502d;
+                }
+
+                .boletas-qr-info strong,
+                .boletas-qr-info p {
+                        color: #1a1a1a;
+                }
         }
 
         @media (max-width: 480px) {
@@ -578,6 +686,11 @@
                 }
 
                 .boletas-resultado-header {
+                        flex-direction: column;
+                        align-items: flex-start;
+                }
+
+                .boletas-qr {
                         flex-direction: column;
                         align-items: flex-start;
                 }

@@ -83,6 +83,8 @@
                         <h1 class="section-title">Contacto y Alianzas Institucionales</h1>
                         <p class="section-description">
                                 ¿Tienes dudas sobre los programas de apadrinamiento, quieres proponer una alianza corporativa o registrarte como voluntario? Escríbenos, con gusto te atenderemos.
+                                Si tu pregunta es sobre donaciones, boletas o certificados, quizá ya la respondimos en las
+                                <a href="/preguntas-frecuentes" style="color: var(--primary); font-weight: 600; text-decoration: underline; text-underline-offset: 3px;">Preguntas Frecuentes</a>.
                         </p>
                 </div>
 
