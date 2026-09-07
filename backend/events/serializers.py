@@ -17,8 +17,8 @@ class EventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
-        fields = ['id', 'titulo', 'descripcion', 'fecha', 'hora', 'lugar', 'costo_bono', 'cupo_maximo', 'cupo_disponible', 'numeracion_min', 'numeracion_max', 'permite_seleccion_numero', 'categoria', 'imagen', 'imagen_webp_srcset', 'imagen_url']
-        read_only_fields = ['imagen']
+        fields = ['id', 'titulo', 'descripcion', 'fecha', 'hora', 'lugar', 'costo_bono', 'cupo_maximo', 'cupo_disponible', 'numeracion_min', 'numeracion_max', 'permite_seleccion_numero', 'categoria', 'imagen', 'imagen_webp_srcset', 'imagen_url', 'actualizado_en']
+        read_only_fields = ['imagen', 'actualizado_en']
 
     def to_representation(self, instance):
         """Unifica la fuente de imagen: archivo subido tiene prioridad."""

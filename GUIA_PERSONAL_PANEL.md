@@ -48,6 +48,22 @@ campañas permanentes (ej. recolecta de pañales).
 
 ---
 
+## 🎟️ Boletas: enviar el código al comprador
+
+Cuando registres (o confirme el pago de) una boleta, el comprador necesita su
+**código de verificación** para consultarla en el sitio y entrar al evento.
+
+1. Ve a **Boletas/Tickets** en el panel y busca la boleta del comprador.
+2. Marca la casilla de la boleta (o varias a la vez).
+3. En el menú **Acción**, elige **"📧 Enviar boleta por email al comprador"** y pulsa **Ir**.
+4. El comprador recibe un correo con: número de boleta, **código destacado**, un
+   **QR** y el enlace para consultarla. La columna "boleta enviada" queda marcada sola.
+
+Si el correo sale con error (⚠️), revisa que el email del comprador esté bien
+escrito; corrígelo en la boleta y vuelve a enviar.
+
+---
+
 ## 🚨 Si algo anda mal
 
 | Situación | Qué hacer |

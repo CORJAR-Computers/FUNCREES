@@ -1378,25 +1378,36 @@
 .form-label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--primary-soft);
+  /* Contraste WCAG AA en ambos temas (bug: --primary-soft en modo claro es
+     casi blanco sobre blanco, ratio 1.17:1). --text-main es oscuro en claro
+     y claro en oscuro; body.dark-mode ya forzaba lo mismo desde ronda 3. */
+  color: var(--text-main);
 }
 
 .form-input {
-  background-color: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  /* Contraste en AMBOS temas (bug: texto blanco invisible en modo claro
+     sobre tarjetas blancas). --bg-card/--border-color/--text-main cambian
+     con el tema; body.high-contrast ya fuerza sus propios colores. */
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   padding: 0.85rem 1.25rem;
-  color: var(--text-white);
+  color: var(--text-main);
   font-family: var(--font-body);
   font-size: 0.95rem;
   transition: var(--transition);
 }
 
+.form-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.85;
+}
+
 .form-input:focus {
   outline: none;
   border-color: var(--primary);
-  background-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 0 0 3px rgba(87, 140, 87, 0.4);
+  background-color: var(--bg-card);
+  box-shadow: 0 0 0 3px var(--primary-trans);
 }
 
 .form-textarea {

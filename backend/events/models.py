@@ -28,6 +28,11 @@ class Event(models.Model):
     categoria = models.CharField(max_length=20, choices=CATEGORIA_CHOICES, default='evento')
     activo = models.BooleanField(default=True)
 
+    # Sello temporal para SEO: el sitemap dinámico del frontend usa esta fecha
+    # como <lastmod> de /eventos/<id>, informando a los buscadores cuándo
+    # cambió realmente el contenido (y no la fecha del deploy).
+    actualizado_en = models.DateTimeField(auto_now=True, verbose_name='Actualizado')
+
     # Imagen subida desde el panel (opción amigable)
     imagen = models.ImageField(
         upload_to='eventos/%Y/%m/',

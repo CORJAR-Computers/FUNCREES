@@ -1,5 +1,6 @@
 <script lang="ts">
         import { onDestroy } from 'svelte';
+        import { page } from '$app/state';
         import { parseCOP, formatMoneyNumber } from '$lib/utils/currency';
         import { toast } from '$lib/stores/toast.svelte';
         import Seo from '$lib/components/Seo.svelte';
@@ -45,6 +46,24 @@
                         now = new Date();
                 }, 1000);
                 return () => clearInterval(id);
+        });
+
+        /**
+         * Deep-link desde la página de detalle: /eventos?evento=<id> abre el
+         * checkout del bono automáticamente (solo eventos con bono pagable; las
+         * campañas libres coordinan por WhatsApp y no deben abrir ventanas solas).
+         */
+        let deepLinkAplicado = $state(false);
+
+        $effect(() => {
+                if (deepLinkAplicado) return;
+                const deepLinkId = page.url.searchParams.get('evento');
+                if (!deepLinkId) return;
+                const ev = eventos.find((e) => e.id === deepLinkId);
+                if (ev && parseCOP(ev.costo) > 0) {
+                        deepLinkAplicado = true;
+                        openTicketModal(ev);
+                }
         });
 
         const categories = [
@@ -335,6 +354,9 @@
                                                 <div class="evento-info">
                                                         <h3 class="evento-titulo">{ev.titulo}</h3>
                                                         <p class="evento-text-desc">{ev.desc}</p>
+                                                        <a class="evento-detalle-link" href="/eventos/{ev.id}">
+                                                                Ver detalles <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                                                        </a>
                                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; flex-wrap: wrap; gap: 1rem;">
                                                                 <span style="font-weight: 700; color: var(--primary-dark); font-size: 1.1rem;">
                                                                         {parseCOP(ev.costo) > 0 ? `Bono: ${ev.costo} COP` : ev.costo || 'Aporte voluntario'}
@@ -500,3 +522,36 @@ Estado:         CONFIRMADO POR LA PASARELA
                 {/if}
         </Modal>
 {/if}
+
+<style>
+        /* Enlace "Ver detalles" de cada tarjeta -> /eventos/[id] */
+        .evento-detalle-link {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.45rem;
+                margin-top: 0.65rem;
+                font-size: 0.88rem;
+                font-weight: 700;
+                color: var(--primary);
+                text-decoration: none;
+                transition: gap 0.2s ease, color 0.2s ease;
+        }
+
+        .evento-detalle-link:hover,
+        .evento-detalle-link:focus-visible {
+                gap: 0.75rem;
+                color: var(--primary-dark, var(--primary));
+        }
+
+        .evento-detalle-link:focus-visible {
+                outline: 2px solid var(--primary);
+                outline-offset: 3px;
+                border-radius: 4px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+                .evento-detalle-link {
+                        transition: none;
+                }
+        }
+</style>

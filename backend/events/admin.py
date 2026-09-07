@@ -4,6 +4,7 @@ from unfold.admin import ModelAdmin
 from unfold.contrib.filters.admin import ChoicesDropdownFilter
 
 from .models import Event, Ticket
+from .services.email_service import send_ticket_email
 
 
 @admin.register(Event)
@@ -100,7 +101,7 @@ class TicketAdmin(ModelAdmin):
     search_fields = ('comprador_nombre', 'comprador_email', 'codigo_verificacion')
     search_help_text = 'Busque por nombre, email o código de verificación de la boleta.'
     readonly_fields = ('codigo_verificacion', 'donacion_id')
-    actions = ('marcar_como_enviado',)
+    actions = ('marcar_como_enviado', 'enviar_boleta_por_email')
 
     fieldsets = (
         ('Boleta', {
@@ -119,3 +120,39 @@ class TicketAdmin(ModelAdmin):
     def marcar_como_enviado(self, request, queryset):
         actualizados = queryset.update(ticket_enviado=True)
         self.message_user(request, f'{actualizados} boletas marcadas como enviadas.', level=messages.SUCCESS)
+
+    @admin.action(description='📧 Enviar boleta por email al comprador')
+    def enviar_boleta_por_email(self, request, queryset):
+        """Envía la boleta oficial (con código y QR) al correo del comprador.
+
+        Errores por ticket (SMTP caído, email inválido) no interrumpen el
+        lote: se cuentan y se informan al final. Solo los envíos exitosos
+        marcan `ticket_enviado=True`.
+        """
+        enviadas, fallidas = 0, 0
+        for ticket in queryset:
+            if send_ticket_email(ticket):
+                ticket.ticket_enviado = True
+                ticket.save(update_fields=['ticket_enviado'])
+                enviadas += 1
+            else:
+                fallidas += 1
+
+        if enviadas and not fallidas:
+            self.message_user(
+                request,
+                f'📧 {enviadas} boleta(s) enviada(s) por email correctamente.',
+                level=messages.SUCCESS,
+            )
+        elif enviadas and fallidas:
+            self.message_user(
+                request,
+                f'📧 {enviadas} enviada(s); ⚠️ {fallidas} con error (revise el correo del comprador o los logs SMTP).',
+                level=messages.WARNING,
+            )
+        else:
+            self.message_user(
+                request,
+                'No se pudo enviar ninguna boleta. Verifique la configuración de email (SMTP) en el servidor.',
+                level=messages.ERROR,
+            )

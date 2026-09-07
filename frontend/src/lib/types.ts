@@ -39,6 +39,8 @@ export interface ApiEvent {
         /** srcset de variantes WebP (200w/400w/800w/1200w); null si aún no hay variantes. */
         imagen_webp_srcset: string | null;
         imagen_url: string | null;
+        /** Sello temporal de la última edición (sitemap <lastmod> real). */
+        actualizado_en?: string | null;
 }
 
 /** POST /api/donations/initiate/ — InitiateDonationSerializer */
@@ -128,6 +130,20 @@ export interface UiEvent {
         desc: string;
         category: string;
         dateObj: string | null; // ISO datetime para el countdown
+}
+
+/**
+ * Evento con datos crudos para la página de detalle /eventos/[id]:
+ * incluye fecha/hora ISO (para JSON-LD y formato propio), cupos y
+ * sello de actualización (SEO).
+ */
+export interface UiEventDetail extends UiEvent {
+        fechaISO: string | null;
+        horaISO: string | null;
+        costoBono: string;
+        cupoMaximo: number | null;
+        cupoDisponible: number | null;
+        actualizadoEn: string | null;
 }
 
 /** Beneficiario ya mapeado para la UI */

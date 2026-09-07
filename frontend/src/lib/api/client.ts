@@ -13,7 +13,8 @@ import type {
         UiBeneficiary,
         PublicStats,
         UiStat,
-        ApiTicket
+        ApiTicket,
+        UiEventDetail
 } from '$lib/types';
 
 /**
@@ -153,30 +154,6 @@ export const FALLBACK_EVENTS: UiEvent[] = [
         }
 ];
 
-/** Formatea una fecha ISO (YYYY-MM-DD) como "26 Octubre". */
-function formatFechaLegible(fechaISO: string | null): string {
-        if (!fechaISO) return 'Permanente';
-        const meses = [
-                'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-        ];
-        const d = new Date(`${fechaISO}T00:00:00`);
-        if (Number.isNaN(d.getTime())) return fechaISO;
-        return `${d.getDate()} ${meses[d.getMonth()]}`;
-}
-
-/** Formatea una hora HH:MM:SS como "7:00 PM". */
-function formatHoraLegible(hora: string | null): string {
-        if (!hora) return 'Horario de Oficina';
-        const [hStr, mStr] = hora.split(':');
-        const h = parseInt(hStr ?? '0', 10);
-        const m = mStr ?? '00';
-        if (Number.isNaN(h)) return hora;
-        const period = h >= 12 ? 'PM' : 'AM';
-        const h12 = h % 12 === 0 ? 12 : h % 12;
-        return `${h12}:${m} ${period}`;
-}
-
 /**
  * Obtiene la lista de adultos mayores beneficiarios.
  * Lanza ApiError si el backend falla — el caller decide el fallback.
@@ -202,6 +179,46 @@ export async function getBeneficiaries(fetchFn: typeof fetch = fetch): Promise<U
         }));
 }
 
+/** Formateadores compartidos de fechas/horas para eventos (lista y detalle). */
+function formatFechaLegible(fechaISO: string | null): string {
+        if (!fechaISO) return 'Permanente';
+        const meses = [
+                'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+        ];
+        const d = new Date(`${fechaISO}T00:00:00`);
+        if (Number.isNaN(d.getTime())) return fechaISO;
+        return `${d.getDate()} ${meses[d.getMonth()]}`;
+}
+
+function formatHoraLegible(hora: string | null): string {
+        if (!hora) return 'Horario de Oficina';
+        const [hStr, mStr] = hora.split(':');
+        const h = parseInt(hStr ?? '0', 10);
+        const m = mStr ?? '00';
+        if (Number.isNaN(h)) return hora;
+        const period = h >= 12 ? 'PM' : 'AM';
+        const h12 = h % 12 === 0 ? 12 : h % 12;
+        return `${h12}:${m} ${period}`;
+}
+
+/** Mapea un ApiEvent del backend al modelo de UI usado en tarjetas. */
+function mapEventoComun(ev: ApiEvent): UiEvent {
+        return {
+                id: String(ev.id),
+                titulo: ev.titulo,
+                fecha: formatFechaLegible(ev.fecha),
+                hora: formatHoraLegible(ev.hora),
+                costo: String(ev.costo_bono ?? ''),
+                lugar: ev.lugar || 'Sede Funcrees',
+                desc: ev.descripcion || '',
+                category: ev.categoria || 'evento',
+                imagen: ev.imagen || ev.imagen_url || null,
+                imagen_webp_srcset: ev.imagen_webp_srcset || null,
+                dateObj: null
+        };
+}
+
 /**
  * Obtiene la lista de eventos solidarios.
  * Lanza ApiError si el backend falla — el caller decide el fallback.
@@ -213,25 +230,46 @@ export async function getEvents(fetchFn: typeof fetch = fetch): Promise<UiEvent[
         const data = (await res.json()) as ApiEvent[] | { results: ApiEvent[] };
         const results = Array.isArray(data) ? data : data.results;
         return results.map((ev) => {
-                let dateObj: string | null = null;
+                const lista = mapEventoComun(ev);
                 if (ev.fecha && ev.hora) {
                         const d = new Date(`${ev.fecha}T${ev.hora}`);
-                        if (!Number.isNaN(d.getTime())) dateObj = d.toISOString();
+                        if (!Number.isNaN(d.getTime())) lista.dateObj = d.toISOString();
                 }
-                return {
-                        id: String(ev.id),
-                        titulo: ev.titulo,
-                        fecha: formatFechaLegible(ev.fecha),
-                        hora: formatHoraLegible(ev.hora),
-                        costo: String(ev.costo_bono ?? ''),
-                        lugar: ev.lugar || 'Sede Funcrees',
-                        desc: ev.descripcion || '',
-                        category: ev.categoria || 'evento',
-                        imagen: ev.imagen || ev.imagen_url || null,
-                        imagen_webp_srcset: ev.imagen_webp_srcset || null,
-                        dateObj
-                };
+                return lista;
         });
+}
+
+/**
+ * Obtiene un evento por su ID (GET /api/events/<id>/ — retrieve del ViewSet).
+ * Devuelve el evento mapeado para tarjetas + datos crudos para la página de
+ * detalle (fecha ISO para JSON-LD, cupos, sello actualizado_en para SEO).
+ * Lanza ApiError(404) si no existe o está inactivo.
+ */
+export async function getEventDetail(
+        id: string,
+        fetchFn: typeof fetch = fetch
+): Promise<UiEventDetail> {
+        const res = await fetchWithTimeout(fetchFn, `/events/${encodeURIComponent(id)}/`);
+        if (res.status === 404) throw new ApiError('Evento no encontrado', 404);
+        if (!res.ok) throw new ApiError(`HTTP ${res.status}`, res.status);
+        const ev = (await res.json()) as ApiEvent;
+
+        const lista = mapEventoComun(ev);
+        let dateObj: string | null = null;
+        if (ev.fecha && ev.hora) {
+                const d = new Date(`${ev.fecha}T${ev.hora}`);
+                if (!Number.isNaN(d.getTime())) dateObj = d.toISOString();
+        }
+        return {
+                ...lista,
+                fechaISO: ev.fecha,
+                horaISO: ev.hora,
+                costoBono: String(ev.costo_bono ?? ''),
+                cupoMaximo: ev.cupo_maximo,
+                cupoDisponible: ev.cupo_disponible,
+                actualizadoEn: ev.actualizado_en ?? null,
+                dateObj
+        };
 }
 
 /**
