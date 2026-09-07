@@ -81,3 +81,4 @@ PAQUETE_ENTREGA.html
 # PDF directo del paquete — regenerable:
 # backend/venv/Scripts/python scripts/build_print_pack.py --pdf
 PAQUETE_ENTREGA.pdf
+*.pid

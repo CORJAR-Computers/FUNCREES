@@ -2081,6 +2081,23 @@ body.modal-open {
   color: var(--primary-soft);
 }
 
+/* El widget de accesibilidad (abajo-izq.) y el botón de WhatsApp (abajo-der.)
+   son position:fixed en las esquinas del viewport: cuando el footer llega al
+   fondo de la pantalla, sus esquinas quedan tapadas. Este padding despeja
+   ambas esquinas para que el texto legal nunca quede debajo de los FAB. */
+@media (max-width: 1400px) {
+  .footer-bottom {
+    padding-inline: 4.75rem;
+  }
+}
+@media (max-width: 640px) {
+  .footer-bottom {
+    justify-content: center;
+    text-align: center;
+    padding-inline: 3.25rem;
+  }
+}
+
 /* ─── FLOATING WHATSAPP BUTTON ─────────────────────────────── */
 
 .whatsapp-float {

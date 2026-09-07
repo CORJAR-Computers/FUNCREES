@@ -240,6 +240,82 @@ def resumen_fundacion() -> dict:
     eventos_activos = Event.objects.filter(activo=True).count()
     boletas_pagadas = Ticket.objects.filter(estado_pago='pagado').count()
 
+    # ── Boletas del mes (usa creado_en, añadido en migración events/0006) ─
+    boletas_actual_q = Ticket.objects.filter(
+        creado_en__gte=_aware(month_start), creado_en__lt=_aware(next_month_start)
+    )
+    boletas_previo_q = Ticket.objects.filter(
+        creado_en__gte=_aware(prev_start), creado_en__lt=_aware(prev_next_start)
+    )
+    boletas_vendidas_mes = boletas_actual_q.count()
+    boletas_pagadas_mes = boletas_actual_q.filter(estado_pago='pagado').count()
+    recaudo_boletas_mes = (
+        boletas_actual_q.filter(estado_pago='pagado').aggregate(s=Sum('monto_pagado'))['s'] or 0
+    )
+    boletas_pagadas_previo = boletas_previo_q.filter(estado_pago='pagado').count()
+
+    variacion_boletas = None
+    if boletas_pagadas_previo > 0:
+        variacion_boletas = round(
+            (boletas_pagadas_mes - boletas_pagadas_previo) / boletas_pagadas_previo * 100
+        )
+    if variacion_boletas is None or variacion_boletas == 0:
+        variacion_boletas_direccion = 'flat'
+    elif variacion_boletas > 0:
+        variacion_boletas_direccion = 'up'
+    else:
+        variacion_boletas_direccion = 'down'
+
+    # Cola de cobro: pendientes con más de 48 horas (el recordatorio semanal
+    # automático ya les escribió; aquí quedan visibles para acción manual).
+    limite_boletas = timezone.now() - dt.timedelta(hours=48)
+    boletas_pendientes_filtro = Q(estado_pago='pendiente')
+    por_cobrar_qs = (
+        Ticket.objects.filter(boletas_pendientes_filtro, creado_en__lt=limite_boletas)
+        .select_related('evento')
+        .order_by('creado_en')[:8]
+    )
+    boletas_por_cobrar = [
+        {
+            'id': t.id,
+            'numero': t.numero_ticket,
+            'evento_id': t.evento_id,
+            'evento_titulo': t.evento.titulo,
+            'comprador': t.comprador_nombre,
+            'monto_fmt': formato_cop(t.monto_pagado),
+            'dias': max(1, int((ahora - t.creado_en).total_seconds() // 86400)),
+            'enviado': t.ticket_enviado,
+        }
+        for t in por_cobrar_qs
+    ]
+    boletas_por_cobrar_total = Ticket.objects.filter(
+        boletas_pendientes_filtro, creado_en__lt=limite_boletas
+    ).count()
+    boletas_pendientes_total = Ticket.objects.filter(estado_pago='pendiente').count()
+    # Pagadas cuyo email con el código aún no se ha enviado (acción del panel)
+    boletas_sin_enviar = Ticket.objects.filter(estado_pago='pagado', ticket_enviado=False).count()
+
+    # Recaudo por evento (top 5 con boletas registradas)
+    eventos_con_boletas = (
+        Event.objects.annotate(
+            boletas_vendidas=Count('tickets'),
+            boletas_pagadas_n=Count('tickets', filter=Q(tickets__estado_pago='pagado')),
+            recaudo=Sum('tickets__monto_pagado', filter=Q(tickets__estado_pago='pagado')),
+        )
+        .filter(boletas_vendidas__gt=0)
+        .order_by('-recaudo', '-boletas_vendidas')[:5]
+    )
+    boletas_por_evento = [
+        {
+            'id': e.id,
+            'titulo': e.titulo,
+            'vendidas': e.boletas_vendidas,
+            'pagadas': e.boletas_pagadas_n,
+            'recaudo_fmt': formato_cop(e.recaudo or 0),
+        }
+        for e in eventos_con_boletas
+    ]
+
     return {
         'mes_nombre': f'{MESES_ES[today.month - 1]} {today.year}',
         # Donaciones
@@ -268,4 +344,17 @@ def resumen_fundacion() -> dict:
         'beneficiarios_apadrinados': beneficiarios_apadrinados,
         'eventos_activos': eventos_activos,
         'boletas_pagadas': boletas_pagadas,
+        # Boletas del mes (métricas por fecha)
+        'boletas_vendidas_mes': boletas_vendidas_mes,
+        'boletas_pagadas_mes': boletas_pagadas_mes,
+        'boletas_pagadas_previo': boletas_pagadas_previo,
+        'recaudo_boletas_mes': recaudo_boletas_mes,
+        'variacion_boletas': variacion_boletas,
+        'variacion_boletas_abs': abs(variacion_boletas) if variacion_boletas is not None else None,
+        'variacion_boletas_direccion': variacion_boletas_direccion,
+        'boletas_pendientes_total': boletas_pendientes_total,
+        'boletas_por_cobrar': boletas_por_cobrar,
+        'boletas_por_cobrar_total': boletas_por_cobrar_total,
+        'boletas_sin_enviar': boletas_sin_enviar,
+        'boletas_por_evento': boletas_por_evento,
     }

@@ -12,10 +12,11 @@ técnicos viven en `DEPLOY.md` y el plan de emergencias en `PLAN_ROLLBACK.md`.
 
 | # | Qué hacer | Dónde |
 |---|---|---|
-| 1 | **Abre el "Resumen de la Fundación"** (es lo primero que ves al entrar): recaudado del mes, gráfico de 6 meses, mensajes nuevos y pagos pendientes. | Inicio del panel |
+| 1 | **Abre el "Resumen de la Fundación"** (es lo primero que ves al entrar): recaudado del mes, **boletas del mes**, gráfico de 6 meses, mensajes nuevos y pagos pendientes. | Inicio del panel |
 | 2 | **Revisa "⏳ Pagos por confirmar con Wompi"** si aparece: son pagos con más de 1 hora sin confirmar. Selecciona cada uno y usa la acción **"🔄 Verificar con Wompi"** para consultar el estado real. Si dejó teléfono, escríbele por el botón verde de **WhatsApp**. | Sección ámbar del inicio o Donaciones |
-| 3 | **Lee los mensajes nuevos** (los que muestran "✉ nuevo"): contéstalos por correo y márcalos con las acciones **"Marcar como leído"** y **"Marcar como respondido"**. | Mensajes de Contacto |
-| 4 | **Revisa el correo del lunes** (7:00 a.m.): trae las cifras de la semana, el gráfico y los pagos pendientes. Es el mismo dato del panel — nunca hay que "cuadrar" a mano. | Correo de la directiva |
+| 3 | **Revisa "🎟️ Boletas pendientes de pago (más de 48h)"** si aparece: son reservas sin pagar a las que el recordatorio del viernes ya escribió. Usa la acción **"⏰ Recordar pago pendiente"** en Boletas/Tickets o coordina por WhatsApp. | Sección ámbar del inicio o Boletas |
+| 4 | **Lee los mensajes nuevos** (los que muestran "✉ nuevo"): contéstalos por correo y márcalos con las acciones **"Marcar como leído"** y **"Marcar como respondido"**. | Mensajes de Contacto |
+| 5 | **Revisa el correo del lunes** (7:00 a.m.): trae las cifras de la semana —incluidas las boletas del mes—, el gráfico y los pagos pendientes. Es el mismo dato del panel — nunca hay que "cuadrar" a mano. | Correo de la directiva |
 
 > 💡 **El panel y la página pública "Nuestros Números"** (`/numeros`) se actualizan solos
 > con cada pago confirmado por Wompi (puede tardar hasta 2 minutos en reflejarse).
@@ -62,6 +63,36 @@ Cuando registres (o confirme el pago de) una boleta, el comprador necesita su
 Si el correo sale con error (⚠️), revisa que el email del comprador esté bien
 escrito; corrígelo en la boleta y vuelve a enviar.
 
+### 📊 Las tarjetas de boletas del inicio
+
+La segunda fila del "Resumen de la Fundación" muestra, siempre:
+
+| Tarjeta | Qué significa |
+|---|---|
+| 🎟️ **Boletas registradas (mes)** | Reservas creadas este mes y cuántas ya están pagadas |
+| 💵 **Recaudo boletas (mes)** | Dinero confirmado por boletas este mes, con variación vs. el mes anterior |
+| ⏳ **Boletas pendientes de pago** | Cuántas reservas siguen sin pagar; en ámbar si alguna supera las 48 horas |
+| 📧 **Pagadas sin email enviado** | Boletas pagadas cuyo comprador **todavía no recibe su código** — ¡envíalo! |
+
+Y si hay boletas sin pagar con más de 48 horas, aparece además una sección
+ámbar con la lista para gestionarlas de una en una.
+
+---
+
+## 💸 Recordar un pago pendiente a un donante
+
+Si una donación quedó **pendiente** (la persona empezó el pago y no lo terminó):
+
+1. Ve a **Donaciones** y filtra por estado **Pendiente** (o usa el filtro
+   "⏳ Pagos por confirmar" del inicio).
+2. Selecciona la(s) donación(es) y elige la acción
+   **"⏰ Recordar pago pendiente (email al donante)"** → **Ir**.
+3. El donante recibe un correo amable con su referencia y el botón para
+   completar su aporte (para apadrinamientos mensuales, el correo orienta a
+   WhatsApp en vez del formulario).
+4. Las donaciones ya confirmadas se omiten solas — no hay riesgo de correos
+   fuera de contexto.
+
 ---
 
 ## 🚨 Si algo anda mal
@@ -84,5 +115,5 @@ escrito; corrígelo en la boleta y vuelve a enviar.
 
 ---
 
-**FUNCREES Colombia · Guía del personal v1.0 (sep 2026)** — acompaña a
+**FUNCREES Colombia · Guía del personal v1.1 (sep 2026)** — acompaña a
 `CHECKLIST_ENTREGA.md` §10 (sesión de capacitación).

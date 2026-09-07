@@ -8,6 +8,7 @@ from unfold.admin import ModelAdmin
 from unfold.contrib.filters.admin import ChoicesDropdownFilter
 
 from .models import Donation, Sponsorship
+from .services.email_service import send_donation_reminder
 from .services.wompi import get_transaction_by_reference
 from .views import procesar_transaccion_wompi
 
@@ -61,7 +62,7 @@ class DonationAdmin(ModelAdmin):
         'donante_documento_cifrado', 'donante_telefono_cifrado', 'referencia_pasarela',
         'wompi_response', 'creado_en', 'ip_origen',
     )
-    actions = ('exportar_csv', 'verificar_con_wompi')
+    actions = ('exportar_csv', 'verificar_con_wompi', 'recordar_pago_pendiente')
 
     fieldsets = (
         ('Resumen del pago', {
@@ -155,6 +156,42 @@ class DonationAdmin(ModelAdmin):
                 )
             return format_html('<span style="color:#6b7280;">recién creada</span>')
         return '—'
+
+    @admin.action(description='⏰ Recordar pago pendiente (email al donante)')
+    def recordar_pago_pendiente(self, request, queryset):
+        """
+        Envía el recordatorio de aporte pendiente a cada donante seleccionado.
+
+        Omite silenciosamente las donaciones ya confirmadas/fallidas (enviar
+        ese correo sería confuso) y reporta el conteo. Un fallo SMTP por fila
+        no interrumpe el lote (send_donation_reminder nunca lanza).
+        """
+        pendientes = queryset.filter(estado__in=['pendiente', 'procesando'])
+        omitidas = queryset.count() - pendientes.count()
+
+        if not pendientes.exists():
+            self.message_user(
+                request,
+                'Ninguna donación de la selección está pendiente: no se envió ningún correo.',
+                level=messages.WARNING,
+            )
+            return
+
+        enviados, fallidos = 0, 0
+        for donation in pendientes:
+            if send_donation_reminder(donation):
+                enviados += 1
+            else:
+                fallidos += 1
+
+        partes = [f'{enviados} recordatorio(s) enviado(s) ✅']
+        if fallidos:
+            partes.append(f'{fallidos} con error de envío ❌')
+        if omitidas:
+            partes.append(f'{omitidas} omitida(s) (no están pendientes)')
+
+        nivel = messages.SUCCESS if not fallidos else messages.WARNING
+        self.message_user(request, 'Resultado del recordatorio: ' + ' · '.join(partes), level=nivel)
 
     @admin.action(description='Exportar seleccionadas a CSV (Excel)')
     def exportar_csv(self, request, queryset):

@@ -80,7 +80,24 @@
 
 html {
   scroll-behavior: smooth;
+  /* El header es sticky (~105px): sin este padding, los anclas internas
+     (p.ej. /transparencia#rendicion-cuentas) aterrizan TAPADAS por el navbar. */
+  scroll-padding-top: 7.5rem;
   font-size: calc(16px * var(--font-scale));
+}
+
+/* Feedback visual al llegar a un ancla (secciones legales enlazadas desde el
+   footer): destello suave del fondo para ubicar la sección en pantalla. */
+@keyframes targetFlash {
+  from { background-color: color-mix(in srgb, var(--primary) 16%, transparent); }
+  to   { background-color: transparent; }
+}
+:target {
+  animation: targetFlash 1.6s ease-out 1;
+  border-radius: 8px;
+}
+@media (prefers-reduced-motion: reduce) {
+  :target { animation: none; }
 }
 
 body {

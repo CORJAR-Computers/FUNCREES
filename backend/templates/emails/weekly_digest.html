@@ -127,6 +127,13 @@
                     <strong style="color:#2d502d;">Eventos activos:</strong> {{ eventos_activos }} · <strong style="color:#2d502d;">Boletas pagadas:</strong> {{ boletas_pagadas }}
                   </td>
                 </tr>
+                <tr>
+                  <td style="padding:3px 0;color:#555;font-size:13px;">
+                    <strong style="color:#2d502d;">Boletas este mes:</strong> {{ boletas_vendidas_mes }} registradas ({{ boletas_pagadas_mes }} pagadas, {{ recaudo_boletas_mes_fmt }} COP)
+                    {% if boletas_pendientes_total > 0 %} · <span style="color:#b45309;font-weight:700;">{{ boletas_pendientes_total }} pendientes de pago</span>{% endif %}
+                    {% if boletas_sin_enviar > 0 %} · <span style="color:#b45309;font-weight:700;">{{ boletas_sin_enviar }} sin email del código</span>{% endif %}
+                  </td>
+                </tr>
               </table>
 
               <!-- Últimos mensajes -->

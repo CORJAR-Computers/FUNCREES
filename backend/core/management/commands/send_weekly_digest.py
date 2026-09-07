@@ -73,6 +73,7 @@ class Command(BaseCommand):
             'total_mes_fmt': formato_cop(resumen['total_mes']),
             'monto_mensual_fmt': formato_cop(resumen['monto_mensual_apadrinamientos']),
             'recaudado_total_fmt': formato_cop(resumen['recaudado_total']),
+            'recaudo_boletas_mes_fmt': formato_cop(resumen['recaudo_boletas_mes']),
         }
 
         subject = (
