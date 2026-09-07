@@ -120,6 +120,35 @@ Nginx, Certbot, backups y monitoreo.
 
 ---
 
+## 📚 Documentación por audiencia
+
+**Para la Fundación (sin conocimientos técnicos):**
+
+| Documento | Para qué |
+|---|---|
+| [GUIA_PERSONAL_PANEL.md](GUIA_PERSONAL_PANEL.md) | Manual del panel administrativo |
+| [QUE_HACER_SI_ALGO_FALLA.md](QUE_HACER_SI_ALGO_FALLA.md) | Contingencia en lenguaje llano: síntomas, a quién llamar, qué anotar |
+| [INVENTARIO_CUENTAS_Y_ACCESOS.md](INVENTARIO_CUENTAS_Y_ACCESOS.md) | Cuentas digitales, propietarios, gestor de contraseñas y transferencia |
+| [COSTOS_Y_CALENDARIO_OPERACION.md](COSTOS_Y_CALENDARIO_OPERACION.md) | Costos recurrentes, vencimientos y rutina de operación |
+| [ACTA_DE_ACEPTACION.md](ACTA_DE_ACEPTACION.md) | Verificación funcional y firma de aceptación |
+| [AGENDA_CAPACITACION.md](AGENDA_CAPACITACION.md) | Plan de la sesión de capacitación |
+
+**Para quien despliegue / soporte técnico:**
+
+| Documento | Para qué |
+|---|---|
+| [GUIA_DEL_PROVEEDOR_DESPLIEGUE.md](GUIA_DEL_PROVEEDOR_DESPLIEGUE.md) | Punto de partida: orden de lectura, requisitos y prohibiciones |
+| [DEPLOY.md](DEPLOY.md) | Referencia completa de despliegue |
+| [RUNBOOK_VPS.md](RUNBOOK_VPS.md) | Guion paso a paso (10 fases con checkpoints) |
+| [PLAN_ROLLBACK.md](PLAN_ROLLBACK.md) | Recuperación ante fallos |
+| [CHECKLIST_ENTREGA.md](CHECKLIST_ENTREGA.md) | Verificación técnica de la entrega |
+| [DIA2_MONITOREO.md](DIA2_MONITOREO.md) | Monitoreo del día siguiente |
+
+El paquete imprimible combinado se genera con
+`python scripts/build_print_pack.py --pdf` (fuente: `PAQUETE_ENTREGA.md`).
+
+---
+
 ## 📝 Notas
 
 - La URL canónica para SEO se configura con `VITE_SITE_URL` (default

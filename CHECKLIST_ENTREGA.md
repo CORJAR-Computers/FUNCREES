@@ -256,6 +256,7 @@ en `deploy_nginx.conf`).
 - [ ] Todo lo anterior en un **gestor de contraseñas** (Bitwarden/1Password), nunca en correo, WhatsApp ni documentos sueltos.
 - [ ] Sesión de capacitación con el personal: subir fotos, crear eventos, revisar donaciones y el panel de resumen, marcar mensajes leídos, exportar CSV de donaciones. **Usar `AGENDA_CAPACITACION.md`** (sesión de 90 min con prácticas) y **entregar `GUIA_PERSONAL_PANEL.md` impresa** a cada participante.
 - [ ] Entregar impresa/PDF: el **`PAQUETE_ENTREGA.md`** (documento combinado: runbook + rollback + guía del personal + agenda + acta de firmas). Para el PDF directo en el VPS, sin navegador: `backend/venv/Scripts/python scripts/build_print_pack.py --pdf` (o sin `--pdf` para el HTML imprimible). También `DEPLOY.md` (operación), este checklist firmado, y las URLs clave.
+- [ ] Entregar los **documentos complementarios para no técnicos**: `QUE_HACER_SI_ALGO_FALLA.md` (contingencia en lenguaje llano), `INVENTARIO_CUENTAS_Y_ACCESOS.md` (cuentas y transferencia de propiedad — completar tablas con el cliente), `COSTOS_Y_CALENDARIO_OPERACION.md` (facturas y rutina), `ACTA_DE_ACEPTACION.md` (verificación funcional + firmas), y `GUIA_DEL_PROVEEDOR_DESPLIEGUE.md` (para quien ponga el sitio en producción). Índice completo en `README.md → 📚 Documentación por audiencia`.
 
 ---
 

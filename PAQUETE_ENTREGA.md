@@ -23,6 +23,14 @@ repositorio (si un fuente cambia, se regenera este paquete).
 | 4 | Agenda de capacitación | Sesión de 90 min con el personal |
 | ✍️ | Acta de entrega y firmas | Al finalizar todo |
 
+**Documentos complementarios (por separado, no incluidos en este paquete):**
+`QUE_HACER_SI_ALGO_FALLA.md` (contingencia para personal no técnico) ·
+`INVENTARIO_CUENTAS_Y_ACCESOS.md` (cuentas y transferencia de propiedad) ·
+`COSTOS_Y_CALENDARIO_OPERACION.md` (facturas y rutina mensual) ·
+`ACTA_DE_ACEPTACION.md` (acta completa de aceptación con verificación funcional) ·
+`GUIA_DEL_PROVEEDOR_DESPLIEGUE.md` (para quien realice el despliegue).
+Índice completo: `README.md → 📚 Documentación por audiencia`.
+
 ---
 ---
 
