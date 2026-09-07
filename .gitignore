@@ -82,3 +82,5 @@ PAQUETE_ENTREGA.html
 # backend/venv/Scripts/python scripts/build_print_pack.py --pdf
 PAQUETE_ENTREGA.pdf
 *.pid
+# Bundles de git (transporte de commits entre máquinas) — artefacto, no código:
+*.bundle
