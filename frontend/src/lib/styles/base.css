@@ -102,6 +102,46 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
 }
 
+/* ─── Selección de texto con color de marca ───────────────── */
+/* Detalle de identidad: al seleccionar texto, el resaltado usa el
+   verde institucional en lugar del azul default del navegador. */
+::selection {
+  background: var(--green-mid-brand);
+  color: #fff;
+}
+
+/* Firefox */
+::-moz-selection {
+  background: var(--green-mid-brand);
+  color: #fff;
+}
+
+/* ─── Scrollbar personalizada (WebKit/Chromium) ───────────── */
+/* Sutil y coherente con la marca; Firefox usa scrollbar-width nativo. */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--green-mid-brand) 55%, var(--bg-secondary));
+  border-radius: 8px;
+  border: 3px solid var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--green-mid-brand);
+}
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--green-mid-brand) 55%, var(--bg-secondary)) var(--bg-secondary);
+}
+
 /* ─── Global Keyframes ────────────────────────────────────── */
 
 @keyframes fadeIn {

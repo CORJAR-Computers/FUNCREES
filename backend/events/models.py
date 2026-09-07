@@ -3,6 +3,10 @@ import secrets
 import string
 from django.db import models
 
+# Ley 1581: el teléfono del comprador es dato personal y se cifra en reposo
+# con el mismo campo Fernet que ya usa donations (documento/teléfono).
+from core.fields import EncryptedCharField
+
 class Event(models.Model):
     CATEGORIA_CHOICES = [
         ('evento', 'Evento (Bingo, Cena, etc)'),
@@ -93,7 +97,13 @@ class Ticket(models.Model):
     numero_ticket = models.PositiveIntegerField(help_text="Número del cartón/boleta — único por evento")
     comprador_nombre = models.CharField(max_length=200)
     comprador_email = models.EmailField()
-    comprador_telefono = models.CharField(max_length=20, blank=True, null=True)
+    comprador_telefono = EncryptedCharField(
+        max_length=500,
+        blank=True,
+        null=True,
+        verbose_name="Teléfono (Cifrado)",
+        help_text="Cifrado en reposo (Ley 1581). El valor ronda los 150+ caracteres por el padding Fernet.",
+    )
     monto_pagado = models.DecimalField(max_digits=10, decimal_places=2)
     codigo_verificacion = models.CharField(max_length=20, unique=True, default=generate_verification_code)
     codigo_qr = models.TextField(blank=True, null=True, help_text="Contenido del QR o URL")

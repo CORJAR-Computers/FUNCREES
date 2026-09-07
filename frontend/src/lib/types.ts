@@ -176,3 +176,18 @@ export interface UiStat {
         label: string;
         value: string;
 }
+
+/** GET /api/tickets/<codigo>/ — TicketSerializer (consulta pública por código) */
+export type TicketEstado = 'pendiente' | 'pagado' | 'cancelado';
+
+/** Ticket tal como lo devuelve el backend DRF (campos públicos y seguros). */
+export interface ApiTicket {
+        id: string;
+        evento: string; // id legible del evento (bingo-2026, ...)
+        evento_titulo: string;
+        numero_ticket: number;
+        comprador_nombre: string;
+        monto_pagado: string; // Decimal serializado como string
+        estado_pago: TicketEstado;
+        seleccion_tipo: 'automatico' | 'manual';
+}

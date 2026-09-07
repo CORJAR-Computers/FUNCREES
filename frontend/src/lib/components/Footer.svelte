@@ -32,6 +32,7 @@
                                 <li><a class="footer-link" href="/historias">Perfiles de Abuelitos</a></li>
                                 <li><a class="footer-link" href="/donaciones">Donaciones &amp; Apadrinamiento</a></li>
                                 <li><a class="footer-link" href="/eventos">Eventos Solidarios</a></li>
+                                <li><a class="footer-link" href="/boletas">Consulta tu Boleta</a></li>
                                 <li><a class="footer-link" href="/contacto">Contacto</a></li>
                         </ul>
                 </div>

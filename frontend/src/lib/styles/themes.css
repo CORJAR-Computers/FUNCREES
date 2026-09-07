@@ -225,6 +225,13 @@ body.dark-mode {
   --green-dark-brand:  hsl(120, 30%, 20%);
 }
 
+/* Contraste de etiquetas de formulario: en modo claro --primary-soft es un
+   verde oscuro legible; en modo oscuro se vuelve casi negro sobre fondo
+   oscuro (falla WCAG AA). Se usa el color de texto principal del tema. */
+body.dark-mode .form-label {
+  color: var(--text-main);
+}
+
 body.dark-mode .header {
   background-color: rgba(14, 27, 36, 0.95);
 }
