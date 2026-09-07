@@ -74,6 +74,13 @@ jobs:
           ENCRYPTION_KEY: Y2ktb25seS1mZXJuZXQta2V5LTMyLWJ5dGVzLWJhc2U2NC0xMg==
           ALLOWED_HOSTS: localhost,127.0.0.1
           CORS_ALLOWED_ORIGINS: https://funcreescolombia.org
+          CSRF_TRUSTED_ORIGINS: https://funcreescolombia.org
+          DEFAULT_FROM_EMAIL: 'FUNCREES CI <no-reply@funcreescolombia.org>'
+          EMAIL_HOST: smtp.ci.invalid
+          EMAIL_PORT: '587'
+          EMAIL_HOST_USER: ci@funcreescolombia.org
+          EMAIL_HOST_PASSWORD: ci-dummy-password
+          EMAIL_USE_TLS: 'True'
           WOMPI_ENV: sandbox
           WOMPI_PUBLIC_KEY: pub_test_ci
           WOMPI_PRIVATE_KEY: prv_test_ci
@@ -98,6 +105,7 @@ jobs:
           SECRET_KEY: ci-only-secret-key-not-for-production
           DEBUG: 'True'
           DATABASE_URL: 'sqlite:///:memory:'
+          DEFAULT_FROM_EMAIL: 'FUNCREES CI <no-reply@funcreescolombia.org>'
           ENCRYPTION_KEY: Y2ktb25seS1mZXJuZXQta2V5LTMyLWJ5dGVzLWJhc2U2NC0xMg==
           WOMPI_ENV: sandbox
           WOMPI_PUBLIC_KEY: pub_test_ci
