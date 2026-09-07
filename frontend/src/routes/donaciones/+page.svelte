@@ -26,7 +26,9 @@
 	let paymentSession = $state<import('$lib/types').WompiPaymentSession | null>(null);
 	let estadoFinal = $state<EstadoDonacion | null>(null);
 	let pollAbort = $state<AbortController | null>(null);
-	let submittedPayload = $state<import('$lib/types').InitiateDonationPayload | null>(null);
+	/** Autorización de tratamiento de datos (Ley 1581). Debe ser una
+	 *  decisión libre del donante: sin marcado, no se envía nada. */
+	let autorizacionDatos = $state(false);
 
 	// Formulario patrocinio / voluntariado
 	let empresa = $state('');
@@ -102,9 +104,14 @@
 		w?.focus();
 	}
 
-	async function submitDonation(): Promise<void> {
+	async function submitDonation(e: SubmitEvent): Promise<void> {
+		e.preventDefault();
 		if (currentAmount <= 0) {
 			toast.show('Por favor ingresa un monto válido', 'warning');
+			return;
+		}
+		if (!autorizacionDatos) {
+			toast.show('Necesitamos tu autorización de tratamiento de datos (Ley 1581) para procesar el aporte y emitir el certificado.', 'warning', 6000);
 			return;
 		}
 
@@ -127,14 +134,13 @@
 			donante_telefono: telefono || undefined,
 			metodo_pago: 'card' as const,
 			beneficiario_id: beneficiarioId,
-			autorizacion_datos: true
+			autorizacion_datos: autorizacionDatos
 		};
 
 		try {
 			const res = await initiateDonation(payload);
 			referencia = res.referencia;
 			paymentSession = res.paymentSession;
-			submittedPayload = payload;
 			openWompiWidget();
 			await waitForPayment();
 		} catch (err) {
@@ -181,7 +187,7 @@
 
 	/**
 	 * Formulario de patrocinio empresarial / voluntariado: se envía por
-	 * contacto con el asunto adecuado (mismo endpoint, mismo inbox del admin).
+	 * contacto con el tipo adecuado (mismo endpoint, mismo inbox del admin).
 	 */
 	async function handleCorporateSubmit(e: SubmitEvent): Promise<void> {
 		e.preventDefault();
@@ -193,7 +199,7 @@
 					nombre: nombre || empresa,
 					email,
 					telefono: telefono || undefined,
-					asunto: 'Alianza Corporativa / RSE',
+					tipo: 'alianza',
 					mensaje: `Empresa: ${empresa}\nContacto: ${nombre}\n${mensaje}`
 				});
 			} else {
@@ -201,7 +207,7 @@
 					nombre,
 					email,
 					telefono: telefono || undefined,
-					asunto: 'Postulación de Voluntariado',
+					tipo: 'voluntariado',
 					mensaje: `Área de interés: ${area || 'No especificada'}\n${mensaje}`
 				});
 			}
@@ -222,7 +228,7 @@
 		estadoFinal = null;
 		referencia = '';
 		paymentSession = null;
-		submittedPayload = null;
+		autorizacionDatos = false;
 	}
 </script>
 
@@ -395,6 +401,11 @@
 				</p>
 			</div>
 
+			<!-- Formulario de checkout: permite validación nativa (required)
+				y envío con Enter. Antes era un div con botón onclick: los campos
+				requeridos no se validaban y el donante podía quedar como anónimo. -->
+			<form onsubmit={submitDonation}>
+
 			<!-- Selector de Frecuencia -->
 			<div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
 				<button
@@ -403,17 +414,23 @@
 					class:btn-primary={!isRecurring}
 					class:btn-outline={isRecurring}
 					style="flex: 1;"
-					onclick={() => isRecurring = false}
+					onclick={() => { isRecurring = false; selectedGateway = 'wompi'; }}
 				>Aporte Único</button>
 				<button
 					type="button"
 					class="btn"
 					class:btn-primary={isRecurring}
-					class:btn-outline={isRecurring}
+					class:btn-outline={!isRecurring}
 					style="flex: 1;"
-					onclick={() => isRecurring = true}
+					onclick={() => { isRecurring = true; selectedGateway = 'whatsapp'; }}
 				>Aporte Mensual 🔁</button>
 			</div>
+			{#if isRecurring}
+				<p style="font-size: 0.8rem; color: var(--text-muted); margin: 0.5rem 0 0; line-height: 1.5;">
+					<i class="fa-solid fa-circle-info"></i> Los aportes recurrentes se coordinan por WhatsApp:
+					creamos tu débito automático mensual con Wompi y firmamos la autorización contigo.
+				</p>
+			{/if}
 
 			<!-- Datos del donante -->
 			<div style="display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 1.5rem;">
@@ -470,8 +487,8 @@
 				</span>
 				<div style="display: flex; flex-direction: column; gap: 0.5rem;">
 					<label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer;">
-						<input type="radio" name="gateway" value="wompi" bind:group={selectedGateway} />
-						<span>Wompi Bancolombia (PSE, Tarjetas, Nequi)</span>
+						<input type="radio" name="gateway" value="wompi" bind:group={selectedGateway} disabled={isRecurring} />
+						<span>Wompi Bancolombia (PSE, Tarjetas, Nequi){isRecurring ? " — solo aportes únicos" : ""}</span>
 					</label>
 					<label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer;">
 						<input type="radio" name="gateway" value="whatsapp" bind:group={selectedGateway} />
@@ -482,17 +499,18 @@
 
 			<!-- Habeas Data -->
 			<label style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.25rem;">
-				<input type="checkbox" checked disabled style="margin-top: 0.2rem;" />
+				<input type="checkbox" bind:checked={autorizacionDatos} required style="margin-top: 0.2rem; width: 1.05rem; height: 1.05rem; accent-color: var(--secondary);" />
 				<span>Autorizo el tratamiento de mis datos personales conforme a la Ley 1581 de 2012 (Habeas Data) para procesar mi donación y emitir el certificado.</span>
 			</label>
 
 			<button
 				class="btn btn-primary"
 				style="width: 100%; padding: 1rem; font-size: 1.1rem;"
-				onclick={submitDonation}
+				type="submit"
 			>
-				Donar ${formatMoneyNumber(currentAmount)} COP {#if isRecurring}(Mensual){/if}
+				{#if isRecurring}Coordinar Aporte Mensual por WhatsApp{:else if selectedGateway === 'whatsapp'}Coordinar por WhatsApp{:else}Donar ${formatMoneyNumber(currentAmount)} COP{/if}
 			</button>
+			</form>
 		{:else if checkoutStep === 'form' && (activeTab === 'patrocinio' || activeTab === 'voluntariado')}
 			<div class="modal-checkout-header">
 				<h2 class="modal-checkout-title" id="checkout-modal-title">

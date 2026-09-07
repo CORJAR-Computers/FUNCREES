@@ -4,8 +4,10 @@ from django.db import models
 class ContactMessage(models.Model):
     TIPO_CHOICES = [
         ('consulta', 'Consulta General'),
+        ('apadrinamiento', 'Apadrinamiento de Adulto Mayor'),
         ('alianza', 'Alianza Corporativa'),
         ('voluntariado', 'Voluntariado'),
+        ('eventos', 'Eventos y Bonos Solidarios'),
         ('donacion', 'Donación'),
         ('otro', 'Otro'),
     ]

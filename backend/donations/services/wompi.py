@@ -1,5 +1,7 @@
 import hashlib
 import hmac
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+
 import requests
 from django.conf import settings
 import logging
@@ -35,12 +37,32 @@ def _get_wompi_config():
     }
 
 
-def generate_integrity_signature(reference: str, amount_cop: float) -> str:
+def _cop_a_centavos(amount_cop) -> int:
+    """
+    Convierte un monto en COP a centavos de forma EXACTA.
+
+    Antes se usaba `int(amount_cop * 100)` sobre float: el punto flotante
+    trunca por debajo (50.13 * 100 = 5012.9999... → 5012), lo que produce
+    firmas de integridad y montos que no coinciden con lo que espera Wompi
+    y el pago queda rechazado/desincronizado.
+
+    Se normaliza vía `str()` para aceptar float, int, str o Decimal
+    (el serializer de DRF entrega Decimal) y se redondea HALF_UP a 2
+    decimales, igual que lo hace Wompi al calcular centavos.
+    """
+    try:
+        monto = Decimal(str(amount_cop)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    except (InvalidOperation, TypeError, ValueError) as exc:
+        raise ValueError(f"Monto inválido: {amount_cop!r}") from exc
+    return int(monto * 100)
+
+
+def generate_integrity_signature(reference: str, amount_cop) -> str:
     """
     Genera la firma de integridad SHA256 para Wompi (usada al iniciar el pago).
     """
     cfg = _get_wompi_config()
-    amount_cents = int(amount_cop * 100)
+    amount_cents = _cop_a_centavos(amount_cop)
     string_to_sign = f"{reference}{amount_cents}COP{cfg['integrity_secret']}"
     return hashlib.sha256(string_to_sign.encode('utf-8')).hexdigest()
 
@@ -94,12 +116,12 @@ def verify_webhook_signature(payload: dict, received_signature: str) -> bool:
         return False
 
 
-def create_payment_session(reference: str, amount_cop: float, description: str, customer_email: str, redirect_url: str):
+def create_payment_session(reference: str, amount_cop, description: str, customer_email: str, redirect_url: str):
     """
     Retorna la configuración necesaria para el Widget de Wompi en el Frontend.
     """
     cfg = _get_wompi_config()
-    amount_cents = int(amount_cop * 100)
+    amount_cents = _cop_a_centavos(amount_cop)
     integrity_signature = generate_integrity_signature(reference, amount_cop)
 
     return {

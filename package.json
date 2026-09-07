@@ -5,8 +5,8 @@
   "description": "Fundación Crece Una Esperanza Social — Soluciones Sociales Innovadoras para un Impacto Positivo y Duradero. NIT: 902036173-3 | Sincelejo, Sucre, Colombia",
   "type": "module",
   "scripts": {
-    "dev": "npm run dev:kill && concurrently --kill-others --names \"BACKEND,FRONTEND\" --prefix-colors \"blue,green\" \"cd backend && venv\\Scripts\\python manage.py runserver 0.0.0.0:8000\" \"npm run frontend:dev\"",
-    "dev:backend": "cd backend && venv\\Scripts\\python manage.py runserver 0.0.0.0:8000",
+    "dev": "npm run dev:kill && concurrently --kill-others --names \"BACKEND,FRONTEND\" --prefix-colors \"blue,green\" \"npm run dev:backend\" \"npm run frontend:dev\"",
+    "dev:backend": "node scripts/py.mjs backend manage.py runserver 0.0.0.0:8000",
     "dev:kill": "npx kill-port 5173 8000 --yes",
     "start": "npm run frontend:dev",
     "build": "npm run frontend:build",
@@ -19,7 +19,7 @@
     "frontend:check": "npm --prefix frontend run check",
     "frontend:start": "npm --prefix frontend run start",
     "frontend:test": "node --test frontend/tests/*.test.js",
-    "backend:test": "cd backend && venv\\Scripts\\python manage.py test --settings=core.test_settings",
+    "backend:test": "node scripts/py.mjs backend manage.py test --settings=core.test_settings",
     "postinstall": "npm --prefix frontend install"
   },
   "license": "ISC",
