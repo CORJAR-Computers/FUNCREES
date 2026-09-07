@@ -1,5 +1,7 @@
+import csv
+
 from django.contrib import admin, messages
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import path, reverse
 from django.utils import timezone
@@ -11,9 +13,36 @@ from .models import Event, Ticket
 from .services.email_service import send_payment_reminder, send_ticket_email
 
 
+class AsistioListFilter(admin.SimpleListFilter):
+    """Filtro "¿Asistió?" para el changelist de boletas.
+
+    No usamos BooleanFieldListFilter sobre checkin_en (DateTimeField):
+    ese filtro convierte el parámetro a True/False y la consulta
+    checkin_en__exact='1' explota como IncorrectLookupParameters
+    (redirect ?e=1). Un SimpleListFilter con isnull es correcto y da
+    etiquetas claras al personal.
+    """
+
+    title = 'Asistió'
+    parameter_name = 'asistio'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('si', 'Sí — con entrada registrada'),
+            ('no', 'No — sin entrada'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'si':
+            return queryset.filter(checkin_en__isnull=False)
+        if self.value() == 'no':
+            return queryset.filter(checkin_en__isnull=True)
+        return queryset
+
+
 @admin.register(Event)
 class EventAdmin(ModelAdmin):
-    list_display = ('titulo', 'categoria', 'fecha_formateada', 'costo_bono', 'cupos_texto', 'boletas_vendidas', 'vista_previa', 'activo')
+    list_display = ('titulo', 'categoria', 'fecha_formateada', 'costo_bono', 'cupos_texto', 'boletas_vendidas', 'asistencia_barra', 'vista_previa', 'activo')
     list_display_links = ('titulo',)
     list_filter = (
         ('activo', ChoicesDropdownFilter),
@@ -23,6 +52,9 @@ class EventAdmin(ModelAdmin):
     search_fields = ('titulo', 'id', 'lugar')
     search_help_text = 'Busque por título, ID corto o lugar.'
     readonly_fields = ('boletas_vendidas', 'vista_previa_grande')
+
+    class Media:
+        css = {'all': ('admin/asistencia.css',)}
 
     fieldsets = (
         ('Datos del evento', {
@@ -67,6 +99,23 @@ class EventAdmin(ModelAdmin):
     def boletas_vendidas(self, obj):
         return obj.tickets.filter(estado_pago='pagado').count()
 
+    @admin.display(description='Asistencia (entradas / pagadas)')
+    def asistencia_barra(self, obj):
+        """Barra de progreso con entradas registradas vs boletas pagadas.
+        Enlaza al listado de boletas del evento filtrado por asistidas."""
+        pagadas = obj.tickets.filter(estado_pago='pagado').count()
+        asistidas = obj.tickets.filter(checkin_en__isnull=False).count()
+        pct = round(asistidas / pagadas * 100) if pagadas else 0
+        pct = max(0, min(100, pct))
+        enlace = reverse('admin:events_ticket_changelist')
+        url = f'{enlace}?evento__id__exact={obj.pk}&asistio=si'
+        return format_html(
+            '<a class="asistencia-link" href="{}" title="Ver boletas con entrada registrada">'
+            '<span class="asistencia-track"><span class="asistencia-bar" style="width:{}%"></span></span>'
+            '<span class="asistencia-num">{} / {}</span></a>',
+            url, pct, asistidas, pagadas,
+        )
+
     @admin.display(description='Imagen')
     def vista_previa(self, obj):
         url = None
@@ -100,13 +149,13 @@ class TicketAdmin(ModelAdmin):
         ('estado_pago', ChoicesDropdownFilter),
         ('seleccion_tipo', ChoicesDropdownFilter),
         ('ticket_enviado', ChoicesDropdownFilter),
-        ('checkin_en', admin.BooleanFieldListFilter),
+        AsistioListFilter,
         'evento',
     )
     search_fields = ('comprador_nombre', 'comprador_email', 'codigo_verificacion')
     search_help_text = 'Busque por nombre, email o código de verificación de la boleta.'
     readonly_fields = ('codigo_verificacion', 'donacion_id', 'checkin_en', 'checkin_por')
-    actions = ('marcar_como_enviado', 'enviar_boleta_por_email', 'recordar_pago_pendiente')
+    actions = ('marcar_como_enviado', 'enviar_boleta_por_email', 'recordar_pago_pendiente', 'exportar_csv')
 
     fieldsets = (
         ('Boleta', {
@@ -142,6 +191,38 @@ class TicketAdmin(ModelAdmin):
         """Marca ✔/✘ de asistencia (columna ordenable por checkin_en vía
         ordering del campo; el booleano dibuja el check verde de Django)."""
         return obj.asistio
+
+    @admin.action(description='⬇️ Exportar boletas a CSV (Excel)')
+    def exportar_csv(self, request, queryset):
+        """Lista de boletas (idealmente filtradas por evento) para imprimir
+        o compartir con el equipo en puerta. Delimitador ';' porque el
+        Excel configurado en español usa coma como separador decimal y
+        ';' como separador de listas — con ',' abriría en una sola columna.
+        """
+        response = HttpResponse(content_type='text/csv; charset=utf-8')
+        fecha = timezone.localdate().strftime('%Y-%m-%d')
+        response['Content-Disposition'] = f'attachment; filename=boletas-{fecha}.csv'
+        # BOM para que Excel detecte UTF-8 (tildes y ñ correctas)
+        response.write('\ufeff')
+        writer = csv.writer(response, delimiter=';')
+        writer.writerow([
+            'Evento', 'Boleta N.º', 'Comprador', 'Email', 'Estado',
+            'Valor (COP)', 'Código de verificación', 'Entrada registrada',
+            'Registrada por',
+        ])
+        for t in queryset.select_related('evento', 'checkin_por'):
+            writer.writerow([
+                t.evento.titulo,
+                t.numero_ticket,
+                t.comprador_nombre,
+                t.comprador_email,
+                t.get_estado_pago_display(),
+                t.monto_pagado,
+                t.codigo_verificacion,
+                timezone.localtime(t.checkin_en).strftime('%Y-%m-%d %H:%M') if t.checkin_en else 'No',
+                t.checkin_por.get_username() if t.checkin_por else '',
+            ])
+        return response
 
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}

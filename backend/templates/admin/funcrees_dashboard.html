@@ -273,6 +273,7 @@
 
         <!-- Accesos rápidos -->
         <div class="fd-quick">
+                <a class="fd-quick-btn fd-quick-btn--door" href="/admin/events/ticket/checkin/">🚪 Check-in en puerta</a>
                 <a class="fd-quick-btn" href="/admin/donations/donation/">Ver donaciones</a>
                 <a class="fd-quick-btn" href="/admin/events/event/">Gestionar eventos</a>
                 <a class="fd-quick-btn" href="/admin/beneficiaries/beneficiary/">Editar beneficiarios</a>
@@ -379,6 +380,12 @@
                 background: var(--color-white, #fff); text-decoration: none;
         }
         .fd-quick-btn:hover { border-color: var(--color-primary-600); color: var(--color-primary-600); }
+        .fd-quick-btn--door {
+                background: var(--color-primary-600); border-color: var(--color-primary-600); color: #fff;
+        }
+        .fd-quick-btn--door:hover { background: var(--color-primary-700); color: #fff; }
+        .dark .fd-quick-btn--door { background: var(--color-primary-500); border-color: var(--color-primary-500); }
+        .dark .fd-quick-btn--door:hover { background: var(--color-primary-400); }
 
         /* ── Modo oscuro (Unfold alterna la clase .dark en un ancestro) ── */
         .dark .fd-title, .dark .fd-card-value, .dark .fd-mini-value, .dark .fd-panel-head h3 { color: var(--color-font-important-dark); }

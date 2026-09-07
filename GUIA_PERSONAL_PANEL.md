@@ -103,6 +103,17 @@ Reglas automáticas para protegerte:
 - El listado de boletas muestra la columna **"Asistió"** y el inicio del
   panel suma las **entradas registradas en puerta**.
 
+### ⬇️ Lista de asistencia en Excel
+
+En **Boletas/Tickets**, filtra por el evento del día (y opcionalmente por
+**"Asistió: Sí"**), selecciona todas y usa la acción
+**"⬇️ Exportar boletas a CSV (Excel)"**: baja un archivo con número de
+boleta, comprador, estado, código y quién registró cada entrada. Abre
+directo en Excel (separador `;` y acentos correctos). En el listado de
+**Eventos**, la columna **"Asistencia"** muestra una barra verde con las
+entradas registradas frente a las boletas pagadas de cada evento — púlsala
+para ver solo las asistidas.
+
 ---
 
 ## 💸 Recordar un pago pendiente a un donante

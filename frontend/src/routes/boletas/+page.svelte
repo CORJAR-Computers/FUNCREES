@@ -220,7 +220,12 @@
                                         </header>
 
                                         {#if qrSvg}
-                                                <div class="boletas-qr" title={qrUrl}>
+                                                <div
+                                                        class="boletas-qr"
+                                                        class:boletas-qr--ok={ticket.estado_pago === 'pagado'}
+                                                        class:boletas-qr--warn={ticket.estado_pago === 'pendiente'}
+                                                        title={qrUrl}
+                                                >
                                                         <div class="boletas-qr-codigo" aria-hidden="true">
                                                                 {@html qrSvg}
                                                         </div>
@@ -433,6 +438,19 @@
                 border-bottom: 1px dashed var(--border-color);
                 background: color-mix(in srgb, var(--primary) 4%, var(--bg-card));
                 flex-wrap: wrap;
+        }
+
+        /* Acento por estado: el QR "habla" del pago de un vistazo */
+        .boletas-qr--ok {
+                border-top: 3px solid #16a34a;
+                border-bottom: 3px solid #16a34a;
+                background: color-mix(in srgb, #16a34a 6%, var(--bg-card));
+        }
+
+        .boletas-qr--warn {
+                border-top: 3px solid #d97706;
+                border-bottom: 3px solid #d97706;
+                background: color-mix(in srgb, #d97706 6%, var(--bg-card));
         }
 
         .boletas-qr-codigo {

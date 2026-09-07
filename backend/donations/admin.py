@@ -199,7 +199,9 @@ class DonationAdmin(ModelAdmin):
         response['Content-Disposition'] = 'attachment; filename=donaciones.csv'
         # BOM para que Excel detecte UTF-8 (tildes y ñ correctas)
         response.write('\ufeff')
-        writer = csv.writer(response)
+        # Delimitador ';' (y no ','): el Excel en español usa la coma como
+        # separador decimal, así que un CSV con ',' abre en UNA sola columna.
+        writer = csv.writer(response, delimiter=';')
         writer.writerow(['Referencia', 'Donante', 'Email', 'Monto (COP)', 'Tipo', 'Estado', 'Beneficiario', 'Certificado enviado', 'Fecha'])
         for d in queryset:
             writer.writerow([

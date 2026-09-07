@@ -1,0 +1,57 @@
+/*
+ * Barra de progreso de asistencia por evento (changelist de eventos).
+ * Hereda el tema de Unfold con sus variables (claro/oscuro automáticos).
+ */
+.asistencia-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+.asistencia-link:hover .asistencia-num {
+  color: var(--color-primary-600);
+  text-decoration: underline;
+}
+.asistencia-track {
+  display: inline-block;
+  width: 64px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-base-200);
+  overflow: hidden;
+  vertical-align: middle;
+}
+.asistencia-bar {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--color-primary-400) 0%,
+    var(--color-primary-600) 100%
+  );
+  transition: width 0.4s ease;
+}
+.asistencia-num {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-font-subtle-light);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.dark .asistencia-track {
+  background: var(--color-base-700);
+}
+.dark .asistencia-num {
+  color: var(--color-font-subtle-dark);
+}
+.dark .asistencia-link:hover .asistencia-num {
+  color: var(--color-primary-400);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .asistencia-bar {
+    transition: none;
+  }
+}

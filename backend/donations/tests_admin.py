@@ -61,7 +61,7 @@ class DonationAdminTests(TestCase):
         )
         self.assertEqual(res.status_code, 200)
         self.assertIn('text/csv', res['Content-Type'])
-        rows = list(csv.reader(io.StringIO(res.content.decode('utf-8-sig'))))
+        rows = list(csv.reader(io.StringIO(res.content.decode('utf-8-sig')), delimiter=';'))
         self.assertEqual(rows[0][0], 'Referencia')
         data = [r for r in rows if r and r[0] == 'TEST-CSV-1']
         self.assertEqual(len(data), 1)
