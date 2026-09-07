@@ -32,6 +32,7 @@
                                 <li><a class="footer-link" href="/historias">Perfiles de Abuelitos</a></li>
                                 <li><a class="footer-link" href="/donaciones">Donaciones &amp; Apadrinamiento</a></li>
                                 <li><a class="footer-link" href="/eventos">Eventos Solidarios</a></li>
+                                <li><a class="footer-link" href="/calendario.ics" download="calendario-funcrees.ics" title="Suscríbete con Google Calendar, Apple Calendar u Outlook">Calendario de Eventos <i class="fa-regular fa-calendar-plus" aria-hidden="true"></i></a></li>
                                 <li><a class="footer-link" href="/boletas">Consulta tu Boleta</a></li>
                                 <li><a class="footer-link" href="/contacto">Contacto</a></li>
                         </ul>

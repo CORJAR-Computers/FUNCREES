@@ -8,11 +8,27 @@
                 path?: string;
                 /** Datos JSON-LD adicionales (schema.org) específicos de la página. */
                 jsonLd?: Record<string, unknown>;
+                /** Imagen Open Graph específica de esta página (URL absoluta).
+                 *  Default: imagen institucional SITE_OG_IMAGE. */
+                image?: string;
+                /** Texto alternativo de la imagen OG (accesibilidad en redes). */
+                imageAlt?: string;
+                /** Tipo Open Graph; las páginas de contenido pueden usar "article". */
+                ogType?: 'website' | 'article';
         }
 
-        const { title, description, path = '', jsonLd = undefined }: Props = $props();
+        const {
+                title,
+                description,
+                path = '',
+                jsonLd = undefined,
+                image = undefined,
+                imageAlt = undefined,
+                ogType = 'website'
+        }: Props = $props();
 
         const canonical = $derived(`${SITE_URL}${path}`);
+        const ogImage = $derived(image || SITE_OG_IMAGE);
         const orgLd = {
                 '@context': 'https://schema.org',
                 '@type': 'NGO',
@@ -42,19 +58,25 @@
         <link rel="canonical" href={canonical} />
 
         <!-- Open Graph -->
-        <meta property="og:type" content="website" />
+        <meta property="og:type" content={ogType} />
         <meta property="og:site_name" content={SITE_NAME} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
         <meta property="og:url" content={canonical} />
-        <meta property="og:image" content={SITE_OG_IMAGE} />
+        <meta property="og:image" content={ogImage} />
+        {#if imageAlt}
+                <meta property="og:image:alt" content={imageAlt} />
+        {/if}
         <meta property="og:locale" content="es_CO" />
 
         <!-- Twitter Card -->
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={description} />
-        <meta name="twitter:image" content={SITE_OG_IMAGE} />
+        <meta name="twitter:image" content={ogImage} />
+        {#if imageAlt}
+                <meta name="twitter:image:alt" content={imageAlt} />
+        {/if}
 
         {@html `<script type="application/ld+json">${JSON.stringify([orgLd, ...(jsonLd ? [jsonLd] : [])])}<\/script>`}
 </svelte:head>

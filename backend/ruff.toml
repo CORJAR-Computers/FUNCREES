@@ -10,6 +10,7 @@ exclude = [
     "migrations",   # código generado por Django
     "staticfiles",
     "media",
+    "../.github",   # ejemplos de skills/tooling versionados — no es código del backend
 ]
 
 [lint]

@@ -243,10 +243,22 @@
                         <p class="section-description">
                                 Tu participación en nuestros eventos financia los comedores comunitarios, medicamentos y terapias de nuestros adultos mayores.
                         </p>
-                        <p style="margin-top: 1rem;">
-                                <a href="/boletas" class="btn btn-outline" style="display: inline-flex; align-items: center; gap: 0.55rem; padding: 0.7rem 1.4rem;">
+                        <div class="eventos-cta-row">
+                                <a href="/boletas" class="btn btn-outline">
                                         <i class="fa-solid fa-ticket-simple"></i> ¿Ya compraste tu boleta? Consúltala aquí
                                 </a>
+                                <a
+                                        href="/calendario.ics"
+                                        download="calendario-funcrees.ics"
+                                        class="btn btn-outline"
+                                        title="Agrega nuestros eventos a Google Calendar, Apple Calendar u Outlook"
+                                >
+                                        <i class="fa-regular fa-calendar-plus"></i> Suscribirse al calendario
+                                </a>
+                        </div>
+                        <p class="eventos-cta-tip">
+                                <i class="fa-solid fa-lightbulb" aria-hidden="true"></i>
+                                Tip: en Google Calendar usa «Desde URL» con esta dirección para recibir los eventos automáticamente.
                         </p>
                         {#if data.usingFallback}
                                 <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">
@@ -546,6 +558,47 @@ Estado:         CONFIRMADO POR LA PASARELA
         @media (prefers-reduced-motion: reduce) {
                 .evento-detalle-link {
                         transition: none;
+                }
+        }
+
+        /* Fila de CTAs secundarios (consulta de boleta + suscripción al calendario) */
+        .eventos-cta-row {
+                margin-top: 1rem;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.75rem;
+        }
+
+        .eventos-cta-row .btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.55rem;
+                padding: 0.7rem 1.4rem;
+                transition:
+                        transform 0.2s ease,
+                        box-shadow 0.2s ease,
+                        border-color 0.2s ease,
+                        color 0.2s ease,
+                        background 0.2s ease;
+        }
+
+        .eventos-cta-row .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px -10px var(--primary-trans, rgba(0, 0, 0, 0.3));
+        }
+
+        .eventos-cta-tip {
+                font-size: 0.8rem;
+                color: var(--text-muted);
+                margin-top: 0.35rem;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+                .eventos-cta-row .btn {
+                        transition: none;
+                }
+                .eventos-cta-row .btn:hover {
+                        transform: none;
                 }
         }
 </style>

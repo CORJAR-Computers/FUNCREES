@@ -184,6 +184,9 @@
                 : 'El evento que buscas no está disponible. Conoce los eventos y campañas vigentes de Fundación Funcrees Colombia.'}
         path={evento ? `/eventos/${evento.id}` : '/eventos'}
         jsonLd={eventJsonLd}
+        image={evento?.imagen || undefined}
+        imageAlt={evento ? `${evento.titulo} — Fundación Funcrees Colombia` : undefined}
+        ogType="article"
 />
 
 <section class="detalle-view">
@@ -303,6 +306,9 @@
                                                                                 <i class="fa-regular fa-calendar-plus"></i> Añadir a Google Calendar
                                                                         </a>
                                                                 {/if}
+                                                                <a class="detalle-accion" href="/calendario.ics" download="calendario-funcrees.ics" title="Agrega todos nuestros eventos a tu calendario">
+                                                                        <i class="fa-solid fa-calendar-days"></i> Ver todos en mi calendario
+                                                                </a>
                                                                 <button type="button" class="detalle-accion" onclick={compartirEvento}>
                                                                         <i class="fa-solid fa-share-nodes"></i>
                                                                         {compartidoOk ? '¡Enlace copiado!' : 'Compartir evento'}
@@ -507,6 +513,21 @@
                                 background: var(--primary-soft);
                                 border: 1px solid var(--border-color);
                                 border-radius: 12px;
+                                transition:
+                                                transform 0.25s ease,
+                                                border-color 0.25s ease,
+                                                box-shadow 0.25s ease;
+                }
+
+                /* Micro-interacción: cada dato "vive" al pasar el cursor */
+                .detalle-facts li:hover {
+                                transform: translateY(-3px);
+                                border-color: var(--primary);
+                                box-shadow: 0 6px 18px -8px var(--primary-trans, rgba(0, 0, 0, 0.25));
+                }
+
+                .detalle-facts li:hover i {
+                                transform: scale(1.12);
                 }
 
                 .detalle-facts i {
@@ -514,6 +535,20 @@
                                 font-size: 1.15rem;
                                 width: 1.4rem;
                                 text-align: center;
+                                transition: transform 0.25s ease;
+                }
+
+                @media (prefers-reduced-motion: reduce) {
+                                .detalle-facts li,
+                                .detalle-facts i {
+                                                transition: none;
+                                }
+                                .detalle-facts li:hover {
+                                                transform: none;
+                                }
+                                .detalle-facts li:hover i {
+                                                transform: none;
+                                }
                 }
 
                 .fact-label {
