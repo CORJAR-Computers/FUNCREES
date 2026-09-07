@@ -126,6 +126,35 @@ DATABASES = {
 }
 
 # ============================================
+# CACHE (compartido entre workers de Gunicorn)
+# ============================================
+# Django usa por defecto LocMemCache, que es POR PROCESO: con Gunicorn en 5
+# workers los throttles (donaciones 10/h, contacto 5/h) valen en realidad
+# 10*5/h por IP y la caché de /api/stats/ es inconsistente entre workers.
+#
+# En producción con varios workers se recomienda CACHE_BACKEND=db (usa la
+# misma base de datos vía DatabaseCache, sin dependencias nuevas) y ejecutar
+# una sola vez:  python manage.py createcachetable
+# Si más adelante se instala Redis, basta con ampliar este bloque.
+CACHE_BACKEND = env('CACHE_BACKEND', default='locmem')
+
+if CACHE_BACKEND == 'db':
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+            'LOCATION': 'funcrees_cache',
+            'OPTIONS': {'MAX_ENTRIES': 5000},
+        }
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'funcrees-locmem',
+        }
+    }
+
+# ============================================
 # CORS & SECURITY
 # ============================================
 

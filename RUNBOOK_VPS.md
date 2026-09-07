@@ -135,6 +135,7 @@ cd /var/www/funcrees/backend
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 python manage.py migrate --noinput
+python manage.py createcachetable   # caché compartido (solo si CACHE_BACKEND=db en .env; si no, se ignora)
 python manage.py collectstatic --noinput
 mkdir -p media
 python manage.py createsuperuser

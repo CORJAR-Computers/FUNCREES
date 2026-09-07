@@ -49,6 +49,33 @@ def procesar_transaccion_wompi(referencia: str, transaction_data: dict) -> Donat
             )
             return donation
 
+        # --- Defensa en profundidad: verificación de monto ------------------
+        # La firma del webhook autentica el ORIGEN del mensaje (Wompi), pero
+        # NO garantiza que el monto reportado coincida con lo que esta
+        # donación acordó. Si un monto alterado llegara a aprobarse, la
+        # fundación emitiría un certificado por un valor no recaudado.
+        monto_reportado = transaction_data.get('amount_in_cents')
+        if monto_reportado is not None:
+            from .services.wompi import _cop_a_centavos
+            try:
+                monto_esperado = _cop_a_centavos(donation.monto)
+                if int(monto_reportado) != monto_esperado:
+                    donation.revision_requerida = True
+                    donation.wompi_response = transaction_data
+                    donation.save(update_fields=['revision_requerida', 'wompi_response'])
+                    logger.critical(
+                        "Webhook con MONTO ALTERADO: donación %s esperaba %s "
+                        "centavos y Wompi reportó %s. Marcada para revisión "
+                        "manual; NO se aprobó ni se emitió certificado.",
+                        referencia, monto_esperado, monto_reportado,
+                    )
+                    return donation
+            except (TypeError, ValueError):
+                logger.warning(
+                    "Webhook con amount_in_cents no numérico para %s: %r",
+                    referencia, monto_reportado,
+                )
+
         nuevo_estado = estado_map.get(transaction_data.get('status'), 'procesando')
         donation.estado = nuevo_estado
         donation.referencia_pasarela = transaction_data.get('id')

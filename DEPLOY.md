@@ -150,6 +150,7 @@ python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().
 ```bash
 source venv/bin/activate
 python manage.py migrate --noinput
+python manage.py createcachetable   # solo si CACHE_BACKEND=db en .env; si no, se ignora
 python manage.py collectstatic --noinput
 mkdir -p media   # fotos de beneficiarios e imágenes de eventos subidas desde el admin
 python manage.py createsuperuser

@@ -43,12 +43,13 @@ class DonationAdmin(ModelAdmin):
         'reembolsado': '#7c3aed',
     }
 
-    list_display = ('referencia', 'donante_nombre', 'monto_formateado', 'tipo', 'estado_badge', 'vista_pendiente', 'certificado_enviado', 'creado_en')
+    list_display = ('referencia', 'donante_nombre', 'monto_formateado', 'tipo', 'estado_badge', 'vista_pendiente', 'revision_badge', 'certificado_enviado', 'creado_en')
     list_display_links = ('referencia',)
     list_filter = (
         ('estado', ChoicesDropdownFilter),
         ('tipo', ChoicesDropdownFilter),
         ('certificado_enviado', ChoicesDropdownFilter),
+        ('revision_requerida', ChoicesDropdownFilter),
         PendientesWompiFilter,
         'creado_en',
     )
@@ -75,7 +76,7 @@ class DonationAdmin(ModelAdmin):
             'classes': ('collapse',),
         }),
         ('Otros datos', {
-            'fields': ('beneficiario', 'certificado_enviado', 'autorizacion_datos', 'ip_origen', 'creado_en'),
+            'fields': ('beneficiario', 'certificado_enviado', 'revision_requerida', 'autorizacion_datos', 'ip_origen', 'creado_en'),
             'classes': ('collapse',),
         }),
     )
@@ -136,6 +137,11 @@ class DonationAdmin(ModelAdmin):
     def estado_badge(self, obj):
         color = self.ESTADO_COLORES.get(obj.estado, '#6b7280')
         return format_html('<span style="color:{};font-weight:600;">● {}</span>', color, obj.get_estado_display())
+
+    @admin.display(description='⚠️ Revisión', boolean=True)
+    def revision_badge(self, obj):
+        """True si el webhook detectó un monto alterado (revisar manual)."""
+        return obj.revision_requerida
 
     @admin.display(description='Atención')
     def vista_pendiente(self, obj):

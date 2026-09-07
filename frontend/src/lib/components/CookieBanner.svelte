@@ -68,7 +68,7 @@
 			</div>
 
 			<p class="cookie-banner__desc" id="cookie-desc">
-				Usamos cookies esenciales para el funcionamiento del sitio y cookies analíticas para mejorar tu experiencia según la Ley 1581 de 2012 de Colombia.
+				Usamos cookies esenciales para el funcionamiento del sitio y cookies analíticas para mejorar tu experiencia según la Ley 1581 de 2012 de Colombia. <a href="/cookies" style="color: var(--primary-soft); font-weight: 700; text-decoration: underline; text-underline-offset: 2px;">Política de Cookies</a>.
 			</p>
 
 			<div class="cookie-banner__actions">

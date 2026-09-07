@@ -500,7 +500,7 @@
 			<!-- Habeas Data -->
 			<label style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.25rem;">
 				<input type="checkbox" bind:checked={autorizacionDatos} required style="margin-top: 0.2rem; width: 1.05rem; height: 1.05rem; accent-color: var(--secondary);" />
-				<span>Autorizo el tratamiento de mis datos personales conforme a la Ley 1581 de 2012 (Habeas Data) para procesar mi donación y emitir el certificado.</span>
+				<span>Autorizo el tratamiento de mis datos personales conforme a la <a href="/privacidad" target="_blank" rel="noopener" style="color: var(--primary-dark); font-weight: 600; text-decoration: underline; text-underline-offset: 2px;">Ley 1581 de 2012</a> (Habeas Data) para procesar mi donación y emitir el certificado. Lee nuestra <a href="/privacidad" target="_blank" rel="noopener" style="color: var(--primary-dark); font-weight: 600; text-decoration: underline; text-underline-offset: 2px;">Política de Privacidad</a>.</span>
 			</label>
 
 			<button

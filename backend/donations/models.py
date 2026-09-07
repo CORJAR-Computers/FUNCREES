@@ -84,6 +84,10 @@ class Donation(models.Model):
     wompi_response = models.JSONField(blank=True, null=True)
     beneficiario = models.ForeignKey('beneficiaries.Beneficiary', on_delete=models.SET_NULL, null=True, blank=True, related_name='donaciones')
     certificado_enviado = models.BooleanField(default=False)
+    # Defensa en profundidad: se activa si el webhook de Wompi reporta un
+    # monto distinto al acordado (firma válida pero monto alterado o bug).
+    # La donación NO se aprueba automáticamente; requiere revisión manual.
+    revision_requerida = models.BooleanField(default=False, verbose_name="Revisión requerida")
     autorizacion_datos = models.BooleanField(default=False)
     ip_origen = models.GenericIPAddressField(null=True, blank=True)
     creado_en = models.DateTimeField(auto_now_add=True)
