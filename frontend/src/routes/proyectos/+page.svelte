@@ -21,7 +21,7 @@
 		'Bienestar Animal'
 	];
 
-	let filteredProjects = $derived(
+	const filteredProjects = $derived(
 		PROYECTOS.filter((p) => {
 			const matchesTag = selectedTag === 'Todos' || p.tag === selectedTag;
 			const query = searchQuery.toLowerCase().trim();
@@ -87,7 +87,7 @@
 
 			<!-- Filtros por Categoría -->
 			<div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center;">
-				{#each tags as tag}
+				{#each tags as tag (tag)}
 					<button
 						class="evento-filter-btn"
 						class:active={selectedTag === tag}

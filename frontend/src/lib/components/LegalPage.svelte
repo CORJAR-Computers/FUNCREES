@@ -13,7 +13,7 @@
                 children?: Snippet;
         }
 
-        let { title, description, path, updated, children }: Props = $props();
+        const { title, description, path, updated, children }: Props = $props();
 </script>
 
 <Seo {title} {description} {path} />

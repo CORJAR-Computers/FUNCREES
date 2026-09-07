@@ -11,7 +11,7 @@
 	import AccessibilityWidget from '$lib/components/AccessibilityWidget.svelte';
 	import FloatingActions from '$lib/components/FloatingActions.svelte';
 
-	let { children } = $props();
+	const { children } = $props();
 </script>
 
 <a href="#main-content" class="skip-link">

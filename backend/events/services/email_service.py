@@ -95,3 +95,55 @@ def send_ticket_email(ticket) -> bool:
             e,
         )
         return False
+
+
+def send_payment_reminder(ticket) -> bool:
+    """Recordatorio amable para boletas con pago 'pendiente'.
+
+    Caso de uso: el comprador coordinó por WhatsApp/transferencia pero el
+    pago aún no se confirma (o pagó y falta verificar). El email le recuerda
+    completar el pago y le da el enlace de consulta para verificar si ya
+    quedó confirmado. Mismo contrato que send_ticket_email: nunca lanza.
+    """
+    try:
+        subject = (
+            f"Recordatorio de pago — Boleta N.º {ticket.numero_ticket} "
+            f"{ticket.evento.titulo} | Funcrees Colombia"
+        )
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'contacto@funcreescolombia.org')
+        to_email = [ticket.comprador_email]
+
+        context = {
+            'nombre': ticket.comprador_nombre,
+            'evento_titulo': ticket.evento.titulo,
+            'evento_fecha': ticket.evento.fecha,
+            'evento_hora': ticket.evento.hora,
+            'evento_lugar': ticket.evento.lugar or 'Por confirmar',
+            'numero_ticket': ticket.numero_ticket,
+            'codigo': ticket.codigo_verificacion,
+            'monto': f"${ticket.monto_pagado:,.0f}".replace(',', '.'),
+            'consulta_url': build_consulta_url(ticket.codigo_verificacion),
+            'whatsapp_url': 'https://wa.me/573137924439',
+            'frontend_url': getattr(settings, 'FRONTEND_URL', 'https://funcreescolombia.org'),
+        }
+
+        html_content = render_to_string('emails/ticket_payment_reminder.html', context)
+        text_content = strip_tags(html_content)
+
+        msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
+        msg.attach_alternative(html_content, 'text/html')
+        msg.send()
+
+        logger.info(
+            "Recordatorio de pago enviado a %s (evento=%s, ticket #%s)",
+            ticket.comprador_email, ticket.evento_id, ticket.numero_ticket,
+        )
+        return True
+    except Exception as e:
+        logger.error(
+            "Error enviando recordatorio #%s a %s: %s",
+            getattr(ticket, 'numero_ticket', '?'),
+            getattr(ticket, 'comprador_email', '?'),
+            e,
+        )
+        return False

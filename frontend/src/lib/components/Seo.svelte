@@ -10,7 +10,7 @@
                 jsonLd?: Record<string, unknown>;
         }
 
-        let { title, description, path = '', jsonLd = undefined }: Props = $props();
+        const { title, description, path = '', jsonLd = undefined }: Props = $props();
 
         const canonical = $derived(`${SITE_URL}${path}`);
         const orgLd = {

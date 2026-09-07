@@ -122,3 +122,85 @@ class TicketAdminEmailActionTests(TestCase):
         self.t2.refresh_from_db()
         self.assertTrue(self.t1.ticket_enviado)
         self.assertFalse(self.t2.ticket_enviado)  # la fallida NO se marca
+
+
+class PaymentReminderTests(TestCase):
+    """Recordatorio de pago: servicio, comando de gestión y acción admin."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.staff = User.objects.create_superuser('admin_rem', 'adminrem@funcrees.org', 'x')
+        cls.evento = Event.objects.create(
+            id='bingo-rem', titulo='Bingo Recordatorio', costo_bono=20000,
+        )
+        cls.pendiente = Ticket.objects.create(
+            evento=cls.evento, numero_ticket=10,
+            comprador_nombre='Pendiente Uno', comprador_email='pend@example.com',
+            monto_pagado=20000, estado_pago='pendiente',
+        )
+        cls.pagado = Ticket.objects.create(
+            evento=cls.evento, numero_ticket=11,
+            comprador_nombre='Pagado Uno', comprador_email='pag@example.com',
+            monto_pagado=20000, estado_pago='pagado',
+        )
+
+    def test_recordatorio_email_contiene_datos(self):
+        from events.services.email_service import send_payment_reminder
+        with self.settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend'):
+            ok = send_payment_reminder(self.pendiente)
+        self.assertTrue(ok)
+        self.assertEqual(len(mail.outbox), 1)
+        msg = mail.outbox[0]
+        self.assertIn('Recordatorio', msg.subject)
+        self.assertIn(str(self.pendiente.numero_ticket), msg.subject)
+        html = msg.alternatives[0][0]
+        self.assertIn(self.pendiente.codigo_verificacion, html)
+        self.assertIn('pendiente', html.lower())
+
+    def test_comando_dry_run_no_envia(self):
+        from io import StringIO
+        from django.core.management import call_command
+        out = StringIO()
+        with self.settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend'):
+            call_command('remind_pending_tickets', dry_run=True, stdout=out)
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertIn('dry-run', out.getvalue().lower())
+        self.assertIn('pend@example.com', out.getvalue())
+
+    def test_comando_envia_solo_pendientes(self):
+        from io import StringIO
+        from django.core.management import call_command
+        out = StringIO()
+        with self.settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend'):
+            call_command('remind_pending_tickets', stdout=out)
+        # 1 pendiente en la BD de esta clase de tests (la pagada se omite)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('pend@example.com', mail.outbox[0].to)
+
+    def test_comando_filtro_dias(self):
+        from io import StringIO
+        from datetime import timedelta
+        from django.core.management import call_command
+        from django.utils import timezone
+        # Boleta recién creada: con --dias 1 no debe incluirse
+        out = StringIO()
+        call_command('remind_pending_tickets', dias=1, dry_run=True, stdout=out)
+        self.assertIn('Boletas pendientes a notificar: 0', out.getvalue())
+        # Antigüedad simulada: sí se incluye
+        Ticket.objects.filter(pk=self.pendiente.pk).update(
+            creado_en=timezone.now() - timedelta(days=5))
+        out = StringIO()
+        call_command('remind_pending_tickets', dias=1, dry_run=True, stdout=out)
+        self.assertIn('Boletas pendientes a notificar: 1', out.getvalue())
+
+    def test_accion_admin_omite_no_pendientes(self):
+        self.client.force_login(self.staff)
+        data = {
+            'action': 'recordar_pago_pendiente',
+            '_selected_action': [str(self.pendiente.pk), str(self.pagado.pk)],
+        }
+        with self.settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend'):
+            res = self.client.post(reverse('admin:events_ticket_changelist'), data)
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('pend@example.com', mail.outbox[0].to)

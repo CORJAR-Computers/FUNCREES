@@ -131,7 +131,7 @@ class DonationAdmin(ModelAdmin):
 
     @admin.display(description='Monto', ordering='monto')
     def monto_formateado(self, obj):
-        return f'$' + f'{obj.monto:,.0f}'.replace(',', '.')
+        return '$' + f'{obj.monto:,.0f}'.replace(',', '.')
 
     @admin.display(description='Estado')
     def estado_badge(self, obj):

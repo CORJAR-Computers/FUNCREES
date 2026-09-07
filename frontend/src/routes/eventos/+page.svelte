@@ -1,24 +1,21 @@
 <script lang="ts">
-        import { onDestroy } from 'svelte';
         import { page } from '$app/state';
         import { parseCOP, formatMoneyNumber } from '$lib/utils/currency';
         import { toast } from '$lib/stores/toast.svelte';
         import Seo from '$lib/components/Seo.svelte';
         import Modal from '$lib/components/Modal.svelte';
         import { initiateDonation, pollDonationStatus, ApiError } from '$lib/api/client';
-        import type { UiEvent, UiBeneficiary, WompiPaymentSession } from '$lib/types';
+        import type { UiEvent, WompiPaymentSession } from '$lib/types';
 
         type CheckoutStep = 'form' | 'loading' | 'success' | 'error';
-        type EstadoDonacion = 'pendiente' | 'procesando' | 'completado' | 'fallido' | 'reembolsado';
 
         interface Props {
                 data: { eventos: UiEvent[]; usingFallback: boolean };
         }
 
-        let { data }: Props = $props();
+        const { data }: Props = $props();
 
-        let eventos = $derived(data.eventos);
-        let isLoading = $state(false);
+        const eventos = $derived(data.eventos);
         let searchQuery = $state('');
         let selectedCategory = $state('todos');
 
@@ -30,7 +27,6 @@
         let checkoutError = $state('');
         let referencia = $state('');
         let paymentSession = $state<WompiPaymentSession | null>(null);
-        let estadoFinal = $state<EstadoDonacion | null>(null);
         let pollAbort = $state<AbortController | null>(null);
 
         // Datos del comprador
@@ -72,7 +68,7 @@
                 { id: 'campania', label: 'Campañas' }
         ];
 
-        let filteredEvents = $derived(
+        const filteredEvents = $derived(
                 eventos.filter((ev) => {
                         const matchesCat = selectedCategory === 'todos' || ev.category === selectedCategory;
                         const q = searchQuery.toLowerCase().trim();
@@ -201,7 +197,6 @@
                 pollAbort = new AbortController();
                 try {
                         const donacion = await pollDonationStatus(referencia, { signal: pollAbort.signal });
-                        estadoFinal = donacion.estado;
                         if (donacion.estado === 'completado') {
                                 checkoutStep = 'success';
                                 toast.show('¡Bono solidario adquirido exitosamente!', 'success');
@@ -229,7 +224,6 @@
         function resetCheckout(): void {
                 checkoutStep = 'form';
                 checkoutError = '';
-                estadoFinal = null;
                 referencia = '';
                 paymentSession = null;
         }
@@ -282,7 +276,7 @@
                         </div>
 
                         <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
-                                {#each categories as cat}
+                                {#each categories as cat (cat.id)}
                                         <button
                                                 class="evento-filter-btn"
                                                 class:active={selectedCategory === cat.id}

@@ -1,16 +1,13 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { parseCOP, formatMoneyNumber } from '$lib/utils/currency';
 	import { toast } from '$lib/stores/toast.svelte';
 	import Seo from '$lib/components/Seo.svelte';
 	import Modal from '$lib/components/Modal.svelte';
-	import { initiateDonation, getDonationStatus, pollDonationStatus, ApiError } from '$lib/api/client';
-	import type { UiBeneficiary } from '$lib/types';
+	import { initiateDonation, pollDonationStatus, ApiError } from '$lib/api/client';
 
 	type Tab = 'donacion' | 'apadrinamiento' | 'patrocinio' | 'voluntariado';
 	type CheckoutStep = 'form' | 'loading' | 'success' | 'error';
-	type EstadoDonacion = 'pendiente' | 'procesando' | 'completado' | 'fallido' | 'reembolsado';
 
 	let activeTab = $state<Tab>('donacion');
 	let selectedPreset = $state(50000);
@@ -24,7 +21,6 @@
 	let checkoutError = $state('');
 	let referencia = $state('');
 	let paymentSession = $state<import('$lib/types').WompiPaymentSession | null>(null);
-	let estadoFinal = $state<EstadoDonacion | null>(null);
 	let pollAbort = $state<AbortController | null>(null);
 	/** Autorización de tratamiento de datos (Ley 1581). Debe ser una
 	 *  decisión libre del donante: sin marcado, no se envía nada. */
@@ -56,7 +52,7 @@
 		}
 	});
 
-	let currentAmount = $derived(customAmount ? parseCOP(customAmount) : selectedPreset);
+	const currentAmount = $derived(customAmount ? parseCOP(customAmount) : selectedPreset);
 
 	function selectPreset(amount: number): void {
 		selectedPreset = amount;
@@ -88,7 +84,6 @@
 	 */
 	function openWompiWidget(): void {
 		if (!paymentSession) return;
-		const W = window as unknown as { WompiWidget?: unknown };
 		// El widget oficial se inserta con el script de Wompi; usamos la URL de
 		// checkout directa (link de pago) como vía robusta sin dependencias.
 		const checkoutUrl =
@@ -157,7 +152,6 @@
 		pollAbort = new AbortController();
 		try {
 			const donacion = await pollDonationStatus(referencia, { signal: pollAbort.signal });
-			estadoFinal = donacion.estado;
 			if (donacion.estado === 'completado') {
 				checkoutStep = 'success';
 				toast.show('¡Donación procesada con éxito! Muchas gracias.', 'success');
@@ -212,7 +206,6 @@
 				});
 			}
 			checkoutStep = 'success';
-			estadoFinal = null;
 			toast.show('Información enviada. Un asesor se comunicará en breve.', 'success');
 		} catch (err) {
 			checkoutStep = 'error';
@@ -225,7 +218,6 @@
 	function resetCheckout(): void {
 		checkoutStep = 'form';
 		checkoutError = '';
-		estadoFinal = null;
 		referencia = '';
 		paymentSession = null;
 		autorizacionDatos = false;
@@ -453,7 +445,7 @@
 				Selecciona el Monto:
 			</span>
 			<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-bottom: 1rem;">
-				{#each presets as amount}
+				{#each presets as amount (amount)}
 					<button
 						type="button"
 						class="amount-btn"

@@ -12,7 +12,7 @@ from rest_framework.throttling import ScopedRateThrottle
 
 from .models import Donation
 from .serializers import DonationSerializer, InitiateDonationSerializer
-from .services.wompi import create_payment_session, verify_webhook_signature, get_transaction_by_reference
+from .services.wompi import create_payment_session, verify_webhook_signature
 from .services.pdf_generator import generate_donation_certificate
 from .services.email_service import send_donation_email
 

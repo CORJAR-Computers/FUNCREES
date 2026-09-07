@@ -13,3 +13,4 @@ gunicorn>=21.2,<24.0
 whitenoise>=6.6,<7.0
 cryptography>=41.0,<45.0
 xhtml2pdf>=0.2.16,<0.3 ; platform_system != "Windows"  # solo para regenerar el PDF del paquete en el VPS
+ruff>=0.6,<2.0  # linter backend (CI: ruff check .)

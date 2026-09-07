@@ -1,7 +1,7 @@
 import re
 from decimal import Decimal
 from rest_framework import serializers
-from .models import Donation, Sponsorship
+from .models import Donation
 
 # Choices de método de pago aceptados por la Fundación. Se definen aquí (no en
 # el modelo) porque el modelo usa un CharField libre por compatibilidad con

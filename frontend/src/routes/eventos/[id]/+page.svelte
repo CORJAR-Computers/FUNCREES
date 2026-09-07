@@ -13,9 +13,9 @@
                 data: { evento: UiEventDetail | null; notFound: boolean; id: string };
         }
 
-        let { data }: Props = $props();
+        const { data }: Props = $props();
 
-        let evento = $derived(data.evento);
+        const evento = $derived(data.evento);
 
         const WHATSAPP = '573137924439';
 
@@ -114,6 +114,66 @@
 
         function fmtCOP(n: number): string {
                 return '$' + String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        /** Enlace "Añadir a Google Calendar" (template URL oficial, sin dependencias).
+         *  Duración supuesta de 2h para eventos con hora; campañas sin fecha no lo muestran. */
+        const googleCalendarUrl = $derived.by(() => {
+                if (!evento?.fechaISO) return null;
+                const compact = (d: Date): string =>
+                        `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, '0')}${String(d.getUTCDate()).padStart(2, '0')}T${String(d.getUTCHours()).padStart(2, '0')}${String(d.getUTCMinutes()).padStart(2, '0')}00Z`;
+
+                let start: Date;
+                let end: Date;
+                if (evento.horaISO) {
+                        start = new Date(`${evento.fechaISO}T${evento.horaISO}`);
+                        end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
+                } else {
+                        // Evento de todo el día: bloque de un día (end exclusivo)
+                        start = new Date(`${evento.fechaISO}T00:00:00`);
+                        end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
+                }
+                if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return null;
+
+                const params = new URLSearchParams({
+                        action: 'TEMPLATE',
+                        text: `${evento.titulo} — FUNCREES Colombia`,
+                        dates: `${compact(start)}/${compact(end)}`,
+                        location: evento.lugar,
+                        details:
+                                evento.desc ||
+                                'Evento solidario de Fundación Funcrees Colombia. ¡Tu apoyo dignifica la vida de nuestros abuelitos!'
+                });
+                return `https://calendar.google.com/calendar/render?${params.toString()}`;
+        });
+
+        /** Compartir el evento con Web Share API y fallback a copiar enlace. */
+        let compartidoOk = $state(false);
+
+        async function compartirEvento(): Promise<void> {
+                if (!evento) return;
+                const url = `${window.location.origin}/eventos/${evento.id}`;
+                const data: ShareData = {
+                        title: evento.titulo,
+                        text: `Conoce ${evento.titulo} y apoya a nuestros abuelitos —`,
+                        url
+                };
+                if (navigator.share) {
+                        try {
+                                await navigator.share(data);
+                        } catch {
+                                /* usuario canceló — no es error */
+                        }
+                        return;
+                }
+                // Fallback: copiar al portapapeles
+                try {
+                        await navigator.clipboard.writeText(url);
+                        compartidoOk = true;
+                        setTimeout(() => (compartidoOk = false), 2000);
+                } catch {
+                        window.open(`https://wa.me/?text=${encodeURIComponent(`${data.text} ${url}`)}`, '_blank');
+                }
         }
 </script>
 
@@ -232,7 +292,30 @@
                                                                                 {/if}
                                                                 </div>
 
-                                                                <p class="detalle-nota">
+                                                                <div class="detalle-extra">
+                                                                {#if googleCalendarUrl}
+                                                                        <a
+                                                                                class="detalle-accion"
+                                                                                href={googleCalendarUrl}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                        >
+                                                                                <i class="fa-regular fa-calendar-plus"></i> Añadir a Google Calendar
+                                                                        </a>
+                                                                {/if}
+                                                                <button type="button" class="detalle-accion" onclick={compartirEvento}>
+                                                                        <i class="fa-solid fa-share-nodes"></i>
+                                                                        {compartidoOk ? '¡Enlace copiado!' : 'Compartir evento'}
+                                                                </button>
+                                                                <a
+                                                                        class="detalle-accion detalle-accion-consulta"
+                                                                        href="/contacto?tipo=eventos&asunto={encodeURIComponent(evento.titulo)}"
+                                                                >
+                                                                        <i class="fa-regular fa-circle-question"></i> ¿Dudas? Escríbenos
+                                                                </a>
+                                                        </div>
+
+                                                        <p class="detalle-nota">
                                                                                 <i class="fa-solid fa-circle-info"></i>
                                                                                 <span>
                                                                                                 El pago se completa en la lista de eventos. Después de tu compra recibirás
@@ -517,6 +600,50 @@
                                 color: var(--text-muted);
                                 font-weight: 700;
                                 border: 1px solid var(--border-color);
+                }
+
+                /* Acciones secundarias: calendario, compartir, consultas */
+                .detalle-extra {
+                        display: flex;
+                        gap: 0.65rem;
+                        flex-wrap: wrap;
+                        margin-bottom: 1.1rem;
+                }
+
+                .detalle-accion {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        padding: 0.55rem 1rem;
+                        min-height: 44px;
+                        border-radius: 10px;
+                        border: 1px solid var(--border-color);
+                        background: var(--bg-card);
+                        color: var(--text-main);
+                        font-size: 0.88rem;
+                        font-weight: 600;
+                        text-decoration: none;
+                        cursor: pointer;
+                        transition:
+                                border-color 0.2s ease,
+                                color 0.2s ease,
+                                transform 0.2s ease,
+                                background 0.2s ease;
+                }
+
+                .detalle-accion i {
+                        color: var(--primary);
+                }
+
+                .detalle-accion:hover,
+                .detalle-accion:focus-visible {
+                        border-color: var(--primary);
+                        color: var(--primary);
+                        transform: translateY(-2px);
+                }
+
+                .detalle-accion-consulta {
+                        border-style: dashed;
                 }
 
                 .detalle-nota {

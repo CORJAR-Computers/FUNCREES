@@ -4,7 +4,7 @@ from unfold.admin import ModelAdmin
 from unfold.contrib.filters.admin import ChoicesDropdownFilter
 
 from .models import Event, Ticket
-from .services.email_service import send_ticket_email
+from .services.email_service import send_payment_reminder, send_ticket_email
 
 
 @admin.register(Event)
@@ -101,7 +101,7 @@ class TicketAdmin(ModelAdmin):
     search_fields = ('comprador_nombre', 'comprador_email', 'codigo_verificacion')
     search_help_text = 'Busque por nombre, email o código de verificación de la boleta.'
     readonly_fields = ('codigo_verificacion', 'donacion_id')
-    actions = ('marcar_como_enviado', 'enviar_boleta_por_email')
+    actions = ('marcar_como_enviado', 'enviar_boleta_por_email', 'recordar_pago_pendiente')
 
     fieldsets = (
         ('Boleta', {
@@ -155,4 +155,44 @@ class TicketAdmin(ModelAdmin):
                 request,
                 'No se pudo enviar ninguna boleta. Verifique la configuración de email (SMTP) en el servidor.',
                 level=messages.ERROR,
+            )
+
+    @admin.action(description='⏰ Recordar pago pendiente por email')
+    def recordar_pago_pendiente(self, request, queryset):
+        """Envía el recordatorio de pago a las boletas seleccionadas que
+        siguen 'pendiente'. Las boletas pagadas/canceladas se omiten con
+        aviso para evitar correos fuera de contexto."""
+        elegibles = queryset.filter(estado_pago='pendiente')
+        omitidas = queryset.count() - elegibles.count()
+
+        enviadas, fallidas = 0, 0
+        for ticket in elegibles:
+            if send_payment_reminder(ticket):
+                enviadas += 1
+            else:
+                fallidas += 1
+
+        prefijo = f'{omitidas} boleta(s) omitida(s) por no estar pendientes. ' if omitidas else ''
+        if enviadas and not fallidas:
+            self.message_user(
+                request, f'{prefijo}⏰ {enviadas} recordatorio(s) enviado(s).',
+                level=messages.SUCCESS,
+            )
+        elif enviadas and fallidas:
+            self.message_user(
+                request,
+                f'{prefijo}⏰ {enviadas} enviado(s); ⚠️ {fallidas} con error (revise logs SMTP).',
+                level=messages.WARNING,
+            )
+        elif fallidas:
+            self.message_user(
+                request,
+                'No se pudo enviar ningún recordatorio. Verifique la configuración SMTP.',
+                level=messages.ERROR,
+            )
+        else:
+            self.message_user(
+                request,
+                f'{prefijo}No hay boletas pendientes entre las seleccionadas.',
+                level=messages.INFO,
             )

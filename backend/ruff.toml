@@ -1,0 +1,38 @@
+# Configuración de Ruff para el backend Django de FUNCREES.
+# Filosofía: lint ADIVISORIO en CI (no rompe el pipeline) pero limpio en
+# desarrollo. Se enfoca en errores reales (E9, F) y consistencia leve;
+# el estilo profundo queda para una futura pasada de formateo.
+target-version = "py312"
+line-length = 100
+
+exclude = [
+    "venv",
+    "migrations",   # código generado por Django
+    "staticfiles",
+    "media",
+]
+
+[lint]
+select = [
+    "E9",   # errores de sintaxis / runtime
+    "F",    # pyflakes: imports sin usar, variables sin definir, f-strings sin placeholders
+    "W605", # escapes inválidos en regex/strings
+    "B",    # bugbear: errores comunes (mutable default, comparaciones con == True...)
+]
+ignore = [
+    "B008",  # Django usa funciones en argumentos default (models, forms) por diseño
+    "B904",  # raise ... from err: bueno tenerlo, pero requiere pasar por toda la base
+]
+
+[lint.per-file-ignores]
+# settings y manage.py usan imports "unused" por side-effect y env() dinámico
+"core/settings.py" = ["F401", "F405"]
+"core/test_settings.py" = ["F401", "F405", "F403"]
+# CRÍTICO: get_fernet parece unused pero donations/migrations/0002 lo importa
+# desde donations.models (patrón de backfill de cifrado). NO remover.
+"donations/models.py" = ["F401"]
+"**/management/commands/*.py" = []  # los comandos se revisan normal
+
+[format]
+quote-style = "single"
+indent-style = "space"

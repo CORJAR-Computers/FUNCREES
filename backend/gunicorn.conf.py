@@ -4,7 +4,6 @@ Production server settings for Hostinger VPS
 """
 
 import multiprocessing
-import os
 from pathlib import Path
 
 # Directorio base del proyecto (un nivel arriba de este archivo)

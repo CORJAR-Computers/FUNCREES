@@ -9,7 +9,6 @@ siempre los mismos números.
 Todas las consultas son de solo lectura y ligeras (agregados sobre columnas
 con índice natural de fecha).
 """
-import calendar
 import datetime as dt
 from datetime import date
 from urllib.parse import quote

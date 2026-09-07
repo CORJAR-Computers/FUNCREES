@@ -1,4 +1,5 @@
 <script lang="ts">
+        import { page } from '$app/state';
         import LeafletMap from '$lib/components/LeafletMap.svelte';
         import Seo from '$lib/components/Seo.svelte';
         import { sendContactMessage, ApiError } from '$lib/api/client';
@@ -14,6 +15,29 @@
         let mensaje = $state('');
         let isSubmitting = $state(false);
         let submitError = $state('');
+
+        /** Deep-link desde otras páginas: /contacto?tipo=eventos&asunto=<texto>
+         *  preselecciona el motivo y arranca el mensaje (ej. desde el detalle
+         *  de un evento). Solo aplica una vez y valida contra TIPO_CHOICES. */
+        const TIPOS_VALIDOS: ContactTipo[] = [
+                'consulta', 'apadrinamiento', 'alianza',
+                'voluntariado', 'eventos', 'donacion', 'otro'
+        ];
+        let deepLinkAplicado = $state(false);
+
+        $effect(() => {
+                if (deepLinkAplicado) return;
+                const tipoParam = page.url.searchParams.get('tipo');
+                const asuntoParam = page.url.searchParams.get('asunto');
+                if (!tipoParam && !asuntoParam) return;
+                deepLinkAplicado = true;
+                if (tipoParam && TIPOS_VALIDOS.includes(tipoParam as ContactTipo)) {
+                        tipo = tipoParam as ContactTipo;
+                }
+                if (asuntoParam) {
+                        mensaje = `Hola, tengo una consulta sobre: ${asuntoParam}. `;
+                }
+        });
 
         async function handleSubmit(e: SubmitEvent): Promise<void> {
                 e.preventDefault();

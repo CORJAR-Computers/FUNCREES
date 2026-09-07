@@ -8,13 +8,13 @@
 		data: { abuelitos: UiBeneficiary[]; usingFallback: boolean };
 	}
 
-	let { data }: Props = $props();
+	const { data }: Props = $props();
 
-	let abuelitos = $derived(data.abuelitos);
+	const abuelitos = $derived(data.abuelitos);
 	let searchQuery = $state('');
 	let selectedAbuelito = $state<UiBeneficiary | null>(null);
 
-	let filteredAbuelitos = $derived(
+	const filteredAbuelitos = $derived(
 		abuelitos.filter((ab) => {
 			const q = searchQuery.toLowerCase().trim();
 			if (!q) return true;

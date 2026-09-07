@@ -117,6 +117,9 @@ class Ticket(models.Model):
     donacion_id = models.UUIDField(blank=True, null=True, help_text="Referencia a la donación/pago")
     ticket_enviado = models.BooleanField(default=False)
     seleccion_tipo = models.CharField(max_length=20, choices=SELECCION_CHOICES, default='automatico')
+    # Fecha de registro de la boleta: habilita recordatorios de pago por
+    # antigüedad (remind_pending_tickets --dias N) y métricas de ventas.
+    creado_en = models.DateTimeField(auto_now_add=True, verbose_name='Creado')
 
     class Meta:
         verbose_name = 'Boleta/Ticket'

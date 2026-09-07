@@ -46,7 +46,6 @@ class Beneficiary(models.Model):
 
     def _resize_image(self):
         from PIL import Image
-        import os
 
         MAX = 800
         try:

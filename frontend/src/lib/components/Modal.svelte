@@ -11,7 +11,7 @@
 		children: Snippet;
 	}
 
-	let { open, onclose, labelledby, children }: Props = $props();
+	const { open, onclose, labelledby, children }: Props = $props();
 
 	let dialogEl = $state<HTMLDialogElement | null>(null);
 

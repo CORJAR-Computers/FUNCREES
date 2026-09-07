@@ -272,7 +272,12 @@ sudo chmod +x /usr/local/bin/funcrees-backup.sh
 0 12 * * 1  cd /var/www/funcrees/backend && venv/bin/python manage.py send_weekly_digest >> /var/log/funcrees/digest.log 2>&1
 */5 * * * * cd /var/www/funcrees/backend && venv/bin/python manage.py check_uptime >> /var/log/funcrees/uptime.log 2>&1
 0 2 * * *   /usr/local/bin/funcrees-backup.sh
+0 13 * * 5  cd /var/www/funcrees/backend && venv/bin/python manage.py remind_pending_tickets --dias 2 --limit 100 >> /var/log/funcrees/recordatorios.log 2>&1
 ```
+
+> El cuarto cron (viernes 8:00 a.m. Colombia) envía recordatorios de pago a
+> boletas pendientes con más de 2 días. Pruébelo antes de activarlo:
+> `python manage.py remind_pending_tickets --dry-run` (no envía nada).
 
 ☐ **Probar ANTES de confiar en ellos:**
 
@@ -281,6 +286,7 @@ python manage.py send_weekly_digest --dry-run
 python manage.py send_weekly_digest --to <tu-correo>     # llega HTML real con gráfico
 python manage.py check_uptime --dry-run                  # ✅ Backend / ✅ Sitio web
 python manage.py check_uptime --force-email --to <tu-correo>   # llega "✅ todo funciona"
+python manage.py remind_pending_tickets --dry-run        # lista boletas pendientes, NO envía
 ```
 
 ☐ **Heartbeat externo (recomendado):** check gratuito en healthchecks.io → su URL de

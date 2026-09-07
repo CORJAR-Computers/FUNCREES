@@ -138,7 +138,7 @@ class VerificarConWompiTests(TestCase):
         )
         self.client.force_login(self.staff)
         with mock.patch('donations.admin.get_transaction_by_reference') as m_tx:
-            res = self._post_accion(d)
+            self._post_accion(d)
         m_tx.assert_not_called()  # nunca consulta Wompi para las ya completadas
         d.refresh_from_db()
         self.assertEqual(d.estado, 'completado')

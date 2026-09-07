@@ -7,14 +7,14 @@
 		data: { cifras: import('$lib/types').PublicStats; usingFallback: boolean };
 	}
 
-	let { data }: Props = $props();
+	const { data }: Props = $props();
 
-	let cifras = $derived(data.cifras);
-	let tarjetas = $derived(mapStatsToCards(cifras));
-	let serie = $derived(cifras.serie_mensual);
+	const cifras = $derived(data.cifras);
+	const tarjetas = $derived(mapStatsToCards(cifras));
+	const serie = $derived(cifras.serie_mensual);
 
 	/** Fecha legible de última actualización: "5 de septiembre de 2026, 14:32". */
-	let actualizadoLegible = $derived.by(() => {
+	const actualizadoLegible = $derived.by(() => {
 		const d = new Date(cifras.actualizado_en);
 		if (Number.isNaN(d.getTime())) return '';
 		// toLocaleString puede terminar en punto ("... 07:03 p. m."): se quita
@@ -31,7 +31,7 @@
 	});
 
 	/** Etiqueta accesible del gráfico, en texto plano. */
-	let ariaSerie = $derived(
+	const ariaSerie = $derived(
 		serie.map((m) => `${m.mes} ${m.anio}: ${m.total_fmt_corto}`).join(', ')
 	);
 </script>
@@ -82,7 +82,7 @@
 					role="img"
 					aria-label="Gráfico de barras del total recaudado por mes. {ariaSerie}."
 				>
-					{#each serie as m, i (m.anio + '-' + m.mes)}
+					{#each serie as m (m.anio + '-' + m.mes)}
 						<div class="numeros-col" class:actual={m.es_actual}>
 							<span class="numeros-col-value">{m.total_fmt_corto}</span>
 							<div class="numeros-bar-area">
