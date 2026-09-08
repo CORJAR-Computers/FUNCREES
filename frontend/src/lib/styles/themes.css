@@ -48,6 +48,13 @@ body.high-contrast .header {
   background-color: #000000;
 }
 
+body.high-contrast .footer-desc,
+body.high-contrast .footer-link,
+body.high-contrast .footer-contact-info,
+body.high-contrast .footer-bottom {
+  color: #ffffff !important;
+}
+
 body.high-contrast .aliados-section {
   background-color: #000000;
 }
@@ -407,6 +414,27 @@ body.dark-mode .ptag-consultoria    { background: hsla(220, 60%, 50%, 0.22); col
 body.dark-mode .ptag-ninez          { background: hsla(350, 70%, 55%, 0.22); color: hsl(350, 70%, 74%); }
 body.dark-mode .ptag-emprendimiento { background: hsla(43, 65%, 47%, 0.22);  color: var(--gold-light); }
 body.dark-mode .ptag-bienestar-animal { background: hsla(160, 50%, 45%, 0.22); color: hsl(160, 60%, 65%); }
+
+/* Contraste del Footer en Modo Oscuro */
+body.dark-mode .footer-desc {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+body.dark-mode .footer-link {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+body.dark-mode .footer-link:hover {
+  color: #ffffff;
+}
+
+body.dark-mode .footer-contact-info {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+body.dark-mode .footer-bottom {
+  color: rgba(255, 255, 255, 0.65);
+}
 
 /* ─── Theme Toggle Button ──────────────────────────────────── */
 

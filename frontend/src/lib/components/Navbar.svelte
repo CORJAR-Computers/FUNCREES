@@ -34,6 +34,17 @@
                         isDarkMode = true;
                         document.body.classList.add('dark-mode');
                 }
+
+                function handleKeyDown(e: KeyboardEvent): void {
+                        if (e.key === 'Escape' && isMenuOpen) {
+                                closeMenu();
+                        }
+                }
+
+                window.addEventListener('keydown', handleKeyDown);
+                return () => {
+                        window.removeEventListener('keydown', handleKeyDown);
+                };
         });
 </script>
 
@@ -56,12 +67,22 @@
                         </div>
                 </a>
 
-                <button class="menu-toggle" aria-label="Abrir menú de navegación" aria-expanded={isMenuOpen} onclick={toggleMenu}>
-                        <i class="fa-solid fa-bars"></i>
+                <button
+                        class="menu-toggle"
+                        class:active={isMenuOpen}
+                        aria-label={isMenuOpen ? "Cerrar menú de navegación" : "Abrir menú de navegación"}
+                        aria-expanded={isMenuOpen}
+                        onclick={toggleMenu}
+                >
+                        {#if isMenuOpen}
+                                <i class="fa-solid fa-xmark"></i>
+                        {:else}
+                                <i class="fa-solid fa-bars"></i>
+                        {/if}
                 </button>
 
-                <nav class:active={isMenuOpen}>
-                        <ul class="nav-menu">
+                <nav class:active={isMenuOpen} aria-label="Navegación principal">
+                        <ul class="nav-menu" class:active={isMenuOpen}>
                                 <li><a class="nav-link" class:active={isActive('/')} href="/" onclick={closeMenu}>Inicio</a></li>
                                 <li><a class="nav-link" class:active={isActive('/quienes-somos')} href="/quienes-somos" onclick={closeMenu}>Quiénes Somos</a></li>
                                 <li><a class="nav-link" class:active={isActive('/proyectos')} href="/proyectos" onclick={closeMenu}>Nuestros Proyectos</a></li>
@@ -94,4 +115,13 @@
                         </ul>
                 </nav>
         </div>
+
+        {#if isMenuOpen}
+                <button
+                        type="button"
+                        class="nav-backdrop"
+                        aria-label="Cerrar menú de navegación"
+                        onclick={closeMenu}
+                ></button>
+        {/if}
 </header>
